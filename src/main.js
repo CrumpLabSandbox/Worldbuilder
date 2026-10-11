@@ -1,0 +1,471 @@
+import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { Planet, R, latLonToDir, dirToLatLon, tangentFrame, formatLat, formatLon, wrapLon } from './planet.js';
+import { FlyControls } from './controls.js';
+import { TerrainLOD } from './terrain.js';
+import { WorldStore, randomSeed, DEFAULT_SPAWN } from './world.js';
+import { STRUCTURES, STRUCTURE_TYPES, buildStructure } from './structures.js';
+
+const $ = (id) => document.getElementById(id);
+const DEG = Math.PI / 180;
+
+// ------------------------------------------------------------------ renderer
+const app = $('app');
+const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+app.appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(window.innerWidth, window.innerHeight);
+labelRenderer.domElement.style.position = 'fixed';
+labelRenderer.domElement.style.inset = '0';
+labelRenderer.domElement.style.pointerEvents = 'none';
+labelRenderer.domElement.style.zIndex = '3';
+document.body.appendChild(labelRenderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x03050a);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 250000);
+
+// lights
+// The sun follows the viewer (always mid-morning where you are), so there is no
+// night side to get lost in. It is eased so lighting doesn't jump.
+const sun = new THREE.DirectionalLight(0xfff1dc, 1.7);
+sun.position.set(1, 0.45, 0.7).multiplyScalar(10000);
+scene.add(sun);
+scene.add(new THREE.AmbientLight(0x9fb4d0, 0.32));
+const hemi = new THREE.HemisphereLight(0xcfe2ff, 0x4a3a2a, 0.3);
+scene.add(hemi);
+const sunTarget = new THREE.Vector3(1, 0.45, 0.7).normalize();
+function updateSun(dt) {
+  const { east, north, up } = tangentFrame(controls.position);
+  sunTarget.copy(up).addScaledVector(east, 0.55).addScaledVector(north, -0.65).normalize();
+  const cur = sun.position.clone().normalize();
+  cur.lerp(sunTarget, Math.min(1, dt * 1.5)).normalize();
+  sun.position.copy(cur).multiplyScalar(10000);
+}
+
+// stars
+{
+  const n = 5000, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const z = Math.random() * 2 - 1, t = Math.random() * Math.PI * 2, r = Math.sqrt(1 - z * z) * 80000;
+    pos[i * 3] = Math.cos(t) * r; pos[i * 3 + 1] = z * 80000; pos[i * 3 + 2] = Math.sin(t) * r;
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 120, sizeAttenuation: true, transparent: true, opacity: 0.8 })));
+}
+
+// ------------------------------------------------------------------ state
+const store = new WorldStore();
+let planet = null;
+let planetGroup = null;   // terrain, ocean, atmosphere, clouds
+let cloudMesh = null, gridGroup = null, terrain = null;
+const structuresGroup = new THREE.Group();
+scene.add(structuresGroup);
+const structureObjects = new Map(); // id -> group
+const spinners = [];
+let controls = null;
+let buildMode = false;
+
+function toast(msg, ms = 2200) {
+  const el = $('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+async function showLoading(text) { $('loading-text').textContent = text; $('loading').classList.remove('hidden'); await nextFrame(); }
+function hideLoading() { $('loading').classList.add('hidden'); }
+
+function disposeObject(obj) {
+  obj.traverse((o) => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) {
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      for (const m of mats) { if (m.alphaMap) m.alphaMap.dispose(); if (m.map) m.map.dispose(); m.dispose(); }
+    }
+  });
+}
+
+// ------------------------------------------------------------------ picking (analytic ray march against the height field)
+const _ray = new THREE.Ray();
+function pickGround(ndcX, ndcY) {
+  const origin = camera.position.clone();
+  const dir = new THREE.Vector3(ndcX, ndcY, 0.5).unproject(camera).sub(origin).normalize();
+  _ray.set(origin, dir);
+  const Rmax = R + planet.maxHeight + 2;
+  // ray-sphere intersection with bounding sphere
+  const b = origin.dot(dir), c = origin.lengthSq() - Rmax * Rmax;
+  const disc = b * b - c;
+  if (disc < 0) return null;
+  const sq = Math.sqrt(disc);
+  let t0 = -b - sq, t1 = -b + sq;
+  if (t1 < 0) return null;
+  t0 = Math.max(t0, 0);
+  const p = new THREE.Vector3(), d = new THREE.Vector3();
+  // height above ground along the ray; negative when underground
+  const above = (t) => { p.copy(origin).addScaledVector(dir, t); d.copy(p).normalize(); return p.length() - planet.groundRadius(d); };
+  let prev = t0;
+  let a = above(prev);
+  if (a < 0) return null; // camera underground - shouldn't happen
+  let t = prev;
+  for (let iter = 0; iter < 4000 && t <= t1; iter++) {
+    // adaptive step: terrain slopes are gentle, so step a fraction of the clearance
+    const step = THREE.MathUtils.clamp(a * 0.5, 1.5, 400);
+    t = prev + step;
+    a = above(t);
+    if (a < 0) {
+      let lo = prev, hi = t;
+      for (let i = 0; i < 12; i++) { const mid = (lo + hi) / 2; if (above(mid) < 0) hi = mid; else lo = mid; }
+      const tm = (lo + hi) / 2;
+      p.copy(origin).addScaledVector(dir, tm);
+      d.copy(p).normalize();
+      const { lat, lon } = dirToLatLon(d);
+      return { point: p.clone(), dir: d.clone(), lat, lon, elevation: planet.elevation(d), distance: tm };
+    }
+    prev = t;
+  }
+  return null;
+}
+
+// ------------------------------------------------------------------ structures
+function placeStructure(rec) {
+  removeStructureObject(rec.id);
+  const g = buildStructure(rec);
+  const dir = latLonToDir(rec.lat, rec.lon);
+  const r = planet.groundRadius(dir) + (rec.alt || 0);
+  g.position.copy(dir).multiplyScalar(r);
+  const { east, north, up } = tangentFrame(dir);
+  const h = (rec.heading || 0) * DEG;
+  const fwd = north.clone().multiplyScalar(Math.cos(h)).addScaledVector(east, Math.sin(h));
+  const right = new THREE.Vector3().crossVectors(up, fwd).normalize();
+  g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, up, fwd));
+  // label
+  const box = new THREE.Box3().setFromObject(g);
+  const height = box.max.clone().sub(box.min).length();
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = rec.name || (STRUCTURES[rec.type]?.label ?? rec.type);
+  const lo = new CSS2DObject(label);
+  lo.position.set(0, (box.max.sub(g.position).dot(up)) / (rec.scale || 1) + 3, 0);
+  g.add(lo);
+  g.userData.label = lo;
+  g.userData.labelRange = 1500 + height * 40;
+  g.traverse((o) => { if (o.name === 'spin') spinners.push(o); });
+  structuresGroup.add(g);
+  structureObjects.set(rec.id, g);
+  return g;
+}
+function removeStructureObject(id) {
+  const g = structureObjects.get(id);
+  if (!g) return;
+  g.traverse((o) => { if (o.isCSS2DObject) o.element.remove(); });
+  structuresGroup.remove(g);
+  disposeObject(g);
+  structureObjects.delete(id);
+  for (let i = spinners.length - 1; i >= 0; i--) { let o = spinners[i]; while (o && o !== g) o = o.parent; if (o === g) spinners.splice(i, 1); }
+}
+function clearStructures() {
+  for (const id of [...structureObjects.keys()]) removeStructureObject(id);
+  spinners.length = 0;
+}
+
+// ------------------------------------------------------------------ world (re)building
+async function buildWorld(world, viewOverride = null) {
+  await showLoading(`Generating “${world.name}” (seed ${world.seed})…`);
+  clearStructures();
+  if (planetGroup) { scene.remove(planetGroup); disposeObject(planetGroup); planetGroup = null; }
+  if (gridGroup) { scene.remove(gridGroup); disposeObject(gridGroup); gridGroup = null; }
+
+  planet = new Planet(world.seed);
+  planetGroup = new THREE.Group();
+  if (terrain) terrain.dispose();
+  terrain = new TerrainLOD(planet);
+  planetGroup.add(terrain.group);
+  planetGroup.add(planet.buildOcean());
+  planetGroup.add(planet.buildAtmosphere());
+  cloudMesh = planet.buildClouds();
+  cloudMesh.visible = $('opt-clouds').checked;
+  planetGroup.add(cloudMesh);
+  scene.add(planetGroup);
+  gridGroup = planet.buildGrid();
+  gridGroup.visible = $('opt-grid').checked;
+  scene.add(gridGroup);
+  terrain.material.wireframe = $('opt-wire').checked;
+
+  for (const rec of world.structures) placeStructure(rec);
+
+  if (!controls) { controls = new FlyControls(camera, renderer.domElement, planet); controls.onTeleport = () => terrain && terrain.warm(controls.position, 1200); }
+  controls.planet = planet;
+  const v = viewOverride || world.spawn || DEFAULT_SPAWN;
+  controls.teleport(v.lat, v.lon, v.alt, v.heading ?? 0, v.pitch ?? -35);
+  updateSun(10);
+  terrain.warm(controls.position, 1500);
+
+  updateWorldPanel();
+  hideLoading();
+}
+
+function updateWorldPanel() {
+  const w = store.current;
+  $('world-name').textContent = w.name + (w.kind === 'local' ? ' (local)' : '');
+  $('world-seed').textContent = String(w.seed);
+  $('world-count').textContent = `${w.structures.length} structure${w.structures.length === 1 ? '' : 's'}`;
+  const sel = $('world-select');
+  sel.innerHTML = '';
+  for (const it of store.listWorlds()) {
+    const o = document.createElement('option');
+    o.value = it.id; o.textContent = `${it.name}${it.kind === 'local' ? ' (local)' : ''}`;
+    if (it.id === w.id) o.selected = true;
+    sel.appendChild(o);
+  }
+  renderStructureList();
+}
+
+function renderStructureList() {
+  const list = $('structure-list');
+  list.innerHTML = '';
+  const w = store.current;
+  if (!w.structures.length) { list.innerHTML = '<div class="item"><span class="name" style="color:var(--muted)">Nothing built yet.</span></div>'; return; }
+  for (const s of w.structures) {
+    const el = document.createElement('div'); el.className = 'item';
+    const name = document.createElement('span'); name.className = 'name'; name.textContent = s.name || STRUCTURES[s.type]?.label || s.type; name.title = `${s.type} · scale ${s.scale || 1}`;
+    const coords = document.createElement('span'); coords.className = 'coords'; coords.textContent = `${s.lat.toFixed(2)}, ${s.lon.toFixed(2)}`;
+    const go = document.createElement('button'); go.textContent = 'Go'; go.title = 'Fly to this structure';
+    go.onclick = () => flyToStructure(s);
+    const del = document.createElement('button'); del.textContent = '×'; del.title = 'Remove';
+    del.onclick = () => { store.removeStructure(s.id); removeStructureObject(s.id); updateWorldPanel(); toast('Removed'); };
+    el.append(name, coords, go, del);
+    list.appendChild(el);
+  }
+}
+
+function flyToStructure(s) {
+  const dist = 45 * (s.scale || 1) + 25;
+  // stand to the south of it, looking north and down
+  const dlat = -(dist / (R * DEG)) * 0.9;
+  controls.teleport(s.lat + dlat, s.lon, dist * 0.6, 0, -30);
+}
+
+// ------------------------------------------------------------------ HUD
+let pickInfo = null;
+function updateHUD() {
+  const { lat, lon } = controls.latLon;
+  const alt = controls.altitude;
+  $('hud-lat').textContent = formatLat(lat);
+  $('hud-lon').textContent = formatLon(wrapLon(lon));
+  $('hud-alt').textContent = alt >= 1000 ? `${(alt / 1000).toFixed(2)} km` : `${alt.toFixed(1)} m`;
+  $('hud-heading').textContent = `${controls.heading.toFixed(0)}° ${compass(controls.heading)}`;
+  const dir = controls.position.clone().normalize();
+  const e = planet.elevation(dir);
+  $('hud-ground').textContent = e > 0 ? `land +${e.toFixed(0)} m` : `sea (${(-e).toFixed(0)} m deep)`;
+  $('hud-speed').textContent = `${controls.baseSpeed().toFixed(0)} m/s`;
+  $('hud-pick').textContent = pickInfo
+    ? `${formatLat(pickInfo.lat)}, ${formatLon(pickInfo.lon)} · ${pickInfo.elevation > 0 ? `+${pickInfo.elevation.toFixed(0)} m` : 'water'} · ${pickInfo.distance.toFixed(0)} m away`
+    : '–';
+}
+function compass(h) {
+  const names = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return names[Math.round(h / 45) % 8];
+}
+function positionString() {
+  const { lat, lon } = controls.latLon;
+  return `lat ${lat.toFixed(4)}, lon ${wrapLon(lon).toFixed(4)}, alt ${controls.altitude.toFixed(0)}, heading ${controls.heading.toFixed(0)}`;
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
+}
+
+// ------------------------------------------------------------------ URL state
+function readHash() {
+  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if (!h.has('lat')) return null;
+  return {
+    world: h.get('w'),
+    view: { lat: +h.get('lat'), lon: +h.get('lon'), alt: +(h.get('alt') ?? 500), heading: +(h.get('h') ?? 0), pitch: +(h.get('p') ?? -30) },
+  };
+}
+function writeHash() {
+  if (!controls || !store.current) return;
+  const { lat, lon } = controls.latLon;
+  const h = new URLSearchParams({ w: store.current.id, lat: lat.toFixed(4), lon: wrapLon(lon).toFixed(4), alt: controls.altitude.toFixed(0), h: controls.heading.toFixed(0), p: controls.pitch.toFixed(0) });
+  history.replaceState(null, '', '#' + h.toString());
+}
+
+// ------------------------------------------------------------------ UI wiring
+function wireUI() {
+  const typeSel = $('build-type');
+  for (const t of STRUCTURE_TYPES) { const o = document.createElement('option'); o.value = t; o.textContent = STRUCTURES[t].label; typeSel.appendChild(o); }
+  typeSel.value = 'house';
+
+  $('btn-copy-pos').onclick = async () => toast((await copyText(positionString())) ? `Copied: ${positionString()}` : positionString(), 4000);
+  $('btn-share').onclick = async () => { writeHash(); toast((await copyText(location.href)) ? 'Link copied' : location.href, 3000); };
+  $('btn-goto').onclick = () => {
+    const lat = parseFloat($('goto-lat').value), lon = parseFloat($('goto-lon').value);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) { toast('Enter lat and lon'); return; }
+    controls.teleport(THREE.MathUtils.clamp(lat, -90, 90), wrapLon(lon), Math.max(60, Math.min(controls.altitude, 400)), controls.heading, -35);
+  };
+  for (const id of ['goto-lat', 'goto-lon']) $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-goto').click(); });
+
+  $('btn-load').onclick = async () => {
+    const id = $('world-select').value;
+    if (!id || id === store.current.id) return;
+    await store.load(id);
+    await buildWorld(store.current);
+    toast(`Loaded ${store.current.name}`);
+  };
+  $('btn-new').onclick = async () => {
+    const input = prompt('New blank world.\nEnter a seed number, or leave empty for a random seed:', '');
+    if (input === null) return;
+    const seed = input.trim() === '' ? randomSeed() : (Number.parseInt(input, 10) >>> 0);
+    const name = prompt('Name for this world:', `World ${seed}`) || `World ${seed}`;
+    const id = store.createLocal({ name, seed });
+    await store.load(id);
+    await buildWorld(store.current);
+    toast(`New world “${name}” (seed ${seed})`);
+  };
+  $('btn-reset').onclick = async () => {
+    const w = store.current;
+    const msg = w.kind === 'repo' ? `Discard your local changes to “${w.name}” and restore it as published?` : `Remove all structures from “${w.name}”? (terrain/seed is kept)`;
+    if (!confirm(msg)) return;
+    const view = { ...controls.latLon, alt: controls.altitude, heading: controls.heading, pitch: controls.pitch };
+    await store.reset();
+    await buildWorld(store.current, view);
+    toast('World reset');
+  };
+  $('btn-export').onclick = () => {
+    const blob = new Blob([store.exportJSON()], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${store.current.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'world'}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+  $('btn-import').onclick = () => $('file-import').click();
+  $('file-import').onchange = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+      const id = store.importJSON(await file.text());
+      await store.load(id);
+      await buildWorld(store.current);
+      toast(`Imported ${store.current.name}`);
+    } catch (err) { toast(`Import failed: ${err.message}`, 4000); }
+    e.target.value = '';
+  };
+
+  $('build-toggle').onchange = (e) => setBuildMode(e.target.checked);
+  $('btn-toggle-list').onclick = () => { const l = $('structure-list'); l.classList.toggle('hidden'); $('btn-toggle-list').textContent = l.classList.contains('hidden') ? 'show' : 'hide'; };
+  $('opt-grid').onchange = (e) => { if (gridGroup) gridGroup.visible = e.target.checked; };
+  $('opt-clouds').onchange = (e) => { if (cloudMesh) cloudMesh.visible = e.target.checked; };
+  $('opt-wire').onchange = (e) => { if (terrain) terrain.material.wireframe = e.target.checked; };
+  $('opt-labels').onchange = () => { /* handled per-frame */ };
+
+  window.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.code === 'KeyH') $('help').classList.toggle('hidden');
+    if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
+    if (e.code === 'KeyB') setBuildMode(!buildMode);
+    if (e.code === 'Escape' && buildMode) setBuildMode(false);
+  });
+
+  // pointer: hover readout + click (coords or build)
+  const canvas = renderer.domElement;
+  let hoverT = 0;
+  canvas.addEventListener('pointermove', (e) => {
+    const now = performance.now();
+    if (now - hoverT < 80 || controls.pointerLocked) return;
+    hoverT = now;
+    pickInfo = pickGround((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  });
+  canvas.addEventListener('pointerup', async (e) => {
+    if (e.button !== 0 || !controls.wasClick()) return;
+    const hit = controls.pointerLocked ? pickGround(0, 0) : pickGround((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    if (!hit) return;
+    if (buildMode) {
+      const rec = store.addStructure({
+        type: $('build-type').value, lat: +hit.lat.toFixed(4), lon: +wrapLon(hit.lon).toFixed(4),
+        heading: +$('build-heading').value, scale: +$('build-scale').value, color: $('build-color').value,
+        name: $('build-name').value.trim() || undefined,
+      });
+      placeStructure(rec);
+      updateWorldPanel();
+      toast(`Built ${STRUCTURES[rec.type].label} at ${formatLat(rec.lat)}, ${formatLon(rec.lon)}`);
+    } else {
+      const text = `${hit.lat.toFixed(4)}, ${wrapLon(hit.lon).toFixed(4)}`;
+      const ok = await copyText(text);
+      toast(`${formatLat(hit.lat)}, ${formatLon(hit.lon)} · ${hit.elevation > 0 ? `elevation ${hit.elevation.toFixed(0)} m` : 'water'}${ok ? ' (copied)' : ''}`, 3500);
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+function setBuildMode(on) {
+  buildMode = on;
+  $('build-toggle').checked = on;
+  renderer.domElement.style.cursor = on ? 'crosshair' : 'grab';
+  toast(on ? `Build mode: click the globe to place a ${STRUCTURES[$('build-type').value].label}` : 'Build mode off');
+}
+
+// ------------------------------------------------------------------ main loop
+const clock = new THREE.Clock();
+let hudT = 0, hashT = 0;
+const _tmp = new THREE.Vector3();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.1);
+  if (!controls) return;
+  controls.update(dt);
+  updateSun(dt);
+  if (terrain) terrain.update(controls.position);
+  if (cloudMesh && cloudMesh.visible) cloudMesh.rotation.y += dt * 0.004;
+  for (const s of spinners) s.rotation.z += dt * 1.2;
+
+  // label visibility: hide labels that are far away or over the horizon
+  const showLabels = $('opt-labels').checked;
+  for (const g of structureObjects.values()) {
+    const lo = g.userData.label;
+    if (!lo) continue;
+    let vis = showLabels;
+    if (vis) {
+      _tmp.copy(g.position).sub(camera.position);
+      const dist = _tmp.length();
+      vis = dist < g.userData.labelRange + controls.altitude * 2.5 && _tmp.dot(g.position) < 0;
+    }
+    lo.visible = vis;
+  }
+
+  const now = performance.now();
+  if (now - hudT > 100) { hudT = now; updateHUD(); }
+  if (now - hashT > 1500) { hashT = now; writeHash(); }
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
+
+// ------------------------------------------------------------------ boot
+(async function boot() {
+  wireUI();
+  await store.init();
+  const hash = readHash();
+  const worlds = store.listWorlds();
+  let id = (hash && hash.world) || store.lastWorldId();
+  if (!worlds.some((w) => w.id === id)) id = worlds[0]?.id;
+  if (!id) {
+    id = store.createLocal({ name: 'My World', seed: randomSeed() });
+  }
+  try {
+    await store.load(id);
+  } catch {
+    await store.load(worlds[0].id);
+  }
+  await buildWorld(store.current, hash && hash.world === store.current.id ? hash.view : null);
+  renderer.domElement.style.cursor = 'grab';
+  animate();
+  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, pickGround, placeStructure };
+})();

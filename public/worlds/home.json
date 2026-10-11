@@ -1,0 +1,11 @@
+{
+  "name": "Home World",
+  "seed": 20261011,
+  "description": "The starting world. Add structures here by coordinates.",
+  "spawn": { "lat": 20, "lon": 0, "alt": 26000, "heading": 0, "pitch": -89 },
+  "structures": [
+    { "id": "origin-beacon", "type": "beacon", "lat": 0, "lon": 0, "heading": 0, "scale": 1.5, "color": "#ff6a3d", "name": "Origin (0°, 0°)" },
+    { "id": "north-pole-flag", "type": "flag", "lat": 90, "lon": 0, "heading": 0, "scale": 2, "color": "#ffffff", "name": "North Pole" },
+    { "id": "south-pole-flag", "type": "flag", "lat": -90, "lon": 0, "heading": 0, "scale": 2, "color": "#9ad0ff", "name": "South Pole" }
+  ]
+}
