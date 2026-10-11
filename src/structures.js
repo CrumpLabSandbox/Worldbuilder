@@ -5,6 +5,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { mulberry32 } from './noise.js';
 import { R, latLonToDir, tangentFrame } from './planet.js';
 import { buildVolcano, buildRoad, buildWoodland } from './featureMeshes.js';
+import { buildCoaster } from './coaster.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -335,6 +336,10 @@ export const STRUCTURES = {
   woodland: {
     label: 'Woodland', feature: true,
     place: (rec, planet) => buildWoodland(rec, planet, planet.featureById(rec.id)),
+  },
+  coaster: {
+    label: 'Roller coaster', feature: true, menu: false,
+    place: (rec, planet) => buildCoaster(rec, planet, planet.featureById(rec.id)),
   },
   road: {
     label: 'Road', feature: true, menu: false,

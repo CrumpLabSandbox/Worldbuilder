@@ -202,6 +202,7 @@ function removeStructureObject(id) {
   }
 }
 function clearStructures() {
+  if (ride) endRide();
   for (const id of [...structureObjects.keys()]) removeStructureObject(id);
   spinners.length = 0;
   animated.length = 0;
@@ -271,6 +272,11 @@ function renderStructureList() {
     const coords = document.createElement('span'); coords.className = 'coords'; coords.textContent = `${s.lat.toFixed(2)}, ${s.lon.toFixed(2)}`;
     const go = document.createElement('button'); go.textContent = 'Go'; go.title = 'Fly to this structure';
     go.onclick = () => flyToStructure(s);
+    if (s.type === 'coaster') {
+      const rb = document.createElement('button'); rb.textContent = 'Ride'; rb.title = 'Ride it from the start';
+      rb.onclick = () => { const g = structureObjects.get(s.id); if (g?.userData.coaster) { startRide(g.userData.coaster); updateRideButton(); } };
+      el.append(rb);
+    }
     const del = document.createElement('button'); del.textContent = '×'; del.title = 'Remove';
     del.onclick = async () => {
       store.removeStructure(s.id); removeStructureObject(s.id);
@@ -283,6 +289,18 @@ function renderStructureList() {
 }
 
 function flyToStructure(s) {
+  if (s.type === 'coaster') {
+    const g = structureObjects.get(s.id);
+    const f = g?.userData.coaster?.feature;
+    if (f) {
+      const fr = f.frameAt(f.stationLen + 10);
+      const back = fr.pos.clone().addScaledVector(fr.tan, -90).normalize();
+      const ll = dirToLatLon(back);
+      const { east, north } = tangentFrame(back);
+      controls.teleport(ll.lat, ll.lon, 25, (Math.atan2(fr.tan.dot(east), fr.tan.dot(north)) / DEG + 360) % 360, -2);
+      return;
+    }
+  }
   if (s.type === 'volcano' || s.type === 'woodland') {
     // stand off to the south, looking north at it
     const r = (s.type === 'volcano' ? (s.radius ?? 600) * 1.8 : (s.radius ?? 400) * 1.2);
@@ -307,6 +325,54 @@ function flyToStructure(s) {
   controls.teleport(s.lat + dlat, s.lon, dist * 0.6, 0, -30);
 }
 
+// ------------------------------------------------------------------ coaster rides
+let ride = null; // the coaster api being ridden
+const eye = { pos: new THREE.Vector3(), target: new THREE.Vector3(), up: new THREE.Vector3(), speed: 0 };
+function coasters() {
+  return [...structureObjects.values()].map((g) => g.userData.coaster).filter(Boolean);
+}
+function nearestCoaster(maxDist = 450) {
+  let best = null, bd = maxDist;
+  for (const c of coasters()) {
+    const d = c.stationPoint().distanceTo(controls.position);
+    if (d < bd) { bd = d; best = c; }
+  }
+  return best;
+}
+function startRide(c) {
+  if (!c) return;
+  ride = c;
+  c.onRideEnd = () => endRide(true);
+  c.board();
+  controls.enabled = false;
+  document.body.classList.add('riding');
+  toast('Hold on! Esc or W/A/S/D to get off', 3500);
+}
+function endRide(arrived = false) {
+  if (!ride) return;
+  const c = ride;
+  ride = null;
+  c.dismount();
+  // step off where the camera is, facing the same way
+  const fwd = eye.target.clone().sub(eye.pos).normalize();
+  const { east, north, up } = tangentFrame(eye.pos);
+  controls.position.copy(eye.pos);
+  if (arrived) controls.position.addScaledVector(up, 1.5);
+  controls.heading = (Math.atan2(fwd.dot(east), fwd.dot(north)) / DEG + 360) % 360;
+  controls.pitch = THREE.MathUtils.clamp(Math.asin(THREE.MathUtils.clamp(fwd.dot(up), -1, 1)) / DEG, -60, 60);
+  controls.enabled = true;
+  controls.updateCamera();
+  document.body.classList.remove('riding');
+  toast(arrived ? 'End of the line. Welcome to the far side.' : 'Got off the ride', 3000);
+}
+function updateRideButton() {
+  const btn = $('btn-ride');
+  if (ride) { btn.textContent = '✋ Get off'; btn.classList.remove('hidden'); return; }
+  const c = nearestCoaster();
+  if (c) { btn.textContent = `🎢 Ride ${c.feature.rec.name || 'the coaster'}`; btn.classList.remove('hidden'); }
+  else btn.classList.add('hidden');
+}
+
 // ------------------------------------------------------------------ HUD
 let pickInfo = null;
 function updateHUD() {
@@ -319,7 +385,7 @@ function updateHUD() {
   const dir = controls.position.clone().normalize();
   const e = planet.elevation(dir);
   $('hud-ground').textContent = planet.inTunnel(controls.position) ? 'in tunnel' : e > 0 ? `land +${e.toFixed(0)} m` : `sea (${(-e).toFixed(0)} m deep)`;
-  $('hud-speed').textContent = `${controls.baseSpeed().toFixed(0)} m/s`;
+  $('hud-speed').textContent = ride ? `${eye.speed.toFixed(0)} m/s (riding)` : `${controls.baseSpeed().toFixed(0)} m/s`;
   $('hud-pick').textContent = pickInfo
     ? `${formatLat(pickInfo.lat)}, ${formatLon(pickInfo.lon)} · ${pickInfo.elevation > 0 ? `+${pickInfo.elevation.toFixed(0)} m` : 'water'} · ${pickInfo.distance.toFixed(0)} m away`
     : '–';
@@ -414,6 +480,7 @@ function wireUI() {
   };
 
   $('build-toggle').onchange = (e) => setBuildMode(e.target.checked);
+  $('btn-ride').onclick = () => { if (ride) endRide(); else startRide(nearestCoaster()); updateRideButton(); };
   $('btn-toggle-list').onclick = () => { const l = $('structure-list'); l.classList.toggle('hidden'); $('btn-toggle-list').textContent = l.classList.contains('hidden') ? 'show' : 'hide'; };
   $('opt-grid').onchange = (e) => { if (gridGroup) gridGroup.visible = e.target.checked; };
   $('opt-clouds').onchange = (e) => { if (cloudMesh) cloudMesh.visible = e.target.checked; };
@@ -425,6 +492,7 @@ function wireUI() {
     if (e.code === 'KeyH') $('help').classList.toggle('hidden');
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
     if (e.code === 'KeyB') setBuildMode(!buildMode);
+    if (ride && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endRide(); updateRideButton(); return; }
     if (e.code === 'Escape' && buildMode) setBuildMode(false);
   });
 
@@ -532,7 +600,18 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
-  controls.update(dt);
+  if (ride) {
+    ride.eye(eye);
+    camera.position.copy(eye.pos);
+    camera.up.copy(eye.up);
+    camera.lookAt(eye.target);
+    controls.position.copy(eye.pos); // keeps HUD, terrain detail and sun following the rider
+    const fwd = eye.target.clone().sub(eye.pos).normalize();
+    const fr = tangentFrame(eye.pos);
+    controls.heading = (Math.atan2(fwd.dot(fr.east), fwd.dot(fr.north)) / DEG + 360) % 360;
+  } else {
+    controls.update(dt);
+  }
   updateSun(dt);
   if (terrain) terrain.update(controls.position);
   if (cloudMesh && cloudMesh.visible) cloudMesh.rotation.y += dt * 0.004;
@@ -554,7 +633,7 @@ function animate() {
   }
 
   const now = performance.now();
-  if (now - hudT > 100) { hudT = now; updateHUD(); }
+  if (now - hudT > 100) { hudT = now; updateHUD(); updateRideButton(); }
   if (now - hashT > 1500) { hashT = now; writeHash(); }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
@@ -580,5 +659,5 @@ function animate() {
   wireTouchUI();
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, pickGround, placeStructure };
+  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, pickGround, placeStructure };
 })();

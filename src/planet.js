@@ -98,6 +98,15 @@ export class Planet {
     for (const f of this.features) if (f.kind === 'volcano' && dir.dot(f.center) > f.cosBound) h += f.profile(dir);
     return h;
   }
+  // distance to the nearest road or coaster footprint
+  clearance(dir) {
+    let c = Infinity;
+    for (const f of this.features) if ((f.kind === 'road' || f.kind === 'coaster') && dir.dot(f.center) > f.cosBound) c = Math.min(c, f.clearance(dir));
+    return c;
+  }
+  insideOtherWoods(dir, id) {
+    return this.features.some((f) => f.kind === 'woods' && f.id !== id && f.contains(dir, 0.8));
+  }
   roadClearance(dir) {
     let c = Infinity;
     for (const f of this.features) if (f.kind === 'road' && dir.dot(f.center) > f.cosBound) c = Math.min(c, f.clearance(dir));

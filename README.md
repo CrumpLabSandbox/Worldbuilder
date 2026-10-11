@@ -75,10 +75,22 @@ Terrain features reshape the planet itself rather than sitting on it:
   bare volcano slopes, and a forest-floor tint. Options: `radius` (default
   400), `count` (tree attempts).
 
+- `coaster` — a one-way roller coaster you can ride. `lat`/`lon` is the start
+  station and `heading` its direction; `path` lists waypoints `[F, L, h]`
+  (metres forward, metres right, height above ground) with elements between
+  them: `{ "loop": diameter }`, `{ "corkscrew": length }`, and
+  `{ "helix": radius, "turns": n, "drop": m, "side": 1 | -1 }`. `liftEnd` is
+  the index of the waypoint at the top of the chain lift. Near a start
+  station a **Ride** button appears (also in the structures list); Esc or
+  W/A/S/D gets you off, and the ride drops you at the far station.
+- A `woodland` with `alien: { lat, lon, start, full }` turns from trees into
+  glowing alien flora (mushrooms, crystals, tendrils, orb stalks, pods,
+  coral) between `start` and `full` metres from that point.
+
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight

@@ -2,7 +2,7 @@
 // tunnels, and instanced woodland.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { R, tangentFrame } from './planet.js';
+import { R, tangentFrame, latLonToDir } from './planet.js';
 import { mulberry32 } from './noise.js';
 
 function hashString(s) {
@@ -220,6 +220,65 @@ export function buildRoad(rec, planet, feature) {
   return group;
 }
 
+// ---------------------------------------------------------------- alien flora
+// Vivid colours; glowing parts emit their own instance colour.
+const ALIEN_PALETTE = [
+  [1.0, 0.18, 0.75], [0.1, 0.95, 1.0], [0.62, 1.0, 0.15], [0.62, 0.25, 1.0],
+  [1.0, 0.52, 0.08], [1.0, 0.3, 0.45], [1.0, 0.92, 0.2], [0.1, 0.85, 0.6],
+];
+function glowMaterial() {
+  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35, metalness: 0.1, flatShading: true });
+  m.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n#ifdef USE_COLOR\n totalEmissiveRadiance += vColor * 0.55;\n#endif');
+  };
+  return m;
+}
+const unit = (fn) => { let g = null; return () => (g || (g = fn())); };
+const helixCurve = (turns, r0, r1) => new (class extends THREE.Curve {
+  getPoint(t, out = new THREE.Vector3()) { const a = t * turns * Math.PI * 2, r = r0 + (r1 - r0) * t; return out.set(Math.cos(a) * r, t, Math.sin(a) * r); }
+})();
+const ALIEN_SPECIES = [
+  { name: 'shroom', min: 7, max: 20, parts: unit(() => [
+    { geo: new THREE.CylinderGeometry(0.05, 0.09, 0.62, 8).translate(0, 0.31, 0), tint: 'pale' },
+    { geo: new THREE.SphereGeometry(0.36, 14, 6, 0, Math.PI * 2, 0, Math.PI / 2).scale(1, 0.55, 1).translate(0, 0.6, 0), glow: true },
+    { geo: new THREE.CylinderGeometry(0.33, 0.33, 0.03, 14).translate(0, 0.6, 0), tint: 'second', glow: true },
+  ]) },
+  { name: 'crystal', min: 8, max: 28, parts: unit(() => {
+    const shards = [];
+    const spec = [[0, 0, 0, 1], [0.12, 0, 0.5, 0.62], [-0.1, 0.05, -0.6, 0.55], [0.05, -0.12, 2.2, 0.48], [-0.06, 0.1, 1.2, 0.4]];
+    for (const [x, zz, tilt, h] of spec) shards.push(new THREE.OctahedronGeometry(0.5, 0).scale(0.13, h, 0.13).translate(0, h * 0.5, 0).rotateX(x).rotateZ(zz).rotateY(tilt));
+    return [{ geo: mergeGeometries(shards), glow: true }];
+  }) },
+  { name: 'tendril', min: 10, max: 26, parts: unit(() => [
+    { geo: new THREE.TubeGeometry(helixCurve(2.5, 0.12, 0.03), 60, 0.035, 6), tint: 'second' },
+    { geo: new THREE.SphereGeometry(0.11, 10, 8).translate(Math.cos(2.5 * Math.PI * 2) * 0.03, 1.02, Math.sin(2.5 * Math.PI * 2) * 0.03), glow: true },
+  ]) },
+  { name: 'orbs', min: 9, max: 24, parts: unit(() => [
+    { geo: new THREE.CylinderGeometry(0.015, 0.04, 1, 6).translate(0, 0.5, 0), tint: 'dark' },
+    { geo: mergeGeometries([
+      new THREE.SphereGeometry(0.12, 12, 10).translate(0, 1.04, 0),
+      new THREE.SphereGeometry(0.08, 10, 8).translate(0.12, 0.78, 0.02),
+      new THREE.SphereGeometry(0.06, 10, 8).translate(-0.1, 0.62, -0.05),
+    ]), glow: true },
+  ]) },
+  { name: 'pod', min: 6, max: 16, parts: unit(() => {
+    const prof = [[0, 0], [0.28, 0.05], [0.4, 0.25], [0.36, 0.5], [0.18, 0.72], [0.1, 0.85], [0.16, 0.95], [0.12, 1.0], [0, 0.97]].map(([x, y]) => new THREE.Vector2(x, y));
+    return [
+      { geo: new THREE.LatheGeometry(prof, 12) },
+      { geo: new THREE.TorusGeometry(0.385, 0.03, 6, 20).rotateX(Math.PI / 2).translate(0, 0.3, 0), glow: true, tint: 'second' },
+    ];
+  }) },
+  { name: 'coral', min: 6, max: 18, parts: unit(() => {
+    const arms = [];
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * Math.PI * 2, tilt = 0.25 + (i % 3) * 0.18, h = 0.7 + (i % 2) * 0.3;
+      arms.push(new THREE.ConeGeometry(0.06, h, 6).translate(0, h / 2, 0).rotateZ(tilt).rotateY(a));
+      arms.push(new THREE.SphereGeometry(0.07, 8, 6).translate(0, h, 0).rotateZ(tilt).rotateY(a));
+    }
+    return [{ geo: mergeGeometries(arms), glow: true }];
+  }) },
+];
+
 // ---------------------------------------------------------------- woodland
 export function buildWoodland(rec, planet, feature) {
   const center = feature.center;
@@ -230,6 +289,8 @@ export function buildWoodland(rec, planet, feature) {
   const { east, north } = tangentFrame(center);
   const noise = planet.noise2;
   const trees = { pine: [], broad: [], poplar: [] };
+  const alien = Object.fromEntries(ALIEN_SPECIES.map((sp) => [sp.name, []]));
+  const alienOrigin = rec.alien ? latLonToDir(rec.alien.lat, rec.alien.lon) : null;
   const dir = new THREE.Vector3(), tmp = new THREE.Vector3();
   for (let i = 0; i < attempts; i++) {
     const r = radius * Math.sqrt(rng()), th = rng() * Math.PI * 2;
@@ -240,15 +301,29 @@ export function buildWoodland(rec, planet, feature) {
     let p = THREE.MathUtils.smoothstep(clump, -0.45, 0.1) * (1 - THREE.MathUtils.smoothstep(r, radius * 0.75, radius));
     const elev = planet.elevation(dir);
     if (elev < 2.5) continue;
-    if (planet.roadClearance(dir) < (rec.roadGap ?? 9)) continue;
+    if (planet.clearance(dir) < (rec.roadGap ?? 9)) continue;
+    if (rec.alien && planet.insideOtherWoods(dir, rec.id)) continue;
     const vh = planet.volcanoHeightAt(dir);
     p *= 1 - THREE.MathUtils.smoothstep(vh, 25, 70);
     if (rng() > p) continue;
+    const pos = dir.clone().multiplyScalar(R + elev - 0.4).applyMatrix4(toLocal);
+    const up = dir.clone().applyQuaternion(invQ);
+    // alien flora takes over with distance from the alien origin
+    if (alienOrigin) {
+      const d = dir.angleTo(alienOrigin) * R;
+      const wAlien = THREE.MathUtils.smoothstep(d, rec.alien.start ?? 300, rec.alien.full ?? 1200);
+      if (rng() < wAlien) {
+        const patch = noise.noise3(dir.x * 60 + 3, dir.y * 60, dir.z * 60) * 0.5 + 0.5;
+        const sp = ALIEN_SPECIES[Math.min(ALIEN_SPECIES.length - 1, Math.floor(((patch * 1.6 + rng() * 0.6) % 1) * ALIEN_SPECIES.length))];
+        const hue = ALIEN_PALETTE[Math.floor(rng() * ALIEN_PALETTE.length)];
+        const h = sp.min + rng() * (sp.max - sp.min) * (0.6 + 0.4 * wAlien);
+        alien[sp.name].push({ pos, up, h, w: 0.8 + rng() * 0.4, yaw: rng() * Math.PI * 2, color: hue, color2: ALIEN_PALETTE[Math.floor(rng() * ALIEN_PALETTE.length)] });
+        continue;
+      }
+    }
     const kindRoll = rng() + elev / 400;
     const kind = kindRoll > 0.62 ? 'pine' : kindRoll > 0.16 ? 'broad' : 'poplar';
     const h = kind === 'pine' ? 14 + rng() * 12 : kind === 'broad' ? 10 + rng() * 8 : 15 + rng() * 8;
-    const pos = dir.clone().multiplyScalar(R + elev - 0.4).applyMatrix4(toLocal);
-    const up = dir.clone().applyQuaternion(invQ);
     trees[kind].push({ pos, up, h, w: 0.85 + rng() * 0.3, yaw: rng() * Math.PI * 2, shade: rng() });
   }
   const unitUp = new THREE.Vector3(0, 1, 0);
@@ -289,6 +364,26 @@ export function buildWoodland(rec, planet, feature) {
     mesh.computeBoundingSphere();
     group.add(mesh);
   }
+  let alienCount = 0;
+  for (const sp of ALIEN_SPECIES) {
+    const list = alien[sp.name];
+    if (!list.length) continue;
+    alienCount += list.length;
+    for (const part of sp.parts()) {
+      const mesh = new THREE.InstancedMesh(part.geo, part.glow ? glowMaterial() : new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, flatShading: true }), list.length);
+      list.forEach((t, i) => {
+        setM(t); mesh.setMatrixAt(i, m);
+        const base = part.tint === 'second' ? t.color2 : t.color;
+        col.setRGB(base[0], base[1], base[2]);
+        if (part.tint === 'pale') col.lerp(new THREE.Color(0.92, 0.9, 1), 0.65);
+        if (part.tint === 'dark') col.multiplyScalar(0.35);
+        mesh.setColorAt(i, col);
+      });
+      mesh.computeBoundingSphere();
+      group.add(mesh);
+    }
+  }
+  group.userData.alienCount = alienCount;
   group.userData.treeCount = all.length;
   group.userData.labelPos = new THREE.Vector3(0, 40, 0);
   group.userData.labelRange = 3000;

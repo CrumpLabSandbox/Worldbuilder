@@ -90,3 +90,8 @@ body.touch #crosshair { display: none; }
   #hud { width: 190px; font-size: 12px; }
   #hud td:first-child { width: 50px; }
 }
+
+#btn-ride { left: 50%; transform: translateX(-50%); bottom: 64px; padding: 10px 18px; font-size: 15px; font-weight: 600; z-index: 12; border-color: rgba(255,79,109,.6); }
+#btn-ride:hover { background: rgba(255,79,109,.35); }
+body.touch #btn-ride { bottom: 170px; }
+body.riding #crosshair, body.riding #touch-ui { display: none; }

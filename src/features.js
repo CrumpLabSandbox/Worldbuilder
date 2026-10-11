@@ -6,6 +6,7 @@
 // Planet.elevation() applies them in order; features only see those before them.
 import * as THREE from 'three';
 import { R, latLonToDir, tangentFrame } from './planet.js';
+import { CoasterFeature } from './coaster.js';
 
 const clamp = THREE.MathUtils.clamp;
 function smooth(a, b, x) { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -17,6 +18,8 @@ const SCORIA = [0.42, 0.20, 0.12];
 const CRATER = [0.16, 0.08, 0.05];
 const FOREST_FLOOR = [0.14, 0.31, 0.12];
 const FOREST_FLOOR2 = [0.22, 0.36, 0.14];
+const ALIEN_MOSS = [0.34, 0.12, 0.46];
+const ALIEN_MOSS2 = [0.06, 0.40, 0.42];
 
 export class VolcanoFeature {
   constructor(rec, planet) {
@@ -199,19 +202,31 @@ export class WoodsFeature {
     this.cosBound = Math.cos(this.radius / R);
     this.noise = planet.noise2;
     this.maxHeight = 0;
+    this.alien = rec.alien ? { origin: latLonToDir(rec.alien.lat, rec.alien.lon), start: rec.alien.start ?? 300, full: rec.alien.full ?? 1200 } : null;
   }
+  contains(dir, frac = 1) { return dir.dot(this.center) > Math.cos((this.radius * frac) / R); }
   color(dir, h, out) {
     if (h < 2) return;
     const r = Math.acos(clamp(dir.dot(this.center), -1, 1)) * R;
     const w = 0.85 * (1 - smooth(this.radius * 0.7, this.radius, r)) * smooth(2, 5, h);
     if (w <= 0) return;
     const c = [FOREST_FLOOR[0], FOREST_FLOOR[1], FOREST_FLOOR[2]];
-    mix(c, FOREST_FLOOR2, 0.5 + 0.5 * this.noise.noise3(dir.x * 300, dir.y * 300, dir.z * 300));
+    const n = 0.5 + 0.5 * this.noise.noise3(dir.x * 300, dir.y * 300, dir.z * 300);
+    mix(c, FOREST_FLOOR2, n);
+    if (this.alien) {
+      const d = dir.angleTo(this.alien.origin) * R;
+      const a = smooth(this.alien.start, this.alien.full, d);
+      if (a > 0) {
+        const m = [ALIEN_MOSS[0], ALIEN_MOSS[1], ALIEN_MOSS[2]];
+        mix(m, ALIEN_MOSS2, smooth(0.3, 0.7, n));
+        mix(c, m, a);
+      }
+    }
     mix(out, c, w);
   }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland']);
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -224,6 +239,10 @@ export function createFeatures(records, planet) {
     roads.push(new RoadFeature(r, planet));
     planet.setFeatures([...volcs, ...roads]);
   }
+  const coasters = [];
+  for (const r of records.filter((x) => x.type === 'coaster' && Array.isArray(x.path) && x.path.length > 1)) {
+    try { coasters.push(new CoasterFeature(r, planet)); } catch (e) { console.warn('coaster', r.id, e); }
+  }
   const woods = records.filter((r) => r.type === 'woodland').map((r) => new WoodsFeature(r, planet));
-  return [...volcs, ...roads, ...woods];
+  return [...volcs, ...roads, ...coasters, ...woods];
 }
