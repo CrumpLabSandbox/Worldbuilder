@@ -108,6 +108,8 @@ export class FlyControls {
   wasClick() { return this.moved < 4; }
 
   get altitude() {
+    const floor = this.planet.tunnelFloor(this.position);
+    if (floor != null) return this.position.length() - (R + floor); // height above a tunnel's road
     const dir = this.position.clone().normalize();
     return this.position.length() - this.planet.groundRadius(dir);
   }
@@ -126,7 +128,8 @@ export class FlyControls {
   // Current motion speed in units/second given altitude.
   baseSpeed() {
     const alt = Math.max(0, this.altitude);
-    return THREE.MathUtils.clamp(alt * 0.9 + 4, 6, R * 2) * this.speedMul;
+    const min = this.planet.tunnelFloor(this.position) != null ? 18 : 6; // cruise through tunnels
+    return THREE.MathUtils.clamp(alt * 0.9 + 4, min, R * 2) * this.speedMul;
   }
 
   update(dt) {
@@ -166,12 +169,14 @@ export class FlyControls {
       this.position.add(move);
       this.velocity = speed * mag;
     }
-    // keep above ground / below ceiling
-    const dir = this.position.clone().normalize();
-    const ground = this.planet.groundRadius(dir);
-    const r = this.position.length();
-    if (r < ground + this.minAlt) this.position.copy(dir).multiplyScalar(ground + this.minAlt);
-    if (r > R + this.maxAlt) this.position.copy(dir).multiplyScalar(R + this.maxAlt);
+    // inside a tunnel: stay within its walls; otherwise keep above ground / below ceiling
+    if (!this.planet.constrainTunnels(this.position)) {
+      const dir = this.position.clone().normalize();
+      const ground = this.planet.groundRadius(dir);
+      const r = this.position.length();
+      if (r < ground + this.minAlt) this.position.copy(dir).multiplyScalar(ground + this.minAlt);
+      if (r > R + this.maxAlt) this.position.copy(dir).multiplyScalar(R + this.maxAlt);
+    }
     this.updateCamera();
   }
 

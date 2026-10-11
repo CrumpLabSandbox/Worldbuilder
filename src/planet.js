@@ -63,6 +63,45 @@ export class Planet {
     this.off = [r() * 100, r() * 100, r() * 100];
     this.maxHeight = 320; // tallest mountain in units above sea level
     this.seaDepth = 160;
+    this.features = [];
+    this.featureMax = 0;
+    this._cv = new THREE.Vector3();
+  }
+
+  // --- terrain features (volcanoes, roads, woodland tints) ---------------
+  setFeatures(list) {
+    this.features = list;
+    this.featureMax = list.reduce((m, f) => Math.max(m, f.maxHeight || 0), 0);
+  }
+  maxElevation() { return this.maxHeight + this.featureMax; }
+  featureById(id) { return this.features.find((f) => f.id === id); }
+  // terrain triangle should be cut away (tunnel mouths)
+  isHole(dir, elev) {
+    for (const f of this.features) if (f.hole && dir.dot(f.center) > f.cosBound && f.hole(dir, elev)) return true;
+    return false;
+  }
+  holeBounds() {
+    return this.features.filter((f) => f.hole && f.tunnels && f.tunnels.length).map((f) => ({ center: f.center, ang: Math.acos(f.cosBound) }));
+  }
+  // keep a position inside any tunnel it is in; true if it was in one
+  constrainTunnels(pos) {
+    for (const f of this.features) if (f.constrain && f.constrain(pos)) return true;
+    return false;
+  }
+  inTunnel(pos) { return this.features.some((f) => f.inTunnel && f.inTunnel(pos)); }
+  tunnelFloor(pos) {
+    for (const f of this.features) { const v = f.floorAt && f.floorAt(pos); if (v != null) return v; }
+    return null;
+  }
+  volcanoHeightAt(dir) {
+    let h = 0;
+    for (const f of this.features) if (f.kind === 'volcano' && dir.dot(f.center) > f.cosBound) h += f.profile(dir);
+    return h;
+  }
+  roadClearance(dir) {
+    let c = Infinity;
+    for (const f of this.features) if (f.kind === 'road' && dir.dot(f.center) > f.cosBound) c = Math.min(c, f.clearance(dir));
+    return c;
   }
 
   // Raw shape in roughly [-1, 1]; > 0 is land. maxFreq limits noise octaves
@@ -83,8 +122,20 @@ export class Planet {
     return h;
   }
 
-  // Elevation in units relative to sea level (negative = seabed depth).
-  elevation(dir, maxFreq = Infinity) {
+  // Elevation in units relative to sea level (negative = seabed depth),
+  // including terrain features (only the first `upto` of them if given).
+  elevation(dir, maxFreq = Infinity, upto) {
+    let h = this._baseElevation(dir, maxFreq);
+    const fs = this.features;
+    const n = upto ?? fs.length;
+    for (let i = 0; i < n; i++) {
+      const f = fs[i];
+      if (f.elev && dir.dot(f.center) > f.cosBound) h = f.elev(dir, h);
+    }
+    return h;
+  }
+
+  _baseElevation(dir, maxFreq = Infinity) {
     const h = this._shape(dir.x, dir.y, dir.z, maxFreq);
     if (h >= 0) {
       const t = Math.min(1, h / 0.9);
@@ -135,6 +186,13 @@ export class Planet {
     }
     if (temp < 0.25) {
       mixColor(out, out, C.snow, smoothstep(0.25, 0.1, temp));
+    }
+    if (this.features.length) {
+      const v = this._cv.set(x, y, z);
+      for (let i = this.features.length - 1; i >= 0; i--) {
+        const f = this.features[i];
+        if (f.color && v.dot(f.center) > f.cosBound) f.color(v, h, out);
+      }
     }
     return out;
   }

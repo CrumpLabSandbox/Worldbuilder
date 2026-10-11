@@ -49,10 +49,21 @@ export class TerrainLOD {
     this._tmp = new THREE.Vector3();
   }
 
-  dispose() {
+  _disposeAll() {
     const walk = (t) => { this._disposeMesh(t); if (t.children) t.children.forEach(walk); };
     this.roots.forEach(walk);
+    this.visible = new Set();
+  }
+
+  dispose() {
+    this._disposeAll();
     this.material.dispose();
+  }
+
+  // Throw away every tile (after terrain features change) and start again.
+  reset() {
+    this._disposeAll();
+    this.roots = FACES.map((_, f) => new Tile(f, 0, -1, -1, 2));
   }
 
   _disposeMesh(t) {
@@ -122,10 +133,30 @@ export class TerrainLOD {
       idx[ii++] = e0; idx[ii++] = s0; idx[ii++] = e1;
       idx[ii++] = e1; idx[ii++] = s0; idx[ii++] = s1;
     }
+    // cut tunnel mouths out of fine tiles that touch a tunnel
+    let index = idx;
+    if (spacing * R < 3.2) {
+      const bounds = planet.holeBounds();
+      const near = bounds.some((b) => Math.acos(THREE.MathUtils.clamp(t.center.dot(b.center), -1, 1)) < t.angRadius + b.ang);
+      if (near) {
+        const kept = new Uint32Array(idx.length);
+        let k = 0;
+        const cen = new THREE.Vector3();
+        for (let q = 0; q < idx.length; q += 3) {
+          const i0 = idx[q] * 3, i1 = idx[q + 1] * 3, i2 = idx[q + 2] * 3;
+          cen.set((pos[i0] + pos[i1] + pos[i2]) / 3, (pos[i0 + 1] + pos[i1 + 1] + pos[i2 + 1]) / 3, (pos[i0 + 2] + pos[i1 + 2] + pos[i2 + 2]) / 3);
+          const r = cen.length();
+          cen.divideScalar(r);
+          if (planet.isHole(cen, r - R)) continue;
+          kept[k++] = idx[q]; kept[k++] = idx[q + 1]; kept[k++] = idx[q + 2];
+        }
+        index = kept.slice(0, k);
+      }
+    }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    geo.setIndex(new THREE.BufferAttribute(idx, 1));
+    geo.setIndex(new THREE.BufferAttribute(index, 1));
     geo.computeBoundingSphere();
     const mesh = new THREE.Mesh(geo, this.material);
     mesh.name = `tile_${t.face}_${t.depth}`;
@@ -152,7 +183,9 @@ export class TerrainLOD {
     const camDir = this._tmp.copy(cameraPos).normalize();
     const camR = cameraPos.length();
     // angle from camera's nadir to the horizon (plus margin for mountains)
-    const horizon = Math.acos(THREE.MathUtils.clamp((R - this.planet.seaDepth) / camR, -1, 1)) + 0.05;
+    // plus how far beyond the horizon the tallest terrain can still poke up
+    const peak = Math.acos(R / (R + this.planet.maxElevation()));
+    const horizon = Math.acos(THREE.MathUtils.clamp((R - this.planet.seaDepth) / camR, -1, 1)) + Math.max(0.05, peak);
     const start = performance.now();
     let built = 0;
     const canBuild = () => built === 0 || performance.now() - start < budgetMs;

@@ -60,6 +60,35 @@
       "landing": 45,
       "color": "#b8b2a6",
       "name": "Dinosaur Island Bridge"
+    },
+    {
+      "id": "mount-cinder",
+      "type": "volcano",
+      "lat": 11.0051,
+      "lon": 24.6195,
+      "radius": 600,
+      "height": 420,
+      "crater": 70,
+      "craterDepth": 60,
+      "name": "Mount Cinder"
+    },
+    {
+      "id": "cinder-tunnel-road",
+      "type": "road",
+      "lat": 12.4896,
+      "lon": 17.1638,
+      "lat2": 9.341,
+      "lon2": 31.996,
+      "width": 9,
+      "name": "Cinder Tunnel"
+    },
+    {
+      "id": "emberwood",
+      "type": "woodland",
+      "lat": 9.6737,
+      "lon": 30.5834,
+      "radius": 900,
+      "name": "Emberwood"
     }
   ]
 }

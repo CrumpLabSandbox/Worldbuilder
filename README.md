@@ -62,10 +62,23 @@ Long bridges: give a `bridge` both ends with `lat`/`lon` and `lat2`/`lon2`
 the seabed, and ramps onto land `landing` metres (default 45) past each end.
 Optional `width` (default 10) and `deckHeight` (default 6) are in metres.
 
+Terrain features reshape the planet itself rather than sitting on it:
+
+- `volcano` — a cone with a crater, lava lake, and smoke. Options: `radius`
+  (base, default 600), `height` (default 420), `crater` (default 70),
+  `craterDepth` (default 60).
+- `road` — needs `lat`/`lon` and `lat2`/`lon2`. It grades a smooth road
+  (cuttings and embankments) and automatically bores a lit tunnel, with stone
+  portals, wherever the ground stands well above it. You can fly through
+  tunnels. Options: `width` (default 9), `tunnelHeight` (9), `grade` (0.08).
+- `woodland` — thousands of instanced trees with clearings, kept off roads and
+  bare volcano slopes, and a forest-floor tint. Options: `radius` (default
+  400), `count` (tree attempts).
+
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight

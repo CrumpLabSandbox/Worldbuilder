@@ -3,6 +3,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 import { Planet, R, latLonToDir, dirToLatLon, tangentFrame, formatLat, formatLon, wrapLon } from './planet.js';
 import { FlyControls } from './controls.js';
 import { TerrainLOD } from './terrain.js';
+import { createFeatures, FEATURE_TYPES } from './features.js';
 import { WorldStore, randomSeed, DEFAULT_SPAWN } from './world.js';
 import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './structures.js';
 
@@ -68,6 +69,7 @@ const structuresGroup = new THREE.Group();
 scene.add(structuresGroup);
 const structureObjects = new Map(); // id -> group
 const spinners = [];
+const animated = []; // objects with userData.update(dt)
 let controls = null;
 let buildMode = false;
 
@@ -95,7 +97,7 @@ function pickGround(ndcX, ndcY) {
   const origin = camera.position.clone();
   const dir = new THREE.Vector3(ndcX, ndcY, 0.5).unproject(camera).sub(origin).normalize();
   _ray.set(origin, dir);
-  const Rmax = R + planet.maxHeight + 2;
+  const Rmax = R + planet.maxElevation() + 2;
   // ray-sphere intersection with bounding sphere
   const b = origin.dot(dir), c = origin.lengthSq() - Rmax * Rmax;
   const disc = b * b - c;
@@ -135,8 +137,13 @@ function isSpan(rec) { return rec.lat2 != null && rec.lon2 != null && STRUCTURES
 
 function placeStructure(rec) {
   removeStructureObject(rec.id);
-  let g, labelY, labelRange;
-  if (isSpan(rec)) {
+  let g, labelY = 0, labelRange;
+  const def = STRUCTURES[rec.type];
+  if (def?.place) {
+    if (def.feature && !planet.featureById(rec.id)) return null; // incomplete record (e.g. road without an end)
+    g = def.place(rec, planet);
+    labelRange = g.userData.labelRange ?? 3000;
+  } else if (isSpan(rec)) {
     g = buildSpan(rec, planet);
     labelY = g.userData.labelHeight;
     labelRange = 3000;
@@ -157,16 +164,31 @@ function placeStructure(rec) {
   }
   const label = document.createElement('div');
   label.className = 'label';
-  label.textContent = rec.name || (STRUCTURES[rec.type]?.label ?? rec.type);
+  label.textContent = rec.name || (def?.label ?? rec.type);
   const lo = new CSS2DObject(label);
-  lo.position.set(0, labelY, 0);
+  if (g.userData.labelPos) lo.position.copy(g.userData.labelPos); else lo.position.set(0, labelY, 0);
   g.add(lo);
   g.userData.label = lo;
   g.userData.labelRange = labelRange;
-  g.traverse((o) => { if (o.name === 'spin') spinners.push(o); });
+  g.traverse((o) => { if (o.name === 'spin') spinners.push(o); if (o.userData.update) animated.push(o); });
   structuresGroup.add(g);
   structureObjects.set(rec.id, g);
   return g;
+}
+
+// Terrain features changed: recompute them, regenerate terrain, re-place everything.
+async function refreshFeatures() {
+  await showLoading('Reshaping terrain…');
+  planet.setFeatures(createFeatures(store.current.structures, planet));
+  terrain.reset();
+  clearStructures();
+  for (const rec of store.current.structures) placeStructure(rec);
+  if (gridGroup) { scene.remove(gridGroup); disposeObject(gridGroup); }
+  gridGroup = planet.buildGrid();
+  gridGroup.visible = $('opt-grid').checked;
+  scene.add(gridGroup);
+  terrain.warm(controls.position, 1500);
+  hideLoading();
 }
 function removeStructureObject(id) {
   const g = structureObjects.get(id);
@@ -175,11 +197,14 @@ function removeStructureObject(id) {
   structuresGroup.remove(g);
   disposeObject(g);
   structureObjects.delete(id);
-  for (let i = spinners.length - 1; i >= 0; i--) { let o = spinners[i]; while (o && o !== g) o = o.parent; if (o === g) spinners.splice(i, 1); }
+  for (const list of [spinners, animated]) {
+    for (let i = list.length - 1; i >= 0; i--) { let o = list[i]; while (o && o !== g) o = o.parent; if (o === g) list.splice(i, 1); }
+  }
 }
 function clearStructures() {
   for (const id of [...structureObjects.keys()]) removeStructureObject(id);
   spinners.length = 0;
+  animated.length = 0;
 }
 
 // ------------------------------------------------------------------ world (re)building
@@ -190,6 +215,7 @@ async function buildWorld(world, viewOverride = null) {
   if (gridGroup) { scene.remove(gridGroup); disposeObject(gridGroup); gridGroup = null; }
 
   planet = new Planet(world.seed);
+  planet.setFeatures(createFeatures(world.structures, planet));
   planetGroup = new THREE.Group();
   if (terrain) terrain.dispose();
   terrain = new TerrainLOD(planet);
@@ -246,14 +272,24 @@ function renderStructureList() {
     const go = document.createElement('button'); go.textContent = 'Go'; go.title = 'Fly to this structure';
     go.onclick = () => flyToStructure(s);
     const del = document.createElement('button'); del.textContent = '×'; del.title = 'Remove';
-    del.onclick = () => { store.removeStructure(s.id); removeStructureObject(s.id); updateWorldPanel(); toast('Removed'); };
+    del.onclick = async () => {
+      store.removeStructure(s.id); removeStructureObject(s.id);
+      if (FEATURE_TYPES.has(s.type)) await refreshFeatures();
+      updateWorldPanel(); toast('Removed');
+    };
     el.append(name, coords, go, del);
     list.appendChild(el);
   }
 }
 
 function flyToStructure(s) {
-  if (isSpan(s)) {
+  if (s.type === 'volcano' || s.type === 'woodland') {
+    // stand off to the south, looking north at it
+    const r = (s.type === 'volcano' ? (s.radius ?? 600) * 1.8 : (s.radius ?? 400) * 1.2);
+    controls.teleport(s.lat - r / (R * DEG), s.lon, s.type === 'volcano' ? 120 : 160, 0, s.type === 'volcano' ? 2 : -12);
+    return;
+  }
+  if (isSpan(s) || (s.type === 'road' && s.lat2 != null)) {
     // stand behind the first end, looking along the span
     const a = latLonToDir(s.lat, s.lon), b = latLonToDir(s.lat2, s.lon2);
     const axis = new THREE.Vector3().crossVectors(a, b).normalize();
@@ -282,7 +318,7 @@ function updateHUD() {
   $('hud-heading').textContent = `${controls.heading.toFixed(0)}° ${compass(controls.heading)}`;
   const dir = controls.position.clone().normalize();
   const e = planet.elevation(dir);
-  $('hud-ground').textContent = e > 0 ? `land +${e.toFixed(0)} m` : `sea (${(-e).toFixed(0)} m deep)`;
+  $('hud-ground').textContent = planet.inTunnel(controls.position) ? 'in tunnel' : e > 0 ? `land +${e.toFixed(0)} m` : `sea (${(-e).toFixed(0)} m deep)`;
   $('hud-speed').textContent = `${controls.baseSpeed().toFixed(0)} m/s`;
   $('hud-pick').textContent = pickInfo
     ? `${formatLat(pickInfo.lat)}, ${formatLon(pickInfo.lon)} · ${pickInfo.elevation > 0 ? `+${pickInfo.elevation.toFixed(0)} m` : 'water'} · ${pickInfo.distance.toFixed(0)} m away`
@@ -411,7 +447,7 @@ function wireUI() {
         heading: +$('build-heading').value, scale: +$('build-scale').value, color: $('build-color').value,
         name: $('build-name').value.trim() || undefined,
       });
-      placeStructure(rec);
+      if (FEATURE_TYPES.has(rec.type)) await refreshFeatures(); else placeStructure(rec);
       updateWorldPanel();
       toast(`Built ${STRUCTURES[rec.type].label} at ${formatLat(rec.lat)}, ${formatLon(rec.lon)}`);
     } else {
@@ -501,6 +537,7 @@ function animate() {
   if (terrain) terrain.update(controls.position);
   if (cloudMesh && cloudMesh.visible) cloudMesh.rotation.y += dt * 0.004;
   for (const s of spinners) s.rotation.z += dt * 1.2;
+  for (const o of animated) o.userData.update(dt);
 
   // label visibility: hide labels that are far away or over the horizon
   const showLabels = $('opt-labels').checked;

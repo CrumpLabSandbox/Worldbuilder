@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { mulberry32 } from './noise.js';
 import { R, latLonToDir, tangentFrame } from './planet.js';
+import { buildVolcano, buildRoad, buildWoodland } from './featureMeshes.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -326,6 +327,19 @@ export const STRUCTURES = {
       return g;
     },
   },
+  // Terrain features: these reshape or recolour the ground and place themselves.
+  volcano: {
+    label: 'Volcano', feature: true,
+    place: (rec, planet) => buildVolcano(rec, planet, planet.featureById(rec.id)),
+  },
+  woodland: {
+    label: 'Woodland', feature: true,
+    place: (rec, planet) => buildWoodland(rec, planet, planet.featureById(rec.id)),
+  },
+  road: {
+    label: 'Road', feature: true, menu: false,
+    place: (rec, planet) => buildRoad(rec, planet, planet.featureById(rec.id)),
+  },
   statue: {
     label: 'Statue', build: (c) => {
       const g = new THREE.Group();
@@ -340,7 +354,7 @@ export const STRUCTURES = {
   },
 };
 
-export const STRUCTURE_TYPES = Object.keys(STRUCTURES);
+export const STRUCTURE_TYPES = Object.keys(STRUCTURES).filter((k) => STRUCTURES[k].menu !== false);
 
 // ---------------------------------------------------------------- long spans
 // A bridge between two points (rec.lat/lon → rec.lat2/lon2) that follows the
