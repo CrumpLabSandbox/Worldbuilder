@@ -23,6 +23,12 @@ from `main` by GitHub Actions.
 | `B` | toggle build mode |
 | `H` | toggle help |
 
+**Touchscreen:** a virtual stick (bottom left) moves you forward, back, and
+sideways; drag one finger on the globe to look around; pinch to change
+altitude; the ▲ ▼ buttons climb and descend, ⚡ toggles boost, and − / +
+change the speed multiplier. Tap the globe to read coordinates, and use the
+☰ button for the world and build panel.
+
 Speed scales with altitude, so you can cross the planet in seconds from orbit and
 creep along at walking pace near the ground.
 

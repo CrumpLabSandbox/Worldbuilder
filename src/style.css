@@ -9,7 +9,7 @@
   color: var(--fg);
 }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #000; }
-#app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 .panel {
   position: fixed; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
   padding: 10px 12px; backdrop-filter: blur(6px); box-shadow: 0 4px 20px rgba(0,0,0,.4);
@@ -58,7 +58,35 @@ label.chk { display: flex; align-items: center; gap: 4px; cursor: pointer; color
 .label { color: #fff; font-size: 12px; padding: 2px 6px; background: rgba(0,0,0,.55); border-radius: 4px; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 2px #000; }
 .label.hidden { display: none; }
 .hidden { display: none !important; }
-@media (max-width: 700px) {
-  #world-panel { display: none; }
+/* ---- touch controls ---- */
+#btn-menu { display: none; top: 12px; right: 12px; width: 40px; height: 40px; padding: 0; font-size: 20px; line-height: 40px; text-align: center; z-index: 12; }
+#touch-ui { display: none; }
+body.touch #touch-ui { display: block; }
+#joystick {
+  position: fixed; left: 24px; bottom: 24px; width: 130px; height: 130px; border-radius: 50%;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.25); touch-action: none; z-index: 11;
+  backdrop-filter: blur(4px);
+}
+#joystick-knob {
+  position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;
+  background: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.5); pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+#touch-buttons { position: fixed; right: 20px; bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 11; }
+.tbtn {
+  width: 60px; height: 60px; border-radius: 50%; font-size: 22px; padding: 0; touch-action: none; user-select: none; -webkit-user-select: none;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); backdrop-filter: blur(4px);
+}
+.tbtn:active, .tbtn.active { background: rgba(79,179,255,.55); }
+#tbtn-boost { grid-column: 1 / span 2; justify-self: center; }
+body.touch #help { display: none; }
+body.touch #crosshair { display: none; }
+
+@media (max-width: 700px), (pointer: coarse) {
   #help { display: none; }
+  #btn-menu { display: block; }
+  #world-panel { display: none; top: 60px; right: 12px; width: min(260px, calc(100vw - 24px)); max-height: calc(100vh - 220px); }
+  #world-panel.open { display: block; }
+  #hud { width: 190px; font-size: 12px; }
+  #hud td:first-child { width: 50px; }
 }

@@ -89,6 +89,19 @@
     <b>Fly:</b> W/S forward · A/D strafe · R/F up/down · Q/E roll-free turn · Shift boost · drag mouse to look (click canvas, or press L for pointer lock) · scroll = speed · H toggles help · click globe to read coordinates
   </div>
 
+  <button id="btn-menu" class="panel" title="World &amp; build panel">☰</button>
+
+  <div id="touch-ui">
+    <div id="joystick"><div id="joystick-knob"></div></div>
+    <div id="touch-buttons">
+      <button class="tbtn" data-key="KeyR" title="Climb">▲</button>
+      <button class="tbtn" data-key="KeyF" title="Descend">▼</button>
+      <button class="tbtn" id="tbtn-boost" title="Boost">⚡</button>
+      <button class="tbtn" id="tbtn-slower" title="Slower">−</button>
+      <button class="tbtn" id="tbtn-faster" title="Faster">+</button>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
   <script type="module" src="./src/main.js"></script>

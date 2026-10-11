@@ -19,6 +19,10 @@ export class FlyControls {
     this.dragging = false;
     this.pointerLocked = false;
     this.lastPointer = { x: 0, y: 0 };
+    this.dragPointerId = null;
+    this.pointers = new Map(); // active pointers on the canvas (for pinch)
+    this.pinchDist = 0;
+    this.touchMove = { x: 0, y: 0 }; // analog stick: x = strafe, y = forward, each in [-1, 1]
     this.enabled = true;
     this.minAlt = 1.5;
     this.maxAlt = R * 4;
@@ -41,19 +45,41 @@ export class FlyControls {
     window.addEventListener('blur', () => this.keys.clear());
     dom.addEventListener('pointerdown', (e) => {
       if (e.button !== 0) return;
-      this.dragging = true; this.moved = 0;
-      this.lastPointer = { x: e.clientX, y: e.clientY };
+      this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       dom.setPointerCapture(e.pointerId);
+      if (this.pointers.size === 2) {
+        // start pinch: cancel look-drag
+        const [a, b] = [...this.pointers.values()];
+        this.pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
+        this.dragging = false; this.moved = 999;
+        return;
+      }
+      if (this.pointers.size > 2) return;
+      this.dragging = true; this.moved = 0; this.dragPointerId = e.pointerId;
+      this.lastPointer = { x: e.clientX, y: e.clientY };
     });
     dom.addEventListener('pointermove', (e) => {
       if (this.pointerLocked) { this._look(e.movementX, e.movementY); return; }
-      if (!this.dragging) return;
+      if (this.pointers.has(e.pointerId)) this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (this.pointers.size === 2) {
+        const [a, b] = [...this.pointers.values()];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (this.pinchDist > 0) this._pinch(d - this.pinchDist);
+        this.pinchDist = d;
+        return;
+      }
+      if (!this.dragging || e.pointerId !== this.dragPointerId) return;
       const dx = e.clientX - this.lastPointer.x, dy = e.clientY - this.lastPointer.y;
       this.moved += Math.abs(dx) + Math.abs(dy);
       this.lastPointer = { x: e.clientX, y: e.clientY };
       this._look(dx, dy);
     });
-    const end = (e) => { this.dragging = false; try { dom.releasePointerCapture(e.pointerId); } catch { /* ignore */ } };
+    const end = (e) => {
+      this.pointers.delete(e.pointerId);
+      if (this.pointers.size < 2) this.pinchDist = 0;
+      if (e.pointerId === this.dragPointerId) { this.dragging = false; this.dragPointerId = null; }
+      try { dom.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+    };
     dom.addEventListener('pointerup', end);
     dom.addEventListener('pointercancel', end);
     dom.addEventListener('wheel', (e) => {
@@ -67,6 +93,15 @@ export class FlyControls {
   _look(dx, dy) {
     this.heading = (this.heading + dx * this.lookSensitivity + 360) % 360;
     this.pitch = THREE.MathUtils.clamp(this.pitch - dy * this.lookSensitivity, -89, 89);
+  }
+
+  // Pinch (two fingers): spread to climb, squeeze to descend, proportional to altitude.
+  _pinch(deltaPx) {
+    const alt = Math.max(2, this.altitude);
+    const dir = this.position.clone().normalize();
+    const r = this.position.length() + deltaPx * alt * 0.01;
+    this.position.copy(dir).multiplyScalar(THREE.MathUtils.clamp(r, this.planet.groundRadius(dir) + this.minAlt, R + this.maxAlt));
+    this.updateCamera();
   }
 
   // True if the last pointer gesture was a click rather than a drag.
@@ -110,7 +145,7 @@ export class FlyControls {
     const right = this._right.copy(east).multiplyScalar(Math.cos(h)).addScaledVector(north, -Math.sin(h));
 
     let speed = this.baseSpeed();
-    if (k.has('ShiftLeft') || k.has('ShiftRight')) speed *= 4;
+    if (k.has('ShiftLeft') || k.has('ShiftRight') || this.boost) speed *= 4;
     const move = new THREE.Vector3();
     if (k.has('KeyW')) move.add(fwd);
     if (k.has('KeyS')) move.sub(fwd);
@@ -119,10 +154,17 @@ export class FlyControls {
     if (k.has('KeyR') || k.has('Space')) move.add(up);
     if (k.has('KeyF') || k.has('KeyC')) move.sub(up);
     this.velocity = 0;
+    if (move.lengthSq() > 0) move.normalize();
+    // analog stick (touch): scaled by stick deflection
+    if (this.touchMove.x !== 0 || this.touchMove.y !== 0) {
+      move.addScaledVector(fwd, this.touchMove.y).addScaledVector(right, this.touchMove.x);
+      if (move.length() > 1) move.normalize();
+    }
     if (move.lengthSq() > 0) {
-      move.normalize().multiplyScalar(speed * dt);
+      const mag = move.length();
+      move.multiplyScalar(speed * dt);
       this.position.add(move);
-      this.velocity = speed;
+      this.velocity = speed * mag;
     }
     // keep above ground / below ceiling
     const dir = this.position.clone().normalize();

@@ -198,7 +198,7 @@ export class Planet {
     ctx.putImageData(img, 0, 0);
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
-    const geo = new THREE.SphereGeometry(R * 1.02, 192, 96);
+    const geo = new THREE.SphereGeometry(R * 1.045, 192, 96);
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, alphaMap: tex, transparent: true, opacity: 0.85, depthWrite: false, roughness: 1 });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.name = 'clouds';

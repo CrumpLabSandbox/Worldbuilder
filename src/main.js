@@ -406,6 +406,59 @@ function wireUI() {
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
   });
 }
+// ------------------------------------------------------------------ touch controls
+function wireTouchUI() {
+  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isTouch = coarse || (hasTouch && window.innerWidth < 1100);
+  if (isTouch) document.body.classList.add('touch');
+  // show the touch UI the first time a finger touches the canvas, even on hybrid devices
+  renderer.domElement.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') document.body.classList.add('touch'); }, { passive: true });
+
+  // menu button toggles the world/build panel on small screens
+  $('btn-menu').onclick = () => $('world-panel').classList.toggle('open');
+
+  // virtual joystick
+  const pad = $('joystick'), knob = $('joystick-knob');
+  let stickId = null;
+  const radius = 45;
+  const setStick = (e) => {
+    const rect = pad.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    let dx = e.clientX - cx, dy = e.clientY - cy;
+    const len = Math.hypot(dx, dy);
+    if (len > radius) { dx *= radius / len; dy *= radius / len; }
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    controls.touchMove.x = dx / radius;
+    controls.touchMove.y = -dy / radius;
+  };
+  const resetStick = () => { stickId = null; knob.style.transform = ''; controls.touchMove.x = 0; controls.touchMove.y = 0; };
+  pad.addEventListener('pointerdown', (e) => { if (stickId !== null) return; stickId = e.pointerId; pad.setPointerCapture(e.pointerId); setStick(e); e.preventDefault(); });
+  pad.addEventListener('pointermove', (e) => { if (e.pointerId === stickId) setStick(e); });
+  pad.addEventListener('pointerup', (e) => { if (e.pointerId === stickId) resetStick(); });
+  pad.addEventListener('pointercancel', (e) => { if (e.pointerId === stickId) resetStick(); });
+  pad.addEventListener('lostpointercapture', (e) => { if (e.pointerId === stickId) resetStick(); });
+
+  // hold buttons map to key codes (climb / descend)
+  for (const btn of document.querySelectorAll('.tbtn[data-key]')) {
+    const key = btn.dataset.key;
+    const press = (e) => { controls.keys.add(key); btn.classList.add('active'); e.preventDefault(); };
+    const release = () => { controls.keys.delete(key); btn.classList.remove('active'); };
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointercancel', release);
+    btn.addEventListener('pointerleave', release);
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+  // boost toggles; +/- change the speed multiplier
+  $('tbtn-boost').addEventListener('pointerdown', (e) => { e.preventDefault(); controls.boost = !controls.boost; $('tbtn-boost').classList.toggle('active', controls.boost); toast(controls.boost ? 'Boost on' : 'Boost off', 1200); });
+  $('tbtn-faster').addEventListener('pointerdown', (e) => { e.preventDefault(); controls.speedMul = Math.min(20, controls.speedMul * 1.5); toast(`Speed ×${controls.speedMul.toFixed(1)}`, 1000); });
+  $('tbtn-slower').addEventListener('pointerdown', (e) => { e.preventDefault(); controls.speedMul = Math.max(0.05, controls.speedMul / 1.5); toast(`Speed ×${controls.speedMul.toFixed(2)}`, 1000); });
+  for (const id of ['tbtn-boost', 'tbtn-faster', 'tbtn-slower']) $(id).addEventListener('contextmenu', (e) => e.preventDefault());
+
+  if (isTouch) setTimeout(() => toast('Touch: left stick moves · drag to look · pinch for altitude · ▲▼ climb/descend', 5000), 1200);
+}
+
 function setBuildMode(on) {
   buildMode = on;
   $('build-toggle').checked = on;
@@ -465,6 +518,7 @@ function animate() {
     await store.load(worlds[0].id);
   }
   await buildWorld(store.current, hash && hash.world === store.current.id ? hash.view : null);
+  wireTouchUI();
   renderer.domElement.style.cursor = 'grab';
   animate();
   window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, pickGround, placeStructure };
