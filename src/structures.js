@@ -6,6 +6,7 @@ import { mulberry32 } from './noise.js';
 import { R, latLonToDir, tangentFrame } from './planet.js';
 import { buildVolcano, buildRoad, buildWoodland } from './featureMeshes.js';
 import { buildCoaster } from './coaster.js';
+import { buildCatapult } from './catapult.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -336,6 +337,10 @@ export const STRUCTURES = {
   woodland: {
     label: 'Woodland', feature: true,
     place: (rec, planet) => buildWoodland(rec, planet, planet.featureById(rec.id)),
+  },
+  catapult: {
+    label: 'Catapult', feature: true,
+    place: (rec, planet) => buildCatapult(rec, planet, planet.featureById(rec.id)),
   },
   coaster: {
     label: 'Roller coaster', feature: true, menu: false,

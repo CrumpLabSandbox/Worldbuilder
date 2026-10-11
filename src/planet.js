@@ -101,7 +101,7 @@ export class Planet {
   // distance to the nearest road or coaster footprint
   clearance(dir) {
     let c = Infinity;
-    for (const f of this.features) if ((f.kind === 'road' || f.kind === 'coaster') && dir.dot(f.center) > f.cosBound) c = Math.min(c, f.clearance(dir));
+    for (const f of this.features) if ((f.kind === 'road' || f.kind === 'coaster' || f.kind === 'site') && dir.dot(f.center) > f.cosBound) c = Math.min(c, f.clearance(dir));
     return c;
   }
   insideOtherWoods(dir, id) {

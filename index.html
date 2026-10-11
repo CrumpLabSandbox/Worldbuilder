@@ -89,6 +89,20 @@
     <b>Fly:</b> W/S forward · A/D strafe · R/F up/down · Q/E roll-free turn · Shift boost · drag mouse to look (click canvas, or press L for pointer lock) · scroll = speed · H toggles help · click globe to read coordinates · 🎢 Ride button appears near a coaster station
   </div>
 
+  <div id="catapult-panel" class="panel hidden">
+    <div class="title"><span id="cat-name">Catapult</span><button id="cat-collapse" class="link">hide</button></div>
+    <div id="cat-body">
+      <div id="cat-ammo" class="ammo-grid"></div>
+      <div class="row small"><span>Size</span><span id="cat-sizes" class="sizes"></span></div>
+      <div class="row small"><label>Power <input id="cat-power" type="range" min="30" max="240" step="1" /></label><span id="cat-power-v" class="mono"></span></div>
+      <div class="row small"><label>Angle <input id="cat-angle" type="range" min="10" max="80" step="1" /></label><span id="cat-angle-v" class="mono"></span></div>
+      <div class="row small"><label>Aim <input id="cat-aim" type="range" min="-60" max="60" step="1" /></label><span id="cat-aim-v" class="mono"></span></div>
+      <div class="row small"><label class="chk"><input id="cat-follow" type="checkbox" checked /> Follow the shot</label><span id="cat-pred" class="mono"></span></div>
+      <div class="row"><button id="cat-fire" class="fire grow">🔥 Launch! <span class="small">(Enter)</span></button></div>
+      <div id="cat-last" class="small mono"></div>
+    </div>
+  </div>
+
   <button id="btn-ride" class="panel hidden">🎢 Ride</button>
 
   <button id="btn-menu" class="panel" title="World &amp; build panel">☰</button>

@@ -185,6 +185,20 @@
         "start": 350,
         "full": 1300
       }
+    },
+    {
+      "id": "great-catapult",
+      "type": "catapult",
+      "lat": 10.6799,
+      "lon": 27.9582,
+      "heading": 120,
+      "pad": 45,
+      "raise": 30,
+      "power": 150,
+      "name": "The Great Catapult",
+      "band": 50,
+      "lane": 900,
+      "laneWidth": 30
     }
   ]
 }

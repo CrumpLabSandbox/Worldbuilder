@@ -87,10 +87,21 @@ Terrain features reshape the planet itself rather than sitting on it:
   glowing alien flora (mushrooms, crystals, tendrils, orb stalks, pods,
   coral) between `start` and `full` metres from that point.
 
+- `catapult` — a giant trebuchet on a raised hill (`raise` metres, `pad`
+  radius, `band` slope width) facing `heading`, with a tree-free firing lane
+  (`lane` metres long, `laneWidth` half-angle) and a pen holding every kind
+  of ammunition. Within about 300 m a control panel appears: pick boulders,
+  barrels, crates, watermelons, pumpkins, a cow, rubber ducks, beach balls,
+  an anvil or an alien orb (or click one in the pen), choose its size, set
+  power, angle and aim, and press **Launch** or Enter. A dashed arc and ring
+  show where it will land. Shots fly under the planet's gravity with a little
+  drag. They bounce, splash, float, sink or splat, and "Follow the shot"
+  rides the camera along (Esc to stop).
+
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight

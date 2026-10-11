@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { R, latLonToDir, tangentFrame } from './planet.js';
 import { CoasterFeature } from './coaster.js';
+import { CatapultFeature } from './catapult.js';
 
 const clamp = THREE.MathUtils.clamp;
 function smooth(a, b, x) { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -226,7 +227,7 @@ export class WoodsFeature {
   }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster']);
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -239,10 +240,12 @@ export function createFeatures(records, planet) {
     roads.push(new RoadFeature(r, planet));
     planet.setFeatures([...volcs, ...roads]);
   }
+  const sites = records.filter((r) => r.type === 'catapult').map((r) => new CatapultFeature(r, planet));
+  planet.setFeatures([...volcs, ...roads, ...sites]);
   const coasters = [];
   for (const r of records.filter((x) => x.type === 'coaster' && Array.isArray(x.path) && x.path.length > 1)) {
     try { coasters.push(new CoasterFeature(r, planet)); } catch (e) { console.warn('coaster', r.id, e); }
   }
   const woods = records.filter((r) => r.type === 'woodland').map((r) => new WoodsFeature(r, planet));
-  return [...volcs, ...roads, ...coasters, ...woods];
+  return [...volcs, ...roads, ...sites, ...coasters, ...woods];
 }

@@ -93,6 +93,7 @@ function disposeObject(obj) {
 
 // ------------------------------------------------------------------ picking (analytic ray march against the height field)
 const _ray = new THREE.Ray();
+const raycaster = new THREE.Raycaster();
 function pickGround(ndcX, ndcY) {
   const origin = camera.position.clone();
   const dir = new THREE.Vector3(ndcX, ndcY, 0.5).unproject(camera).sub(origin).normalize();
@@ -203,6 +204,8 @@ function removeStructureObject(id) {
 }
 function clearStructures() {
   if (ride) endRide();
+  if (follow) endFollow();
+  if (catapult) { catapult = null; $('catapult-panel').classList.add('hidden'); }
   for (const id of [...structureObjects.keys()]) removeStructureObject(id);
   spinners.length = 0;
   animated.length = 0;
@@ -289,6 +292,11 @@ function renderStructureList() {
 }
 
 function flyToStructure(s) {
+  if (s.type === 'catapult') {
+    const h = (s.heading ?? 0) * DEG, back = 70 / (R * DEG);
+    controls.teleport(s.lat - Math.cos(h) * back, s.lon - Math.sin(h) * back / Math.cos(s.lat * DEG), 30, s.heading ?? 0, -6);
+    return;
+  }
   if (s.type === 'coaster') {
     const g = structureObjects.get(s.id);
     const f = g?.userData.coaster?.feature;
@@ -368,9 +376,112 @@ function endRide(arrived = false) {
 function updateRideButton() {
   const btn = $('btn-ride');
   if (ride) { btn.textContent = '✋ Get off'; btn.classList.remove('hidden'); return; }
-  const c = nearestCoaster();
+  const c = follow ? null : nearestCoaster();
   if (c) { btn.textContent = `🎢 Ride ${c.feature.rec.name || 'the coaster'}`; btn.classList.remove('hidden'); }
   else btn.classList.add('hidden');
+}
+
+// ------------------------------------------------------------------ catapults
+let catapult = null;       // the catapult whose panel is open
+let follow = null;         // { body, saved, hold } while the camera follows a shot
+function catapults() { return [...structureObjects.values()].map((g) => g.userData.catapult).filter(Boolean); }
+function nearestCatapult(maxDist = 320) {
+  let best = null, bd = maxDist;
+  for (const c of catapults()) { const d = c.center().distanceTo(controls.position); if (d < bd) { bd = d; best = c; } }
+  return best;
+}
+function fmtDist(m) { return m >= 1000 ? `${(m / 1000).toFixed(2)} km` : `${m.toFixed(0)} m`; }
+function renderCatapultPanel() {
+  const c = catapult; if (!c) return;
+  $('cat-name').textContent = c.name;
+  const grid = $('cat-ammo');
+  if (grid.dataset.for !== c.feature.id) {
+    grid.dataset.for = c.feature.id;
+    grid.innerHTML = '';
+    for (const a of c.catalog) {
+      const b = document.createElement('button');
+      b.innerHTML = `${a.emoji}<span>${a.label}</span>`; b.title = a.label; b.dataset.id = a.id;
+      b.onclick = () => { c.select(a.id); renderCatapultPanel(); };
+      grid.appendChild(b);
+    }
+    $('cat-power').value = c.power; $('cat-angle').value = c.angle; $('cat-aim').value = c.aim; $('cat-follow').checked = c.follow;
+  }
+  for (const b of grid.children) b.classList.toggle('on', b.dataset.id === c.selection.id);
+  const sizes = $('cat-sizes'); sizes.innerHTML = '';
+  const def = c.current();
+  def.sizes.forEach((sz, i) => {
+    const b = document.createElement('button');
+    b.textContent = def.sizes.length === 1 ? `${sz} m` : `${c.sizeLabel(def, i)} · ${sz} m`;
+    b.classList.toggle('on', i === c.selection.si);
+    b.onclick = () => { c.select(def.id, i); renderCatapultPanel(); };
+    sizes.appendChild(b);
+  });
+  $('cat-power-v').textContent = `${c.power} m/s`;
+  $('cat-angle-v').textContent = `${c.angle}°`;
+  $('cat-aim-v').textContent = `${c.heading().toFixed(0)}° ${compass(c.heading())}`;
+  $('cat-pred').textContent = c.predicted ? `≈ ${fmtDist(c.predicted.dist)}` : 'into orbit?';
+  $('cat-pred').title = c.predicted ? `Predicted to land ${c.predicted.where}` : '';
+  $('cat-fire').disabled = !c.canFire();
+  const L = c.lastShot;
+  $('cat-last').textContent = L ? `Last: ${L.label} flew ${fmtDist(L.dist)} (peak ${fmtDist(L.maxAlt)}), landed ${L.where} at ${L.lat.toFixed(4)}, ${L.lon.toFixed(4)}` : 'Pick something from the pen (or click it), then launch.';
+}
+function updateCatapultPanel() {
+  const c = ride || follow ? null : nearestCatapult();
+  if (c !== catapult) {
+    if (catapult) catapult.setPreviewVisible(false);
+    catapult = c;
+    $('catapult-panel').classList.toggle('hidden', !c);
+    if (c) {
+      c.setPreviewVisible(true);
+      c.onShot = (body) => {
+        if (body.def.cry) toast(body.def.cry, 2000);
+        if (c.follow) startFollow(body);
+      };
+      c.onLand = (shot) => {
+        toast(`${shot.label} ${shot.state === 'splat' ? 'splatted' : shot.state === 'sink' ? 'sank' : shot.state === 'float' ? 'is floating' : 'landed'} ${shot.where}, ${fmtDist(shot.dist)} away`, 4000);
+        renderCatapultPanel();
+      };
+    }
+  }
+  if (c) renderCatapultPanel();
+}
+function fireCatapult() {
+  if (!catapult || !catapult.canFire()) return;
+  catapult.fire();
+  renderCatapultPanel();
+}
+function startFollow(body) {
+  follow = { body, saved: { pos: controls.position.clone(), heading: controls.heading, pitch: controls.pitch }, hold: 0, cam: null };
+  controls.enabled = false;
+  document.body.classList.add('following');
+}
+function endFollow() {
+  if (!follow) return;
+  controls.position.copy(follow.saved.pos);
+  controls.heading = follow.saved.heading; controls.pitch = follow.saved.pitch;
+  controls.enabled = true;
+  controls.updateCamera();
+  follow = null;
+  document.body.classList.remove('following');
+}
+function updateFollow(dt) {
+  const b = follow.body;
+  const pos = b.pos;
+  const upv = pos.clone().normalize();
+  let back = b.vel.lengthSq() > 1 ? b.vel.clone().normalize() : (follow.lastDir || upv.clone());
+  follow.lastDir = back.clone();
+  const dist = 22 + b.size * 4;
+  const want = pos.clone().addScaledVector(back, -dist).addScaledVector(upv, 7 + b.size * 1.5);
+  // never put the camera under the ground
+  const wdir = want.clone().normalize();
+  const g = R + Math.max(0, planet.elevation(wdir)) + 3;
+  if (want.length() < g) want.setLength(g);
+  if (!follow.cam) follow.cam = want.clone(); else follow.cam.lerp(want, Math.min(1, dt * 4));
+  camera.position.copy(follow.cam);
+  camera.up.copy(follow.cam.clone().normalize());
+  camera.lookAt(pos);
+  controls.position.copy(follow.cam);
+  if (b.state !== 'fly') { follow.hold += dt; if (follow.hold > 3) endFollow(); }
 }
 
 // ------------------------------------------------------------------ HUD
@@ -480,6 +591,17 @@ function wireUI() {
   };
 
   $('build-toggle').onchange = (e) => setBuildMode(e.target.checked);
+  $('cat-fire').onclick = () => fireCatapult();
+  $('cat-collapse').onclick = () => { const b = $('cat-body'); b.classList.toggle('hidden'); $('cat-collapse').textContent = b.classList.contains('hidden') ? 'show' : 'hide'; };
+  let previewTimer = 0;
+  const onCatInput = () => {
+    if (!catapult) return;
+    catapult.power = +$('cat-power').value; catapult.angle = +$('cat-angle').value; catapult.aim = +$('cat-aim').value;
+    clearTimeout(previewTimer); previewTimer = setTimeout(() => { catapult && catapult.refreshPreview(); renderCatapultPanel(); }, 60);
+    renderCatapultPanel();
+  };
+  for (const id of ['cat-power', 'cat-angle', 'cat-aim']) $(id).addEventListener('input', onCatInput);
+  $('cat-follow').onchange = (e) => { if (catapult) catapult.follow = e.target.checked; };
   $('btn-ride').onclick = () => { if (ride) endRide(); else startRide(nearestCoaster()); updateRideButton(); };
   $('btn-toggle-list').onclick = () => { const l = $('structure-list'); l.classList.toggle('hidden'); $('btn-toggle-list').textContent = l.classList.contains('hidden') ? 'show' : 'hide'; };
   $('opt-grid').onchange = (e) => { if (gridGroup) gridGroup.visible = e.target.checked; };
@@ -493,6 +615,8 @@ function wireUI() {
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
     if (e.code === 'KeyB') setBuildMode(!buildMode);
     if (ride && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endRide(); updateRideButton(); return; }
+    if (follow && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endFollow(); return; }
+    if ((e.code === 'Enter' || e.code === 'NumpadEnter') && catapult) { fireCatapult(); return; }
     if (e.code === 'Escape' && buildMode) setBuildMode(false);
   });
 
@@ -507,7 +631,14 @@ function wireUI() {
   });
   canvas.addEventListener('pointerup', async (e) => {
     if (e.button !== 0 || !controls.wasClick()) return;
-    const hit = controls.pointerLocked ? pickGround(0, 0) : pickGround((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    const ndc = controls.pointerLocked ? new THREE.Vector2(0, 0) : new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    if (catapult && !buildMode) {
+      raycaster.setFromCamera(ndc, camera);
+      const hits = raycaster.intersectObject(catapult.site, true);
+      const pick = hits.find((h) => h.object.userData.pick)?.object.userData.pick;
+      if (pick) { catapult.select(pick.id, pick.si); renderCatapultPanel(); toast(`Loaded: ${catapult.current().label} (${catapult.currentSize()} m)`, 1800); return; }
+    }
+    const hit = pickGround(ndc.x, ndc.y);
     if (!hit) return;
     if (buildMode) {
       const rec = store.addStructure({
@@ -594,13 +725,15 @@ function setBuildMode(on) {
 
 // ------------------------------------------------------------------ main loop
 const clock = new THREE.Clock();
-let hudT = 0, hashT = 0;
+let hudT = 0, hashT = 0, catT = 0;
 const _tmp = new THREE.Vector3();
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
-  if (ride) {
+  if (follow) {
+    updateFollow(dt);
+  } else if (ride) {
     ride.eye(eye);
     camera.position.copy(eye.pos);
     camera.up.copy(eye.up);
@@ -634,6 +767,7 @@ function animate() {
 
   const now = performance.now();
   if (now - hudT > 100) { hudT = now; updateHUD(); updateRideButton(); }
+  if (now - catT > 400) { catT = now; updateCatapultPanel(); }
   if (now - hashT > 1500) { hashT = now; writeHash(); }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
@@ -659,5 +793,5 @@ function animate() {
   wireTouchUI();
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, pickGround, placeStructure };
+  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get catapult() { return catapult; }, fireCatapult, pickGround, placeStructure };
 })();
