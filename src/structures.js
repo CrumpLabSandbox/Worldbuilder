@@ -1,7 +1,9 @@
 // Procedural low-poly structure library. Each builder returns a THREE.Group whose
 // local +Y is up, base at y = 0, "front" facing local +Z, sized in world units.
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { mulberry32 } from './noise.js';
+import { R, latLonToDir, tangentFrame } from './planet.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -260,7 +262,7 @@ export const STRUCTURES = {
     },
   },
   bridge: {
-    label: 'Bridge (60 long)', build: (c) => {
+    label: 'Bridge (60 long)', span: true, build: (c) => {
       const g = new THREE.Group();
       g.add(mesh(BOX(), mat(c), 0, 5.5, 0, 60, 1, 6));
       for (let i = 0; i < 5; i++) g.add(mesh(BOX(), mat(shade(c, 0.85)), -24 + i * 12, 2.5, 0, 2.5, 6, 6));
@@ -339,6 +341,121 @@ export const STRUCTURES = {
 };
 
 export const STRUCTURE_TYPES = Object.keys(STRUCTURES);
+
+// ---------------------------------------------------------------- long spans
+// A bridge between two points (rec.lat/lon → rec.lat2/lon2) that follows the
+// planet's curvature. It extends `landing` metres inland past each end and
+// ramps down to the ground there. Piers reach down to the seabed.
+// Returns a group positioned at the midpoint, local +Y = up at the midpoint.
+export function buildSpan(rec, planet) {
+  const color = new THREE.Color(rec.color || '#b8b2a6');
+  const width = rec.width || 10;
+  const deckH = rec.deckHeight || 6;      // metres above sea level over water
+  const landing = rec.landing ?? 45;      // metres inland past each end
+  const slope = 0.15;                     // ramp gradient
+  const a = latLonToDir(rec.lat, rec.lon), b = latLonToDir(rec.lat2, rec.lon2);
+  const axis = new THREE.Vector3().crossVectors(a, b).normalize();
+  const span = a.angleTo(b) * R;
+  const total = span + 2 * landing;
+  const start = a.clone().applyAxisAngle(axis, -landing / R);
+  const step = 10;
+  const n = Math.max(2, Math.ceil(total / step));
+  const ds = total / n;
+  // sample path: direction, ground altitude (>= 0 over water), seabed elevation
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const dir = start.clone().applyAxisAngle(axis, (i * ds) / R);
+    const elev = planet.elevation(dir);
+    pts.push({ dir, elev, ground: Math.max(0, elev), u: Math.min(i * ds, total - i * ds) });
+  }
+  const g0 = pts[0].ground, g1 = pts[n].ground;
+  pts.forEach((p, i) => {
+    const endGround = i * ds < total / 2 ? g0 : g1; // ground level at the nearer end
+    const ramp = Math.min(deckH, endGround + 0.3 + slope * p.u);
+    p.deck = Math.max(p.ground + 0.3, ramp);
+  });
+  const mid = a.clone().add(b).normalize();
+  const group = new THREE.Group();
+  group.position.copy(mid).multiplyScalar(R);
+  const { east, north, up } = tangentFrame(mid);
+  group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(east, up, north.clone().negate()));
+  group.updateMatrixWorld(true);
+  const toLocal = new THREE.Matrix4().copy(group.matrixWorld).invert();
+
+  const box = new THREE.BoxGeometry(1, 1, 1);
+  const cyl = new THREE.CylinderGeometry(0.5, 0.5, 1, 10);
+  const parts = { deck: [], rail: [], pier: [], lamp: [], glow: [] };
+  const m4 = new THREE.Matrix4(), sc = new THREE.Vector3(), q = new THREE.Quaternion();
+  // place a unit primitive: centre (world), basis (right, up, fwd), size
+  const put = (list, geo, centre, right, upv, fwd, sx, sy, sz) => {
+    m4.makeBasis(right, upv, fwd);
+    q.setFromRotationMatrix(m4);
+    sc.set(sx, sy, sz);
+    m4.compose(centre, q, sc).premultiply(toLocal);
+    list.push(geo.clone().applyMatrix4(m4));
+  };
+  const world = (p, alt) => p.dir.clone().multiplyScalar(R + alt);
+  for (let i = 0; i < n; i++) {
+    const p0 = world(pts[i], pts[i].deck), p1 = world(pts[i + 1], pts[i + 1].deck);
+    const fwd = p1.clone().sub(p0); const len = fwd.length(); fwd.normalize();
+    const upv = pts[i].dir.clone().add(pts[i + 1].dir).normalize();
+    upv.addScaledVector(fwd, -upv.dot(fwd)).normalize();
+    const right = new THREE.Vector3().crossVectors(upv, fwd).normalize();
+    const c = p0.clone().add(p1).multiplyScalar(0.5);
+    put(parts.deck, box, c.clone().addScaledVector(upv, -0.6), right, upv, fwd, width, 1.2, len * 1.03);
+    for (const side of [-1, 1]) put(parts.rail, box, c.clone().addScaledVector(right, side * (width / 2 - 0.15)).addScaledVector(upv, 0.55), right, upv, fwd, 0.3, 1.1, len * 1.03);
+  }
+  // piers every 40 m where the deck is clear of the ground; lamps every 50 m
+  for (let i = 0; i <= n; i++) {
+    const p = pts[i], dist = i * ds;
+    const { east: e2, north: n2, up: u2 } = tangentFrame(p.dir);
+    const nextDir = pts[Math.min(n, i + 1)].dir, prevDir = pts[Math.max(0, i - 1)].dir;
+    const fwd = nextDir.clone().sub(prevDir); fwd.addScaledVector(u2, -fwd.dot(u2)).normalize();
+    const right = new THREE.Vector3().crossVectors(u2, fwd).normalize();
+    if (Math.round(dist / ds) % Math.round(40 / ds) === 0 && p.deck - Math.max(p.elev, p.ground) > 1.2) {
+      const bottom = Math.min(p.elev, p.ground) - 2, top = p.deck - 1.2;
+      for (const side of [-1, 1]) {
+        const base = world(p, (bottom + top) / 2).addScaledVector(right, side * width * 0.28);
+        put(parts.pier, cyl, base, right, u2, fwd, 2.4, top - bottom, 2.4);
+      }
+      put(parts.pier, box, world(p, top - 0.6), right, u2, fwd, width * 0.85, 1.2, 2.6); // pier cap
+    }
+    if (i % Math.round(50 / ds) === 0 && i > 0 && i < n) {
+      const side = (Math.round(i / Math.round(50 / ds)) % 2) ? 1 : -1;
+      const base = world(p, p.deck).addScaledVector(right, side * (width / 2 - 0.4));
+      put(parts.lamp, cyl, base.clone().addScaledVector(u2, 3), right, u2, fwd, 0.25, 6, 0.25);
+      put(parts.glow, box, base.clone().addScaledVector(u2, 6.2).addScaledVector(right, -side * 0.6), right, u2, fwd, 1.4, 0.4, 0.8);
+    }
+  }
+  // gateway arches where the bridge meets each shore
+  for (const shoreDist of [landing, total - landing]) {
+    const i = Math.round(shoreDist / ds), p = pts[i];
+    const { up: u2 } = tangentFrame(p.dir);
+    const fwd = pts[Math.min(n, i + 1)].dir.clone().sub(pts[Math.max(0, i - 1)].dir); fwd.addScaledVector(u2, -fwd.dot(u2)).normalize();
+    const right = new THREE.Vector3().crossVectors(u2, fwd).normalize();
+    for (const side of [-1, 1]) put(parts.pier, box, world(p, p.deck + 7).addScaledVector(right, side * (width / 2 + 1)), right, u2, fwd, 2, 14, 2);
+    put(parts.pier, box, world(p, p.deck + 14.5), right, u2, fwd, width + 4, 2, 2.4);
+  }
+  const mats = {
+    deck: new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.9 }),
+    rail: new THREE.MeshStandardMaterial({ color: color.clone().multiplyScalar(0.75), flatShading: true, roughness: 0.8 }),
+    pier: new THREE.MeshStandardMaterial({ color: color.clone().multiplyScalar(0.85), flatShading: true, roughness: 0.9 }),
+    lamp: new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6 }),
+    glow: new THREE.MeshStandardMaterial({ color: 0xfff1c0, emissive: 0xffd27a, emissiveIntensity: 1.5 }),
+  };
+  for (const k of Object.keys(parts)) {
+    if (!parts[k].length) continue;
+    const merged = mergeGeometries(parts[k], false);
+    parts[k].forEach((gg) => gg.dispose());
+    merged.computeBoundingSphere();
+    group.add(new THREE.Mesh(merged, mats[k]));
+  }
+  box.dispose(); cyl.dispose();
+  group.userData.record = rec;
+  group.userData.labelHeight = deckH + 18;
+  group.userData.length = total;
+  return group;
+}
 
 function hashString(s) {
   let h = 2166136261;

@@ -4,7 +4,7 @@ import { Planet, R, latLonToDir, dirToLatLon, tangentFrame, formatLat, formatLon
 import { FlyControls } from './controls.js';
 import { TerrainLOD } from './terrain.js';
 import { WorldStore, randomSeed, DEFAULT_SPAWN } from './world.js';
-import { STRUCTURES, STRUCTURE_TYPES, buildStructure } from './structures.js';
+import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './structures.js';
 
 const $ = (id) => document.getElementById(id);
 const DEG = Math.PI / 180;
@@ -131,28 +131,38 @@ function pickGround(ndcX, ndcY) {
 }
 
 // ------------------------------------------------------------------ structures
+function isSpan(rec) { return rec.lat2 != null && rec.lon2 != null && STRUCTURES[rec.type]?.span; }
+
 function placeStructure(rec) {
   removeStructureObject(rec.id);
-  const g = buildStructure(rec);
-  const dir = latLonToDir(rec.lat, rec.lon);
-  const r = planet.groundRadius(dir) + (rec.alt || 0);
-  g.position.copy(dir).multiplyScalar(r);
-  const { east, north, up } = tangentFrame(dir);
-  const h = (rec.heading || 0) * DEG;
-  const fwd = north.clone().multiplyScalar(Math.cos(h)).addScaledVector(east, Math.sin(h));
-  const right = new THREE.Vector3().crossVectors(up, fwd).normalize();
-  g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, up, fwd));
-  // label
-  const box = new THREE.Box3().setFromObject(g);
-  const height = box.max.clone().sub(box.min).length();
+  let g, labelY, labelRange;
+  if (isSpan(rec)) {
+    g = buildSpan(rec, planet);
+    labelY = g.userData.labelHeight;
+    labelRange = 3000;
+  } else {
+    g = buildStructure(rec);
+    const dir = latLonToDir(rec.lat, rec.lon);
+    const r = planet.groundRadius(dir) + (rec.alt || 0);
+    g.position.copy(dir).multiplyScalar(r);
+    const { east, north, up } = tangentFrame(dir);
+    const h = (rec.heading || 0) * DEG;
+    const fwd = north.clone().multiplyScalar(Math.cos(h)).addScaledVector(east, Math.sin(h));
+    const right = new THREE.Vector3().crossVectors(up, fwd).normalize();
+    g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, up, fwd));
+    const box = new THREE.Box3().setFromObject(g);
+    const height = box.max.clone().sub(box.min).length();
+    labelY = (box.max.sub(g.position).dot(up)) / (rec.scale || 1) + 3;
+    labelRange = 1500 + height * 40;
+  }
   const label = document.createElement('div');
   label.className = 'label';
   label.textContent = rec.name || (STRUCTURES[rec.type]?.label ?? rec.type);
   const lo = new CSS2DObject(label);
-  lo.position.set(0, (box.max.sub(g.position).dot(up)) / (rec.scale || 1) + 3, 0);
+  lo.position.set(0, labelY, 0);
   g.add(lo);
   g.userData.label = lo;
-  g.userData.labelRange = 1500 + height * 40;
+  g.userData.labelRange = labelRange;
   g.traverse((o) => { if (o.name === 'spin') spinners.push(o); });
   structuresGroup.add(g);
   structureObjects.set(rec.id, g);
@@ -243,6 +253,18 @@ function renderStructureList() {
 }
 
 function flyToStructure(s) {
+  if (isSpan(s)) {
+    // stand behind the first end, looking along the span
+    const a = latLonToDir(s.lat, s.lon), b = latLonToDir(s.lat2, s.lon2);
+    const axis = new THREE.Vector3().crossVectors(a, b).normalize();
+    const behind = a.clone().applyAxisAngle(axis, -90 / R);
+    const { east, north } = tangentFrame(behind);
+    const fwd = b.clone().addScaledVector(behind, -behind.dot(b)).normalize();
+    const heading = (Math.atan2(fwd.dot(east), fwd.dot(north)) / DEG + 360) % 360;
+    const ll = dirToLatLon(behind);
+    controls.teleport(ll.lat, ll.lon, 22, heading, -8);
+    return;
+  }
   const dist = 45 * (s.scale || 1) + 25;
   // stand to the south of it, looking north and down
   const dlat = -(dist / (R * DEG)) * 0.9;

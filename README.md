@@ -57,6 +57,11 @@ Structures are placed by coordinates. Two ways to build:
    (optional) raises the base above the ground. Structures sit on the terrain
    (or float on the sea).
 
+Long bridges: give a `bridge` both ends with `lat`/`lon` and `lat2`/`lon2`
+(the two shore points). It follows the planet's curvature, puts piers down to
+the seabed, and ramps onto land `landing` metres (default 45) past each end.
+Optional `width` (default 10) and `deckHeight` (default 6) are in metres.
+
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
