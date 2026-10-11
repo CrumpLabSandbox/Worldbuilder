@@ -66,6 +66,17 @@ function towerPiece(color, r = 2, h = 12, crenel = true) {
   return g;
 }
 
+const v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+// Spheres strung along a curve with a tapering radius (necks, tails, trunks).
+function beads(group, curve, count, r0, r1, m) {
+  for (let i = 0; i <= count; i++) {
+    const t = i / count;
+    const p = curve.getPoint(t);
+    const r = r0 + (r1 - r0) * t;
+    group.add(mesh(SPHERE(), m, p.x, p.y, p.z, r * 2, r * 2, r * 2));
+  }
+}
+
 // ---------------------------------------------------------------- builders
 export const STRUCTURES = {
   house: { label: 'House', build: (c, rng) => house(c, rng) },
@@ -280,6 +291,36 @@ export const STRUCTURES = {
       g.add(mesh(BOX(), mat(c), -7, 7, 0, 3, 14, 3));
       g.add(mesh(BOX(), mat(c), 7, 7, 0, 3, 14, 3));
       g.add(mesh(BOX(), mat(shade(c, 0.9)), 0, 15, 0, 20, 3, 3.5));
+      return g;
+    },
+  },
+  dinosaur: {
+    label: 'Dinosaur monument', build: (c) => {
+      const g = new THREE.Group();
+      const bronze = mat(c, { metalness: 0.2, roughness: 0.45 });
+      const dark = mat(shade(c, 0.7), { metalness: 0.2, roughness: 0.55 });
+      // stepped stone plinth (long axis along local Z, the facing direction)
+      g.add(mesh(BOX(), mat(STONE), 0, 1.5, 0, 26, 3, 48));
+      g.add(mesh(BOX(), mat(shade(STONE, 0.9)), 0, 4, 0, 20, 2, 40));
+      g.add(mesh(BOX(), mat(new THREE.Color(0xd9b24c), { metalness: 0.7, roughness: 0.3 }), 0, 1.8, 24.2, 10, 2, 0.4)); // plaque
+      // sauropod, modelled with the head toward +X then turned to face +Z
+      const d = new THREE.Group();
+      const y0 = 5;
+      d.add(mesh(SPHERE(), bronze, 0, y0 + 12, 0, 22, 12, 11));                    // body
+      d.add(mesh(SPHERE(), dark, 0, y0 + 16.5, 0, 14, 6, 7));                        // back ridge
+      for (const [x, z] of [[6.5, 3.6], [6.5, -3.6], [-6.5, 3.6], [-6.5, -3.6]]) {
+        d.add(mesh(CYL(8), bronze, x, y0 + 4.5, z, 3.6, 9, 3.6));                    // legs
+        d.add(mesh(CYL(8), dark, x, y0 + 0.6, z, 4.2, 1.2, 4.2));                    // feet
+      }
+      const neck = new THREE.CatmullRomCurve3([v3(9, y0 + 14, 0), v3(14, y0 + 19, 0), v3(17.5, y0 + 27, 0), v3(19.5, y0 + 35, 0)]);
+      beads(d, neck, 12, 3.4, 1.7, bronze);
+      d.add(mesh(SPHERE(), bronze, 22, y0 + 36.5, 0, 6.5, 3.6, 3.4));              // head
+      d.add(mesh(SPHERE(), dark, 24.5, y0 + 35.6, 0, 2.6, 1.6, 2.8));               // snout
+      for (const z of [-1.4, 1.4]) d.add(mesh(SPHERE(), mat(new THREE.Color(0x111111)), 22.5, y0 + 37.4, z, 0.7, 0.7, 0.7)); // eyes
+      const tail = new THREE.CatmullRomCurve3([v3(-9, y0 + 12.5, 0), v3(-16, y0 + 11, 1), v3(-23, y0 + 8, 3.5), v3(-30, y0 + 5.5, 7), v3(-35, y0 + 4.5, 10)]);
+      beads(d, tail, 16, 3.6, 0.7, bronze);
+      d.rotation.y = -Math.PI / 2; // head faces +Z (the structure's heading)
+      g.add(d);
       return g;
     },
   },
