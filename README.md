@@ -98,10 +98,22 @@ Terrain features reshape the planet itself rather than sitting on it:
   drag. They bounce, splash, float, sink or splat, and "Follow the shot"
   rides the camera along (Esc to stop).
 
+- `graffiti` — the Graffiti Garden: a paved plaza (`pad` radius) of large
+  concrete installations in graffiti styles, built when you come within a few
+  kilometres. It has puffy bubble throw-ups with drips and shines, wildstyle
+  with arrows and spikes, chrome 3D blockbuster letters, a crown, a spray can,
+  a POW starburst, a heart, a curly arrow, a drippy alien eye, a chrome tag,
+  painted mural walls and a gateway. The garden renders at higher fidelity:
+  clearcoat paint with banded fades, chrome sky reflections, cartoon outlines,
+  2048 px textures and real-time shadows. `entrance` is the gateway's bearing
+  from the centre.
+
+Press **U** for photo mode, which hides the interface.
+
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight

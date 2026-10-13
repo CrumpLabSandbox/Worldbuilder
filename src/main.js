@@ -4,6 +4,7 @@ import { Planet, R, latLonToDir, dirToLatLon, tangentFrame, formatLat, formatLon
 import { FlyControls } from './controls.js';
 import { TerrainLOD } from './terrain.js';
 import { createFeatures, FEATURE_TYPES } from './features.js';
+import { gardenCtx } from './graffiti.js';
 import { WorldStore, randomSeed, DEFAULT_SPAWN } from './world.js';
 import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './structures.js';
 
@@ -17,7 +18,10 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 app.appendChild(renderer.domElement);
+gardenCtx.renderer = renderer;
 
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -36,7 +40,14 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 // night side to get lost in. It is eased so lighting doesn't jump.
 const sun = new THREE.DirectionalLight(0xfff1dc, 1.7);
 sun.position.set(1, 0.45, 0.7).multiplyScalar(10000);
+// only the garden's pieces cast shadows; the shadow camera follows the viewer
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -170, right: 170, top: 170, bottom: -170, near: 1, far: 1600 });
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.4;
 scene.add(sun);
+scene.add(sun.target);
 scene.add(new THREE.AmbientLight(0x9fb4d0, 0.32));
 const hemi = new THREE.HemisphereLight(0xcfe2ff, 0x4a3a2a, 0.3);
 scene.add(hemi);
@@ -44,10 +55,13 @@ const sunTarget = new THREE.Vector3(1, 0.45, 0.7).normalize();
 function updateSun(dt) {
   const { east, north, up } = tangentFrame(controls.position);
   sunTarget.copy(up).addScaledVector(east, 0.55).addScaledVector(north, -0.65).normalize();
-  const cur = sun.position.clone().normalize();
-  cur.lerp(sunTarget, Math.min(1, dt * 1.5)).normalize();
-  sun.position.copy(cur).multiplyScalar(10000);
+  sunDir.lerp(sunTarget, Math.min(1, dt * 1.5)).normalize();
+  const ground = controls.position.clone().setLength(R + Math.max(0, planet.elevation(controls.position.clone().normalize())));
+  sun.target.position.copy(ground);
+  sun.position.copy(ground).addScaledVector(sunDir, 800);
+  sun.target.updateMatrixWorld();
 }
+const sunDir = new THREE.Vector3(1, 0.45, 0.7).normalize();
 
 // stars
 {
@@ -292,6 +306,12 @@ function renderStructureList() {
 }
 
 function flyToStructure(s) {
+  if (s.type === 'graffiti') {
+    // stand outside the gateway on the approach road, looking in
+    const b = (s.entrance ?? 0) * DEG, back = ((s.pad ?? 150) + 45) / (R * DEG);
+    controls.teleport(s.lat + Math.cos(b) * back, s.lon + Math.sin(b) * back / Math.cos(s.lat * DEG), 9, ((s.entrance ?? 0) + 180) % 360, -3);
+    return;
+  }
   if (s.type === 'catapult') {
     const h = (s.heading ?? 0) * DEG, back = 70 / (R * DEG);
     controls.teleport(s.lat - Math.cos(h) * back, s.lon - Math.sin(h) * back / Math.cos(s.lat * DEG), 30, s.heading ?? 0, -6);
@@ -612,6 +632,7 @@ function wireUI() {
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) return;
     if (e.code === 'KeyH') $('help').classList.toggle('hidden');
+    if (e.code === 'KeyU') { document.body.classList.toggle('photo'); toast(document.body.classList.contains('photo') ? 'Photo mode: UI hidden (U to show)' : 'UI shown', 1500); }
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
     if (e.code === 'KeyB') setBuildMode(!buildMode);
     if (ride && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endRide(); updateRideButton(); return; }
@@ -791,7 +812,8 @@ function animate() {
   }
   await buildWorld(store.current, hash && hash.world === store.current.id ? hash.view : null);
   wireTouchUI();
+  gardenCtx.viewer = () => controls.position;
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get catapult() { return catapult; }, fireCatapult, pickGround, placeStructure };
+  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
 })();

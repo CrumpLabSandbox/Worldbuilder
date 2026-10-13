@@ -31,7 +31,7 @@ export class CatapultFeature {
     let k = 1 - smooth(this.pad, this.pad + this.band, this.dist(dir));
     if (k <= 0) return h;
     // fade out before any road so the hill never buries it
-    k *= smooth(10, 30, this.planet.roadClearance(dir));
+    if (this.rec.yieldToRoads !== false) k *= smooth(10, 30, this.planet.roadClearance(dir));
     return h + (this.target - h) * k;
   }
   // trees keep well back, and a firing lane down the heading stays open

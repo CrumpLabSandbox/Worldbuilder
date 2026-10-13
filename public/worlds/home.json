@@ -199,6 +199,28 @@
       "band": 50,
       "lane": 900,
       "laneWidth": 30
+    },
+    {
+      "id": "graffiti-way",
+      "type": "road",
+      "lat": 1.3218,
+      "lon": 47.0824,
+      "lat2": -0.2735,
+      "lon2": 46.7282,
+      "width": 7,
+      "name": "Graffiti Way"
+    },
+    {
+      "id": "graffiti-garden",
+      "type": "graffiti",
+      "lat": -1.1349,
+      "lon": 46.5369,
+      "pad": 150,
+      "band": 40,
+      "raise": -1.5,
+      "yieldToRoads": false,
+      "entrance": 12.5,
+      "name": "Graffiti Garden"
     }
   ]
 }

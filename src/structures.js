@@ -7,6 +7,7 @@ import { R, latLonToDir, tangentFrame } from './planet.js';
 import { buildVolcano, buildRoad, buildWoodland } from './featureMeshes.js';
 import { buildCoaster } from './coaster.js';
 import { buildCatapult } from './catapult.js';
+import { buildGraffitiGarden } from './graffiti.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -337,6 +338,10 @@ export const STRUCTURES = {
   woodland: {
     label: 'Woodland', feature: true,
     place: (rec, planet) => buildWoodland(rec, planet, planet.featureById(rec.id)),
+  },
+  graffiti: {
+    label: 'Graffiti garden', feature: true, menu: false,
+    place: (rec, planet) => buildGraffitiGarden(rec, planet, planet.featureById(rec.id)),
   },
   catapult: {
     label: 'Catapult', feature: true,

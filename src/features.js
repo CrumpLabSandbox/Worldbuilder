@@ -227,7 +227,7 @@ export class WoodsFeature {
   }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult']);
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -240,7 +240,7 @@ export function createFeatures(records, planet) {
     roads.push(new RoadFeature(r, planet));
     planet.setFeatures([...volcs, ...roads]);
   }
-  const sites = records.filter((r) => r.type === 'catapult').map((r) => new CatapultFeature(r, planet));
+  const sites = records.filter((r) => r.type === 'catapult' || r.type === 'graffiti').map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
   planet.setFeatures([...volcs, ...roads, ...sites]);
   const coasters = [];
   for (const r of records.filter((x) => x.type === 'coaster' && Array.isArray(x.path) && x.path.length > 1)) {

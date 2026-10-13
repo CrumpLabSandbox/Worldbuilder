@@ -109,3 +109,5 @@ button.fire { font-weight: 700; font-size: 15px; padding: 8px; background: rgba(
 button.fire:disabled { opacity: .5; cursor: default; }
 #cat-last { margin-top: 4px; color: var(--fg); }
 #cat-pred { color: var(--muted); font-size: 11px; }
+
+body.photo .panel, body.photo #help, body.photo #crosshair, body.photo #toast, body.photo #touch-ui, body.photo .label { display: none !important; }
