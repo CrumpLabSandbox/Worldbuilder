@@ -108,12 +108,18 @@ Terrain features reshape the planet itself rather than sitting on it:
   2048 px textures and real-time shadows. `entrance` is the gateway's bearing
   from the centre.
 
+- `mushroomtree` — the Super Mushroom Tree: a colossal fungal tree (`height`,
+  default 320 m, and optional `capRadius`) with a fluted stem veined in
+  light, buttress roots, branches ending in their own caps, bracket shelves,
+  a spotted canopy with glowing gills, swaying bioluminescent tendrils,
+  drifting spores and a fairy ring. Trees in any woodland keep clear of it.
+
 Press **U** for photo mode, which hides the interface.
 
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`, `mushroomtree`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight

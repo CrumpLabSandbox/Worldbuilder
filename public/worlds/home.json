@@ -221,6 +221,14 @@
       "yieldToRoads": false,
       "entrance": 12.5,
       "name": "Graffiti Garden"
+    },
+    {
+      "id": "super-mushroom-tree",
+      "type": "mushroomtree",
+      "lat": -0.2883,
+      "lon": 34.4934,
+      "height": 320,
+      "name": "Super Mushroom Tree"
     }
   ]
 }

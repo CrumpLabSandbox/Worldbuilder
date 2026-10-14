@@ -8,6 +8,7 @@ import { buildVolcano, buildRoad, buildWoodland } from './featureMeshes.js';
 import { buildCoaster } from './coaster.js';
 import { buildCatapult } from './catapult.js';
 import { buildGraffitiGarden } from './graffiti.js';
+import { buildMushroomTree } from './mushroomTree.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -338,6 +339,10 @@ export const STRUCTURES = {
   woodland: {
     label: 'Woodland', feature: true,
     place: (rec, planet) => buildWoodland(rec, planet, planet.featureById(rec.id)),
+  },
+  mushroomtree: {
+    label: 'Super mushroom tree', feature: true,
+    place: (rec, planet) => buildMushroomTree(rec, planet),
   },
   graffiti: {
     label: 'Graffiti garden', feature: true, menu: false,

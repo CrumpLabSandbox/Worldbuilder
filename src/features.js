@@ -227,7 +227,19 @@ export class WoodsFeature {
   }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti']);
+// keeps trees clear of a circle (used by giant structures)
+export class ClearingFeature {
+  constructor(rec, radius) {
+    this.id = rec.id; this.rec = rec; this.kind = 'site';
+    this.center = latLonToDir(rec.lat, rec.lon);
+    this.radius = radius;
+    this.cosBound = Math.cos((radius + 30) / R);
+    this.maxHeight = 0;
+  }
+  clearance(dir) { return Math.max(0, Math.acos(clamp(dir.dot(this.center), -1, 1)) * R - this.radius); }
+}
+
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -246,6 +258,7 @@ export function createFeatures(records, planet) {
   for (const r of records.filter((x) => x.type === 'coaster' && Array.isArray(x.path) && x.path.length > 1)) {
     try { coasters.push(new CoasterFeature(r, planet)); } catch (e) { console.warn('coaster', r.id, e); }
   }
+  const clearings = records.filter((r) => r.type === 'mushroomtree').map((r) => new ClearingFeature(r, (r.height ?? 320) * 0.3));
   const woods = records.filter((r) => r.type === 'woodland').map((r) => new WoodsFeature(r, planet));
-  return [...volcs, ...roads, ...sites, ...coasters, ...woods];
+  return [...volcs, ...roads, ...sites, ...coasters, ...clearings, ...woods];
 }
