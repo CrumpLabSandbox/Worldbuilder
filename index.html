@@ -106,7 +106,7 @@
         <button id="btn-mouselook" title="Steer with the mouse without holding a button (L, Esc to stop)"><kbd>L</kbd> Mouse look</button>
         <span class="speed">Speed <button id="speed-down" title="Slower (−)">−</button><span id="speed-val" class="mono">×1</span><button id="speed-up" title="Faster (+)">+</button></span>
       </div>
-      <div class="help-more">More keys: <kbd>B</kbd> build · <kbd>G</kbd> grid · <kbd>U</kbd> photo mode · <kbd>H</kbd> this card · 🎢 Ride appears near a coaster</div>
+      <div class="help-more">More keys: <kbd>T</kbd> ask Claude to build · <kbd>B</kbd> build · <kbd>G</kbd> grid · <kbd>U</kbd> photo mode · <kbd>H</kbd> this card · 🎢 Ride appears near a coaster</div>
     </div>
     <div class="help-touch">
       <div class="help-list">
@@ -115,6 +115,7 @@
         <div><span class="gesture">⇅</span><span><b>Slide the lever</b> up or down to climb or descend</span></div>
         <div><span class="gesture">🤏</span><span><b>Pinch</b> to zoom your altitude in and out</span></div>
         <div><span class="gesture">✨</span><span><b>Double-tap</b> the ground to fly there; tap for its coordinates</span></div>
+        <div><span class="gesture">💬</span><span><b>Chat</b> (top right) asks Claude to build something</span></div>
       </div>
       <button id="help-ok" class="primary">Got it</button>
     </div>
@@ -138,6 +139,19 @@
   <button id="btn-ride" class="panel hidden">🎢 Ride</button>
 
   <button id="btn-menu" class="panel" title="World &amp; build panel">☰</button>
+
+  <button id="btn-chat" class="panel hidden" title="Ask Claude to build something (T)">💬 <span class="chat-label">Ask Claude to build</span></button>
+  <div id="chat" class="panel hidden">
+    <div class="title">Claude builder <span class="chat-actions"><button id="chat-new" class="link" title="Start a new conversation">new chat</button><button id="chat-close" class="link" title="Close (Esc)">close</button></span></div>
+    <div id="chat-log">
+      <div class="msg claude">Hi! Tell me what to build. Click (or tap) the globe to pick a spot, or I'll build just ahead of you. Everything I build is shared with everyone in this world.</div>
+    </div>
+    <div class="chat-spot"><span id="chat-spot-text">📍 No spot picked: building ahead of you</span><button id="chat-spot-clear" class="link hidden">clear</button></div>
+    <form id="chat-form">
+      <textarea id="chat-input" rows="2" maxlength="1000" placeholder="e.g. build a harbour town with a lighthouse here"></textarea>
+      <button id="chat-send" class="primary" type="submit">Send</button>
+    </form>
+  </div>
 
   <div id="touch-ui">
     <div id="stick-hint"><div class="ring"><div class="dot"></div></div><span>Move</span></div>

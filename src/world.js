@@ -1,7 +1,9 @@
 // World definitions and persistence.
-// Repo worlds live in public/worlds/*.json (editable in git); the browser keeps a
-// local overlay (added/removed structures) per world. Local worlds created with
-// "New world" or "Import" live entirely in localStorage.
+// Repo worlds live in public/worlds/*.json (editable in git). The server layers
+// shared edits on top (structures built through the Claude chat, seen by everyone),
+// and the browser keeps a private local overlay (added/removed structures) per
+// world. Local worlds created with "New world" or "Import" live entirely in
+// localStorage.
 
 const LS = {
   overlay: (id) => `wb:overlay:${id}`,
@@ -28,6 +30,15 @@ export class WorldStore {
     this.repoWorlds = [];
     this.current = null;   // { id, name, seed, spawn, structures, kind: 'repo' | 'local', description }
     this.base = null;      // the repo world as loaded from file (for reset)
+    this.shared = null;    // shared edits from the server: { version, added, removed }
+  }
+
+  async fetchShared(id) {
+    try {
+      const res = await fetch(`./api/worlds/${encodeURIComponent(id)}/edits`, { cache: 'no-store' });
+      if (res.ok) return await res.json();
+    } catch { /* no server (static hosting): shared edits are simply unavailable */ }
+    return null;
   }
 
   async init() {
@@ -57,10 +68,11 @@ export class WorldStore {
       const res = await fetch(`./worlds/${repo.file}`, { cache: 'no-cache' });
       const base = await res.json();
       this.base = { ...base, structures: base.structures || [] };
+      this.shared = (await this.fetchShared(id)) || { version: 0, added: [], removed: [] };
       const overlay = lsGet(LS.overlay(id), { added: [], removed: [] });
-      const removed = new Set(overlay.removed || []);
+      const removed = new Set([...(overlay.removed || []), ...this.shared.removed]);
       const structures = [
-        ...this.base.structures.filter((s) => !removed.has(s.id)),
+        ...this.sharedBase().filter((s) => !removed.has(s.id)),
         ...(overlay.added || []),
       ];
       this.current = { id, kind: 'repo', name: base.name || repo.name, seed: base.seed >>> 0, spawn: base.spawn || DEFAULT_SPAWN, description: base.description || '', structures };
@@ -68,10 +80,32 @@ export class WorldStore {
       const local = lsGet(LS.local(id), null);
       if (!local) throw new Error(`World ${id} not found`);
       this.base = null;
+      this.shared = null;
       this.current = { ...local, kind: 'local', structures: local.structures || [], spawn: local.spawn || DEFAULT_SPAWN };
     }
     lsSet(LS.last, id);
     return this.current;
+  }
+
+  // The published structures plus everything built through the shared chat.
+  sharedBase() {
+    const removed = new Set(this.shared?.removed || []);
+    return [...this.base.structures.filter((s) => !removed.has(s.id)), ...(this.shared?.added || [])];
+  }
+
+  // Bring in newer shared edits. Returns what changed so the scene can follow,
+  // or null when nothing did.
+  applyShared(edits) {
+    const w = this.current;
+    if (!w || w.kind !== 'repo' || !edits || edits.version === this.shared?.version) return null;
+    const before = new Map(this.sharedBase().map((s) => [s.id, s]));
+    this.shared = edits;
+    const after = new Map(this.sharedBase().map((s) => [s.id, s]));
+    const added = [...after.values()].filter((s) => !before.has(s.id));
+    const removed = [...before.keys()].filter((id) => !after.has(id));
+    const gone = new Set(removed);
+    w.structures = [...w.structures.filter((s) => !gone.has(s.id)), ...added];
+    return added.length || removed.length ? { added, removed } : null;
   }
 
   // Persist the current world (overlay for repo worlds, whole world for local ones).
@@ -79,10 +113,11 @@ export class WorldStore {
     const w = this.current;
     if (!w) return;
     if (w.kind === 'repo') {
-      const baseIds = new Set(this.base.structures.map((s) => s.id));
+      const shared = this.sharedBase();
+      const baseIds = new Set(shared.map((s) => s.id));
       const currentIds = new Set(w.structures.map((s) => s.id));
       const added = w.structures.filter((s) => !baseIds.has(s.id));
-      const removed = this.base.structures.filter((s) => !currentIds.has(s.id)).map((s) => s.id);
+      const removed = shared.filter((s) => !currentIds.has(s.id)).map((s) => s.id);
       lsSet(LS.overlay(w.id), { added, removed });
     } else {
       lsSet(LS.local(w.id), { id: w.id, name: w.name, seed: w.seed, spawn: w.spawn, description: w.description, structures: w.structures });

@@ -144,16 +144,55 @@ Coordinates: latitude −90…90 (north positive), longitude −180…180 (east
 positive). One degree is about 175 m on this planet (radius 10 km), and the
 tallest peaks are around 320 m.
 
+## Building with Claude
+
+Press **T** (or the **💬 Ask Claude to build** button) to chat with Claude.
+Click or tap the globe to pick a spot, then describe what you want, e.g.
+"build a harbour town with a lighthouse here". Claude checks the terrain,
+looks at what is already nearby, and places structures from the list above.
+What it builds is saved on the server and shows up for everyone in that world
+within a few seconds. It can also move or remove things it built, but not the
+published structures in `public/worlds`. New *kinds* of structure still have
+to be added in code.
+
+Only the shared worlds from `public/worlds` take part. Your own *Build mode*
+edits and local worlds stay in your browser.
+
 ## Development
 
 ```sh
 npm install
-npm run dev      # local dev server
-npm run build    # production build in dist/
+cp .env.example .env   # add ANTHROPIC_API_KEY to try the chat
+npm run server         # API + shared world on :3000 (restarts on changes)
+npm run dev            # game with hot reload on :5173, /api proxied to :3000
+npm run build          # production build in dist/
 ```
 
-Deployment: the app runs on Coolify (it is no longer published to GitHub
-Pages). The `Dockerfile` builds the site and serves `dist/` with nginx on
-port 80. In Coolify, add a resource from this repository, pick the
-**Dockerfile** build pack, set the exposed port to 80, and press **Redeploy**
-after pushing to `main`.
+Without `ANTHROPIC_API_KEY` everything works except the chat, which hides
+itself.
+
+The server (`server/`) is a small Express app:
+
+- `GET /api/worlds/:id/edits` returns the shared edits for a world.
+- `POST /api/chat` runs a chat turn with Claude (tool use; the tools only
+  create validated structure records, never code).
+- Shared edits are stored as JSON in `DATA_DIR` (default `./data`), with a log
+  of every chat request and what it built in `chat-log.jsonl`.
+
+Settings (environment variables): `ANTHROPIC_API_KEY`, `PORT` (3000 locally, 80 in Docker),
+`DATA_DIR`, `CLAUDE_MODEL` (`claude-opus-5-5`), `CLAUDE_EFFORT` (`medium`),
+`CHAT_LIMIT_PER_HOUR` (30 per visitor) and `CHAT_LIMIT_PER_DAY` (500 for the
+whole site). Requests use the API's server-side refusal fallback.
+
+## Deployment
+
+The app runs on Coolify from the `Dockerfile` (it is no longer published to
+GitHub Pages). The image builds the game and runs the Node server on port 80.
+In Coolify:
+
+1. Use the **Dockerfile** build pack with port **80**.
+2. Add a persistent **volume** mounted at `/app/data`, so shared builds survive
+   redeploys.
+3. Add `ANTHROPIC_API_KEY` as a runtime environment variable (not a build
+   variable) and mark it secret.
+4. Press **Redeploy** after pushing to `main`.

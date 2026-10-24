@@ -7,6 +7,7 @@ import { createFeatures, FEATURE_TYPES } from './features.js';
 import { gardenCtx } from './graffiti.js';
 import { WorldStore, randomSeed, DEFAULT_SPAWN } from './world.js';
 import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './structures.js';
+import { initChat } from './chat.js';
 
 const $ = (id) => document.getElementById(id);
 const DEG = Math.PI / 180;
@@ -671,6 +672,10 @@ function wireUI() {
     }
     const hit = pickGround(ndc.x, ndc.y);
     if (!hit) return;
+    if (!buildMode && chat && chat.pick(hit)) {
+      toast(`Spot picked for Claude: ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800);
+      return;
+    }
     if (buildMode) {
       const rec = store.addStructure({
         type: $('build-type').value, lat: +hit.lat.toFixed(4), lon: +wrapLon(hit.lon).toFixed(4),
@@ -774,6 +779,53 @@ function wireControlsUI() {
   for (const el of [lift, $('tbtn-boost')]) el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
+// ------------------------------------------------------------------ shared world + Claude chat
+let chat = null;
+const spotMarker = new THREE.Mesh(
+  new THREE.RingGeometry(0.75, 1, 40),
+  new THREE.MeshBasicMaterial({ color: 0xffc94d, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthTest: false }),
+);
+spotMarker.renderOrder = 10;
+spotMarker.visible = false;
+scene.add(spotMarker);
+function showSpot(hit) {
+  spotMarker.visible = !!hit;
+  if (!hit) return;
+  const dir = latLonToDir(hit.lat, hit.lon);
+  spotMarker.position.copy(dir).multiplyScalar(planet.groundRadius(dir) + 0.5);
+  spotMarker.lookAt(spotMarker.position.clone().add(dir));
+}
+
+// Bring the scene in line with the shared edits from the server.
+async function applyEdits(edits, { fly = false, own = false } = {}) {
+  const types = new Map(store.current.structures.map((s) => [s.id, s.type]));
+  const diff = store.applyShared(edits);
+  if (!diff) return;
+  for (const id of diff.removed) removeStructureObject(id);
+  const reshape = diff.added.some((s) => FEATURE_TYPES.has(s.type)) || diff.removed.some((id) => FEATURE_TYPES.has(types.get(id)));
+  if (reshape) await refreshFeatures();
+  else for (const rec of diff.added) placeStructure(rec);
+  updateWorldPanel();
+  const first = diff.added[0];
+  if (fly && first) {
+    const { lat, lon } = controls.latLon;
+    const far = latLonToDir(lat, lon).angleTo(latLonToDir(first.lat, first.lon)) * R > 250;
+    if (far && !ride && !follow) controls.flyTo(first.lat, first.lon);
+  }
+  if (!own && diff.added.length) toast(`New in the world: ${diff.added.map((s) => s.name || STRUCTURES[s.type]?.label || s.type).slice(0, 3).join(', ')}`, 3500);
+}
+
+function wireChat() {
+  chat = initChat({ store, controls, applyEdits, onSpot: showSpot });
+  chat.enable();
+  // pick up what other players have built
+  setInterval(async () => {
+    if (document.visibilityState !== 'visible' || chat.busy || store.current?.kind !== 'repo') return;
+    const edits = await store.fetchShared(store.current.id);
+    if (edits) applyEdits(edits);
+  }, 6000);
+}
+
 function setBuildMode(on) {
   buildMode = on;
   $('build-toggle').checked = on;
@@ -804,6 +856,7 @@ function animate() {
     controls.update(dt);
   }
   updateSun(dt);
+  if (spotMarker.visible) spotMarker.scale.setScalar(THREE.MathUtils.clamp(camera.position.distanceTo(spotMarker.position) * 0.025, 3, 400));
   if (terrain) terrain.update(controls.position);
   if (cloudMesh && cloudMesh.visible) cloudMesh.rotation.y += dt * 0.004;
   for (const s of spinners) s.rotation.z += dt * 1.2;
@@ -849,6 +902,7 @@ function animate() {
   }
   await buildWorld(store.current, hash && hash.world === store.current.id ? hash.view : null);
   wireControlsUI();
+  wireChat();
   gardenCtx.viewer = () => controls.position;
   renderer.domElement.style.cursor = 'grab';
   animate();
