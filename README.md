@@ -119,12 +119,22 @@ Terrain features reshape the planet itself rather than sitting on it:
   a spotted canopy with glowing gills, swaying bioluminescent tendrils,
   drifting spores and a fairy ring. Trees in any woodland keep clear of it.
 
+- `computer` — the MEGAzine BBS terminal: a colossal beige 486 (about 165 m
+  tall) with a CRT monitor, keyboard, mouse and a floppy disk, on a levelled
+  plateau (`pad`, `band` and `raise` as for the catapult). Its screen loops a
+  DOS boot, a Telix dial-up and the board's banner. Near it a **📞 Dial in**
+  button appears (clicking the screen works too): the camera glides up to the
+  monitor and the real BBS at `url` (default
+  https://samuelling.github.io/BBS/) opens lined up with the glass, or full
+  screen on small displays. **Hang up** or Esc returns you to flying. Logins
+  inside the game are kept separately from visiting the BBS directly.
+
 Press **U** for photo mode, which hides the interface.
 
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`, `mushroomtree`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`, `mushroomtree`, `computer`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight

@@ -239,7 +239,7 @@ export class ClearingFeature {
   clearance(dir) { return Math.max(0, Math.acos(clamp(dir.dot(this.center), -1, 1)) * R - this.radius); }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree']);
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree', 'computer']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -252,7 +252,8 @@ export function createFeatures(records, planet) {
     roads.push(new RoadFeature(r, planet));
     planet.setFeatures([...volcs, ...roads]);
   }
-  const sites = records.filter((r) => r.type === 'catapult' || r.type === 'graffiti').map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
+  // levelled sites: the catapult's hill, the graffiti plaza, the BBS computer's pad
+  const sites = records.filter((r) => r.type === 'catapult' || r.type === 'graffiti' || r.type === 'computer').map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
   planet.setFeatures([...volcs, ...roads, ...sites]);
   const coasters = [];
   for (const r of records.filter((x) => x.type === 'coaster' && Array.isArray(x.path) && x.path.length > 1)) {

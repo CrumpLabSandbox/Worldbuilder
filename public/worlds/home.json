@@ -229,6 +229,18 @@
       "lon": 34.4934,
       "height": 320,
       "name": "Super Mushroom Tree"
+    },
+    {
+      "id": "megazine-bbs",
+      "type": "computer",
+      "lat": 51.0525,
+      "lon": -28.9404,
+      "heading": 154,
+      "pad": 130,
+      "band": 90,
+      "raise": 62,
+      "url": "https://samuelling.github.io/BBS/",
+      "name": "MEGAzine BBS"
     }
   ]
 }

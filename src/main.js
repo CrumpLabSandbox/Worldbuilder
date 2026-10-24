@@ -313,6 +313,10 @@ function flyToStructure(s) {
     controls.teleport(s.lat + Math.cos(b) * back, s.lon + Math.sin(b) * back / Math.cos(s.lat * DEG), 9, ((s.entrance ?? 0) + 180) % 360, -3);
     return;
   }
+  if (s.type === 'computer') {
+    const c = structureObjects.get(s.id)?.userData.computer;
+    if (c) { setPose(c.viewPoint(340), c.normal.clone().negate()); return; }
+  }
   if (s.type === 'catapult') {
     const h = (s.heading ?? 0) * DEG, back = 70 / (R * DEG);
     controls.teleport(s.lat - Math.cos(h) * back, s.lon - Math.sin(h) * back / Math.cos(s.lat * DEG), 30, s.heading ?? 0, -6);
@@ -400,6 +404,93 @@ function updateRideButton() {
   const c = follow ? null : nearestCoaster();
   if (c) { btn.textContent = `🎢 Ride ${c.feature.rec.name || 'the coaster'}`; btn.classList.remove('hidden'); }
   else btn.classList.add('hidden');
+}
+
+// ------------------------------------------------------------------ the BBS computer
+// Near a BBS computer a Dial in button appears (clicking its screen works too).
+// The camera glides up to face the monitor, then the real BBS opens in a frame
+// lined up with the glass (or full screen when the glass would be too small).
+let bbs = null; // { c, phase: 'flying' | 'online', t, from, to }
+function computers() { return [...structureObjects.values()].map((g) => g.userData.computer).filter(Boolean); }
+function nearestComputer(maxDist = 900) {
+  let best = null, bd = maxDist;
+  for (const c of computers()) { const d = c.center.distanceTo(controls.position); if (d < bd) { bd = d; best = c; } }
+  return best;
+}
+function lookPose(pos, look) {
+  const { east, north, up } = tangentFrame(pos);
+  return { heading: (Math.atan2(look.dot(east), look.dot(north)) / DEG + 360) % 360, pitch: Math.asin(THREE.MathUtils.clamp(look.dot(up), -1, 1)) / DEG };
+}
+function setPose(pos, look) {
+  const p = lookPose(pos, look);
+  controls.cancelFlight();
+  controls.position.copy(pos); controls.heading = p.heading; controls.pitch = p.pitch;
+  controls.updateCamera();
+  if (controls.onTeleport) controls.onTeleport();
+}
+function updateDialButton() {
+  const c = !bbs && !ride && !follow ? nearestComputer() : null;
+  $('btn-dial').classList.toggle('hidden', !c);
+}
+function dialIn(c) {
+  if (bbs || !c) return;
+  if (ride) endRide();
+  if (follow) endFollow();
+  // stand back far enough that the whole screen fits the view
+  const t = Math.tan(camera.fov * DEG / 2);
+  const dist = Math.max(c.size.h / 2 / t, c.size.w / 2 / (t * camera.aspect)) * 1.04;
+  const to = c.viewPoint(dist);
+  bbs = { c, phase: 'flying', t: 0, from: controls.position.clone(), to, fromPose: { heading: controls.heading, pitch: controls.pitch }, toPose: lookPose(to, c.normal.clone().negate()) };
+  controls.cancelFlight();
+  controls.enabled = false;
+  c.screen.setMode('calling');
+  document.body.classList.add('bbs-calling');
+  updateDialButton();
+}
+function stepDial(dt) {
+  bbs.t = Math.min(1, bbs.t + dt / 2.2);
+  const u = bbs.t < 0.5 ? 4 * bbs.t ** 3 : 1 - (-2 * bbs.t + 2) ** 3 / 2;
+  controls.position.lerpVectors(bbs.from, bbs.to, u);
+  const dh = ((bbs.toPose.heading - bbs.fromPose.heading + 540) % 360) - 180;
+  controls.heading = (bbs.fromPose.heading + dh * u + 360) % 360;
+  controls.pitch = THREE.MathUtils.lerp(bbs.fromPose.pitch, bbs.toPose.pitch, u);
+  controls.updateCamera();
+  if (bbs.t >= 1) openBBS();
+}
+function openBBS() {
+  bbs.phase = 'online';
+  bbs.c.screen.setMode('online');
+  document.body.classList.remove('bbs-calling');
+  document.body.classList.add('bbs-on');
+  const frame = document.createElement('iframe');
+  frame.src = bbs.c.url;
+  frame.title = 'MEGAzine BBS';
+  frame.allow = 'clipboard-read; clipboard-write; fullscreen';
+  $('bbs-slot').replaceChildren(frame);
+  $('bbs-open').href = bbs.c.url;
+  placeBBS();
+  frame.focus();
+}
+// line the frame up with the monitor glass when it is big enough on screen
+function placeBBS() {
+  if (!bbs || bbs.phase !== 'online') return;
+  const pts = bbs.c.corners().map((p) => p.project(camera));
+  const xs = pts.map((p) => (p.x + 1) / 2 * innerWidth), ys = pts.map((p) => (1 - p.y) / 2 * innerHeight);
+  const r = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+  const fits = r.w >= 560 && r.h >= 400 && r.x >= 0 && r.y >= 0 && r.x + r.w <= innerWidth && r.y + r.h <= innerHeight;
+  const el = $('bbs-slot');
+  el.classList.toggle('full', !fits);
+  Object.assign(el.style, fits ? { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` } : { left: '', top: '', width: '', height: '' });
+}
+function hangUp() {
+  if (!bbs) return;
+  bbs.c.screen.hangUp();
+  $('bbs-slot').replaceChildren();
+  document.body.classList.remove('bbs-on', 'bbs-calling');
+  bbs = null;
+  controls.enabled = true;
+  updateDialButton();
+  toast('NO CARRIER', 1500);
 }
 
 // ------------------------------------------------------------------ catapults
@@ -624,6 +715,9 @@ function wireUI() {
   for (const id of ['cat-power', 'cat-angle', 'cat-aim']) $(id).addEventListener('input', onCatInput);
   $('cat-follow').onchange = (e) => { if (catapult) catapult.follow = e.target.checked; };
   $('btn-ride').onclick = () => { if (ride) endRide(); else startRide(nearestCoaster()); updateRideButton(); };
+  $('btn-dial').onclick = () => dialIn(nearestComputer());
+  $('bbs-hangup').onclick = hangUp;
+  window.addEventListener('resize', placeBBS);
   $('btn-toggle-list').onclick = () => { const l = $('structure-list'); l.classList.toggle('hidden'); $('btn-toggle-list').textContent = l.classList.contains('hidden') ? 'show' : 'hide'; };
   $('opt-grid').onchange = (e) => { if (gridGroup) gridGroup.visible = e.target.checked; };
   $('opt-clouds').onchange = (e) => { if (cloudMesh) cloudMesh.visible = e.target.checked; };
@@ -636,6 +730,8 @@ function wireUI() {
     if (e.code === 'KeyU') { document.body.classList.toggle('photo'); toast(document.body.classList.contains('photo') ? 'Photo mode: UI hidden (U to show)' : 'UI shown', 1500); }
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
     if (e.code === 'KeyB') setBuildMode(!buildMode);
+    if (bbs && e.code === 'Escape') { hangUp(); return; }
+    if (bbs) return;
     if (ride && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endRide(); updateRideButton(); return; }
     if (follow && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endFollow(); return; }
     if ((e.code === 'Enter' || e.code === 'NumpadEnter') && catapult) { fireCatapult(); return; }
@@ -663,6 +759,16 @@ function wireUI() {
       const hit = pickGround(ndc.x, ndc.y);
       if (hit) { controls.flyTo(hit.lat, hit.lon); toast(`Flying to ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800); }
       return;
+    }
+    if (!buildMode && !bbs) {
+      raycaster.setFromCamera(ndc, camera);
+      const screens = computers().map((c) => c.screenMesh);
+      const hitScreen = screens.length && raycaster.intersectObjects(screens, false)[0];
+      const ground = hitScreen && pickGround(ndc.x, ndc.y);
+      if (hitScreen && (!ground || hitScreen.distance < ground.distance + 5)) { // not hidden behind a hill
+        dialIn(computers().find((c) => c.screenMesh === hitScreen.object));
+        return;
+      }
     }
     if (catapult && !buildMode) {
       raycaster.setFromCamera(ndc, camera);
@@ -841,7 +947,9 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
-  if (follow) {
+  if (bbs) {
+    if (bbs.phase === 'flying') stepDial(dt);
+  } else if (follow) {
     updateFollow(dt);
   } else if (ride) {
     ride.eye(eye);
@@ -877,7 +985,7 @@ function animate() {
   }
 
   const now = performance.now();
-  if (now - hudT > 100) { hudT = now; updateHUD(); updateRideButton(); }
+  if (now - hudT > 100) { hudT = now; updateHUD(); updateRideButton(); updateDialButton(); }
   if (now - catT > 400) { catT = now; updateCatapultPanel(); }
   if (now - hashT > 1500) { hashT = now; writeHash(); }
   renderer.render(scene, camera);

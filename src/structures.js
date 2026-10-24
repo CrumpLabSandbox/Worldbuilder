@@ -9,6 +9,7 @@ import { buildCoaster } from './coaster.js';
 import { buildCatapult } from './catapult.js';
 import { buildGraffitiGarden } from './graffiti.js';
 import { buildMushroomTree } from './mushroomTree.js';
+import { buildComputer } from './computer.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -343,6 +344,10 @@ export const STRUCTURES = {
   mushroomtree: {
     label: 'Super mushroom tree', feature: true,
     place: (rec, planet) => buildMushroomTree(rec, planet),
+  },
+  computer: {
+    label: 'BBS computer', feature: true, menu: false,
+    place: (rec, planet) => buildComputer(rec, planet, planet.featureById(rec.id)),
   },
   graffiti: {
     label: 'Graffiti garden', feature: true, menu: false,
