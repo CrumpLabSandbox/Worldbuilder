@@ -151,3 +151,7 @@ Deployment: `.github/workflows/deploy.yml` builds on every push to `main` and
 publishes `dist/` with GitHub Pages. In the repository settings, Pages must have
 its source set to **GitHub Actions** (the workflow attempts to enable this
 itself on first run).
+
+Self-hosting (e.g. Coolify): the `Dockerfile` builds the site and serves
+`dist/` with nginx on port 80. In Coolify, add a resource from this public
+repository, pick the **Dockerfile** build pack, and set the exposed port to 80.
