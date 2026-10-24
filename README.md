@@ -1,10 +1,8 @@
 # Worldbuilder
 
 A procedurally generated globe you can fly around, explore, and build on.
-Built with [Three.js](https://threejs.org/) and Vite; deployed to GitHub Pages
-from `main` by GitHub Actions.
-
-**Live site:** https://crumplabsandbox.github.io/Worldbuilder/
+Built with [Three.js](https://threejs.org/) and Vite, and self-hosted on
+Coolify from a Docker image.
 
 ## Exploring
 
@@ -154,11 +152,8 @@ npm run dev      # local dev server
 npm run build    # production build in dist/
 ```
 
-Deployment: `.github/workflows/deploy.yml` builds on every push to `main` and
-publishes `dist/` with GitHub Pages. In the repository settings, Pages must have
-its source set to **GitHub Actions** (the workflow attempts to enable this
-itself on first run).
-
-Self-hosting (e.g. Coolify): the `Dockerfile` builds the site and serves
-`dist/` with nginx on port 80. In Coolify, add a resource from this public
-repository, pick the **Dockerfile** build pack, and set the exposed port to 80.
+Deployment: the app runs on Coolify (it is no longer published to GitHub
+Pages). The `Dockerfile` builds the site and serves `dist/` with nginx on
+port 80. In Coolify, add a resource from this repository, pick the
+**Dockerfile** build pack, set the exposed port to 80, and press **Redeploy**
+after pushing to `main`.
