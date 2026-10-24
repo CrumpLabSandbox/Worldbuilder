@@ -3,11 +3,12 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { CATALOG, TYPES, FEATURE_OPTIONS } from './catalog.js';
 import { distanceM } from './worldStore.js';
+import { SHAPES, SHAPE_NAMES, LIMITS } from '../src/blueprintSpec.js';
 
 const MODEL = process.env.CLAUDE_MODEL || 'claude-opus-5-5';
 const EFFORT = process.env.CLAUDE_EFFORT || 'medium';
 const MAX_LOOPS = 10;          // model calls per player message
-const MAX_PLACES = 12;         // structures per player message
+const MAX_PLACES = 12;         // structures (catalogue pieces or blueprints) per player message
 const MAX_HISTORY = 60;        // messages kept per conversation before it restarts
 const SESSION_TTL = 2 * 3600e3;
 const M_PER_DEG = (2 * Math.PI * 10000) / 360; // planet radius is 10 km
@@ -30,8 +31,19 @@ How to work:
 - Compose bigger requests from several pieces, e.g. a harbour town from a town, a lighthouse on the shore, and ships on the water. Place at most ${MAX_PLACES} structures per request.
 - Give structures short, fitting names and pleasant colours (#rrggbb). Scale runs from 0.5 to 4.
 - You can only remove structures that were built through this chat (find_structures marks them). Use that to move or undo things the player asks about.
-- If a request needs a kind of structure that isn't in the list, say so plainly, build the closest match if it makes sense, and mention that new kinds of structures have to be added by the game's developer.
+- Use catalogue structures when they genuinely fit (a town, a castle, ships). For anything else (animals, vehicles, giant objects, signs, statues of particular things, pixel art) design a blueprint rather than substituting an unrelated catalogue piece.
 - Keep replies to one to three short sentences: say what you built and where. Don't list coordinates unless asked.
+
+Blueprints (build_blueprint) are your own designs made of basic shapes and/or voxels:
+- Frame: metres, origin on the ground at the blueprint's lat/lon. +y is up, +z is the front (it faces the heading), +x is to the right of someone standing in front of it looking at it. Each shape's "at" is its centre.
+- Shapes (each fills a box of the given size before rotating):
+${SHAPE_NAMES.map((n) => `  - ${n}: ${SHAPES[n]}`).join('\n')}
+- "rot" is degrees about x, then y, then z. A cylinder lying along x is rot [0, 0, 90]; a wheel facing sideways is a cylinder with rot [0, 0, 90].
+- "glow" makes a shape (or voxel colour) light up: eyes, windows at night, screens, lava, lamps.
+- Voxels give the blocky / pixel look: a cube edge "size", a "palette" of colours, and "cells" [x, y, z, colourIndex] on an integer grid. Cell [0, 0, 0] sits on the ground at the origin; cell [x, y, z] is centred at (x·size, y·size + size/2, z·size). An upright picture (a pixel portrait, a sign) uses x and y with z = 0, so it faces the front. Shapes and voxels can be mixed in one blueprint.
+- Scale: players fly, so make things read from the air. A person-sized statue would vanish; 20-300 m is typical, and "really large" means 150 m or more. Keep the base at y = 0 and sink it a few metres (slightly negative y) on sloping ground so nothing floats. Blueprints sit on the terrain at their anchor and don't reshape it, so check_ground and pick a flat-ish spot. "alt" raises the whole blueprint, e.g. onto something else.
+- Work like a sculptor: block out the big masses first, then the features that make it recognisable (ears, eyes, windows, wheels, trim), overlapping parts slightly so it reads as solid. Use colour contrast for detail. For a recognisable silhouette, think about proportions before writing coordinates.
+- Limits per blueprint: ${LIMITS.parts} shapes, ${LIMITS.cells} voxels, ${LIMITS.palette} palette colours, everything within ${LIMITS.reach} m of the anchor horizontally and ${LIMITS.height} m high, no single shape over ${LIMITS.partSize} m. Big scenes can use several blueprints. A very large voxel build is a lot of output, so prefer bigger voxels over more of them.
 - Decline anything hateful or obscene, including names.`;
 
 const num = { type: 'number' };
@@ -72,6 +84,43 @@ const TOOLS = [
         lon2: { type: ['number', 'null'], description: 'Bridges only: the far end. Otherwise null.' },
         radius: { type: ['number', 'null'], description: 'volcano or woodland only, in metres. Otherwise null.' },
         height: { type: ['number', 'null'], description: 'volcano or mushroomtree only, in metres. Otherwise null.' },
+      },
+    },
+  },
+  {
+    name: 'build_blueprint',
+    description: 'Build your own design from basic shapes and/or a voxel grid (see the system prompt for the frame and shapes). Returns its id and measured size.',
+    eager_input_streaming: true, // blueprints can be long; stream them as they are written
+    input_schema: {
+      type: 'object', additionalProperties: false, required: ['lat', 'lon', 'heading', 'name'],
+      properties: {
+        lat: num, lon: num,
+        heading: { type: 'number', description: 'Degrees clockwise from north that the front (+z) faces.' },
+        alt: { type: 'number', description: 'Optional metres to raise the whole blueprint above the ground.' },
+        name: { type: 'string', description: 'Short label shown in the world.' },
+        parts: {
+          type: 'array', description: `Up to ${LIMITS.parts} shapes.`,
+          items: {
+            type: 'object', additionalProperties: false, required: ['shape', 'at', 'size', 'color'],
+            properties: {
+              shape: { type: 'string', enum: SHAPE_NAMES },
+              at: { type: 'array', items: num, description: '[x, y, z] centre in metres.' },
+              size: { type: 'array', items: num, description: '[width x, height y, depth z] in metres.' },
+              rot: { type: 'array', items: num, description: 'Optional [x, y, z] rotation in degrees.' },
+              color: { type: 'string', description: '#rrggbb' },
+              glow: { type: 'boolean' },
+            },
+          },
+        },
+        voxels: {
+          type: 'object', additionalProperties: false, required: ['size', 'palette', 'cells'],
+          properties: {
+            size: { type: 'number', description: `Cube edge in metres (${LIMITS.voxel[0]}-${LIMITS.voxel[1]}).` },
+            palette: { type: 'array', items: { type: 'string' }, description: `Up to ${LIMITS.palette} #rrggbb colours.` },
+            cells: { type: 'array', items: { type: 'array', items: { type: 'integer' } }, description: `Up to ${LIMITS.cells} [x, y, z, colourIndex].` },
+            glow: { type: 'array', items: { type: 'integer' }, description: 'Optional palette indices that glow.' },
+          },
+        },
       },
     },
   },
@@ -135,10 +184,12 @@ export class BuilderChat {
 
     let reply = '';
     let usage = { input: 0, output: 0, cacheRead: 0 };
+    let jsonRetries = 0;
     for (let loop = 0; loop < MAX_LOOPS; loop++) {
-      const response = await this.client.beta.messages.create({
+      // streamed, so long blueprints don't run into request timeouts
+      const stream = this.client.beta.messages.stream({
         model: MODEL,
-        max_tokens: 16000,
+        max_tokens: 64000,
         system: SYSTEM,
         tools: TOOLS,
         messages: session.messages,
@@ -148,6 +199,16 @@ export class BuilderChat {
         betas: ['server-side-fallback-2026-07-01'],
         fallbacks: 'default',
       });
+      let response;
+      try {
+        response = await stream.finalMessage();
+        jsonRetries = 0;
+      } catch (e) {
+        // a streamed tool input that isn't valid JSON: ask again (API errors are rethrown)
+        if (e instanceof Anthropic.APIError || jsonRetries++ >= 2) throw e;
+        loop--;
+        continue;
+      }
       usage.input += response.usage.input_tokens;
       usage.output += response.usage.output_tokens;
       usage.cacheRead += response.usage.cache_read_input_tokens || 0;
@@ -158,12 +219,16 @@ export class BuilderChat {
       if (response.stop_reason === 'refusal') { reply = "Sorry, I can't help with that one."; break; }
       if (response.stop_reason === 'pause_turn') continue;
       const toolUses = response.content.filter((b) => b.type === 'tool_use');
-      if (response.stop_reason !== 'tool_use' || !toolUses.length) break;
+      if (!toolUses.length || (response.stop_reason !== 'tool_use' && response.stop_reason !== 'max_tokens')) break;
 
       const results = [];
       for (const t of toolUses) {
         let content, isError = false;
-        try { content = JSON.stringify(await this._runTool(t.name, t.input, turn)); } catch (e) { content = e.message; isError = true; }
+        try {
+          // a tool call cut off by the output limit parses as a partial object: never run it
+          if (response.stop_reason === 'max_tokens') throw new Error('Your output was cut off before this call finished, so nothing was built. Split the design into smaller blueprints or use bigger voxels.');
+          content = JSON.stringify(await this._runTool(t.name, t.input, turn));
+        } catch (e) { content = e.message; isError = true; }
         results.push({ type: 'tool_result', tool_use_id: t.id, content, is_error: isError });
       }
       session.messages.push({ role: 'user', content: results });
@@ -203,6 +268,14 @@ export class BuilderChat {
       turn.changes.push({ op: 'add', structure: rec });
       return { id: rec.id, placed: true };
     }
+    if (name === 'build_blueprint') {
+      if (turn.places >= MAX_PLACES) throw new Error(`Limit of ${MAX_PLACES} structures per request reached.`);
+      const rec = validateBlueprint(input);
+      turn.places += 1;
+      await store.add(worldId, rec);
+      turn.changes.push({ op: 'add', structure: rec });
+      return { id: rec.id, placed: true, shapes: rec.parts.length, voxels: rec.voxels?.cells.length || 0, ...rec.extent };
+    }
     if (name === 'remove_structure') {
       const s = (await store.structures(worldId)).find((x) => x.id === input.id);
       if (!s) throw new Error('No structure with that id.');
@@ -239,6 +312,75 @@ function validateStructure(input) {
   for (const opt of FEATURE_OPTIONS[input.type] || []) {
     if (finite(input[opt])) rec[opt] = Math.round(clamp(input[opt], opt === 'height' ? 40 : 50, opt === 'height' ? 600 : 1500));
   }
+  return rec;
+}
+
+const COLOR = /^#[0-9a-f]{6}$/i;
+const vec3 = (v, what) => {
+  if (!Array.isArray(v) || v.length !== 3 || !v.every(finite)) throw new Error(`${what} must be three numbers.`);
+  return v.map((x) => round(x, 2));
+};
+
+// Check a blueprint against the limits and return the record to store.
+function validateBlueprint(input) {
+  if (!finite(input.lat) || !finite(input.lon)) throw new Error('lat and lon must be numbers.');
+  const parts = Array.isArray(input.parts) ? input.parts : [];
+  const vox = input.voxels || null;
+  if (!parts.length && !(vox && Array.isArray(vox.cells) && vox.cells.length)) throw new Error('A blueprint needs some parts or voxels.');
+  if (parts.length > LIMITS.parts) throw new Error(`Too many shapes (${parts.length}); the limit is ${LIMITS.parts}.`);
+  let reach = 0, top = 0, bottom = 0;
+  const extend = (x, y, z, r) => { reach = Math.max(reach, Math.hypot(x, z) + r); top = Math.max(top, y + r); bottom = Math.min(bottom, y - r); };
+  const outParts = parts.map((p, i) => {
+    if (!SHAPE_NAMES.includes(p.shape)) throw new Error(`Part ${i}: unknown shape "${p.shape}".`);
+    const at = vec3(p.at, `Part ${i} "at"`), size = vec3(p.size, `Part ${i} "size"`);
+    if (size.some((v) => v <= 0 || v > LIMITS.partSize)) throw new Error(`Part ${i}: sizes must be between 0 and ${LIMITS.partSize} m.`);
+    if (!COLOR.test(p.color || '')) throw new Error(`Part ${i}: color must be #rrggbb.`);
+    const out = { shape: p.shape, at, size, color: p.color };
+    if (p.rot != null) { const rot = vec3(p.rot, `Part ${i} "rot"`); if (rot.some((v) => v !== 0)) out.rot = rot; }
+    if (p.glow === true) out.glow = true;
+    extend(at[0], at[1], at[2], Math.hypot(...size) / 2);
+    return out;
+  });
+  let outVox = null;
+  if (vox && Array.isArray(vox.cells) && vox.cells.length) {
+    const size = vox.size;
+    if (!finite(size) || size < LIMITS.voxel[0] || size > LIMITS.voxel[1]) throw new Error(`Voxel size must be ${LIMITS.voxel[0]}-${LIMITS.voxel[1]} m.`);
+    const palette = Array.isArray(vox.palette) ? vox.palette : [];
+    if (!palette.length || palette.length > LIMITS.palette || !palette.every((c) => COLOR.test(c))) throw new Error(`The voxel palette needs 1-${LIMITS.palette} #rrggbb colours.`);
+    if (vox.cells.length > LIMITS.cells) throw new Error(`Too many voxels (${vox.cells.length}); the limit is ${LIMITS.cells}. Use bigger voxels.`);
+    const seen = new Set();
+    const cells = [];
+    for (const c of vox.cells) {
+      if (!Array.isArray(c) || c.length !== 4 || !c.every(Number.isInteger)) throw new Error('Each voxel cell must be four integers [x, y, z, colourIndex].');
+      if (c[3] < 0 || c[3] >= palette.length) throw new Error(`Voxel colour index ${c[3]} is not in the palette.`);
+      const key = `${c[0]},${c[1]},${c[2]}`;
+      if (seen.has(key)) continue; // later duplicates are ignored
+      seen.add(key);
+      cells.push(c);
+      extend(c[0] * size, c[1] * size + size / 2, c[2] * size, size * 0.87);
+    }
+    const glow = Array.isArray(vox.glow) ? vox.glow.filter((g) => Number.isInteger(g) && g >= 0 && g < palette.length) : [];
+    outVox = { size: round(size, 2), palette, cells };
+    if (glow.length) outVox.glow = glow;
+  }
+  if (reach > LIMITS.reach) throw new Error(`The design reaches ${Math.round(reach)} m from its anchor; the limit is ${LIMITS.reach} m. Make it smaller or split it up.`);
+  if (top > LIMITS.height) throw new Error(`The design is ${Math.round(top)} m tall; the limit is ${LIMITS.height} m.`);
+  const name = typeof input.name === 'string' ? input.name.trim().slice(0, 60) : '';
+  const rec = {
+    id: newId(),
+    type: 'blueprint',
+    lat: round(clamp(input.lat, -90, 90)),
+    lon: round(wrapLon(input.lon)),
+    heading: round((((finite(input.heading) ? input.heading : 0) % 360) + 360) % 360, 1),
+    parts: outParts,
+    createdBy: 'claude',
+    createdAt: new Date().toISOString(),
+  };
+  if (outVox) rec.voxels = outVox;
+  if (finite(input.alt) && input.alt > 0) rec.alt = round(Math.min(input.alt, 600), 1);
+  if (name) rec.name = name;
+  // reported back to Claude, not stored
+  Object.defineProperty(rec, 'extent', { value: { reach_m: Math.round(reach), height_m: Math.round(top), lowest_m: Math.round(bottom) }, enumerable: false });
   return rec;
 }
 

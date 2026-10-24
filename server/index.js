@@ -58,7 +58,10 @@ app.get('/api/config', (req, res) => res.json({ chat: chat.enabled }));
 app.get('/api/worlds/:id/edits', async (req, res) => {
   if (!store.has(req.params.id)) return res.status(404).json({ error: 'Unknown world' });
   res.set('Cache-Control', 'no-store');
-  res.json(await store.getEdits(req.params.id));
+  const edits = await store.getEdits(req.params.id);
+  // the game polls with the version it has; only send everything when it changed
+  if (req.query.known != null && +req.query.known === edits.version) return res.json({ version: edits.version, unchanged: true });
+  res.json(edits);
 });
 
 app.post('/api/chat', async (req, res) => {

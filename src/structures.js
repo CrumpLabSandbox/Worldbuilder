@@ -10,6 +10,7 @@ import { buildCatapult } from './catapult.js';
 import { buildGraffitiGarden } from './graffiti.js';
 import { buildMushroomTree } from './mushroomTree.js';
 import { buildComputer } from './computer.js';
+import { buildBlueprint } from './blueprint.js';
 
 const geoCache = new Map();
 function geo(key, make) {
@@ -365,6 +366,8 @@ export const STRUCTURES = {
     label: 'Road', feature: true, menu: false,
     place: (rec, planet) => buildRoad(rec, planet, planet.featureById(rec.id)),
   },
+  // free-form designs from basic shapes and voxels (made through the Claude chat)
+  blueprint: { label: 'Blueprint', menu: false, build: (c, rng, rec) => buildBlueprint(rec) },
   statue: {
     label: 'Statue', build: (c) => {
       const g = new THREE.Group();
@@ -507,7 +510,7 @@ export function buildStructure(rec) {
   const def = STRUCTURES[rec.type] || STRUCTURES.flag;
   const color = new THREE.Color(rec.color || '#c8b89a');
   const rng = mulberry32(hashString(rec.id || rec.name || rec.type));
-  const g = def.build(color, rng);
+  const g = def.build(color, rng, rec);
   const s = rec.scale || 1;
   g.scale.setScalar(s);
   g.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });

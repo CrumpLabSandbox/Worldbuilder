@@ -33,10 +33,12 @@ export class WorldStore {
     this.shared = null;    // shared edits from the server: { version, added, removed }
   }
 
-  async fetchShared(id) {
+  // Shared edits for a world; with `known`, null when that version is still current.
+  async fetchShared(id, known = null) {
     try {
-      const res = await fetch(`./api/worlds/${encodeURIComponent(id)}/edits`, { cache: 'no-store' });
-      if (res.ok) return await res.json();
+      const q = known != null ? `?known=${known}` : '';
+      const res = await fetch(`./api/worlds/${encodeURIComponent(id)}/edits${q}`, { cache: 'no-store' });
+      if (res.ok) { const data = await res.json(); return data.unchanged ? null : data; }
     } catch { /* no server (static hosting): shared edits are simply unavailable */ }
     return null;
   }

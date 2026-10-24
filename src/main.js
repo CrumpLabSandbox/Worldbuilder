@@ -927,7 +927,7 @@ function wireChat() {
   // pick up what other players have built
   setInterval(async () => {
     if (document.visibilityState !== 'visible' || chat.busy || store.current?.kind !== 'repo') return;
-    const edits = await store.fetchShared(store.current.id);
+    const edits = await store.fetchShared(store.current.id, store.shared?.version);
     if (edits) applyEdits(edits);
   }, 6000);
 }

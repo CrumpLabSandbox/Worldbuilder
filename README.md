@@ -162,8 +162,16 @@ Click or tap the globe to pick a spot, then describe what you want, e.g.
 looks at what is already nearby, and places structures from the list above.
 What it builds is saved on the server and shows up for everyone in that world
 within a few seconds. It can also move or remove things it built, but not the
-published structures in `public/worlds`. New *kinds* of structure still have
-to be added in code.
+published structures in `public/worlds`.
+
+When nothing in the list fits (a bear, a car, a giant telephone, pixel art),
+Claude designs a **blueprint**: its own structure made of basic shapes (box,
+sphere, dome, cylinder, cone, pyramid, ring and wedge, each with a position,
+size, rotation, colour and optional glow) and/or a voxel grid of coloured
+cubes. Blueprints are data, checked against limits on the server (600 shapes,
+8000 voxels, 500 m reach, 900 m height; see `src/blueprintSpec.js`), and drawn
+with one instanced mesh per shape. Interactive things such as rides still need
+code.
 
 Only the shared worlds from `public/worlds` take part. Your own *Build mode*
 edits and local worlds stay in your browser.
