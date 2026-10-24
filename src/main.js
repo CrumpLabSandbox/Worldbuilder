@@ -631,7 +631,7 @@ function wireUI() {
 
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) return;
-    if (e.code === 'KeyH') $('help').classList.toggle('hidden');
+    if (e.code === 'KeyH') setHelp($('help').classList.contains('hidden'));
     if (e.code === 'KeyU') { document.body.classList.toggle('photo'); toast(document.body.classList.contains('photo') ? 'Photo mode: UI hidden (U to show)' : 'UI shown', 1500); }
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
     if (e.code === 'KeyB') setBuildMode(!buildMode);
@@ -650,9 +650,19 @@ function wireUI() {
     hoverT = now;
     pickInfo = pickGround((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   });
+  let lastClick = null;
   canvas.addEventListener('pointerup', async (e) => {
-    if (e.button !== 0 || !controls.wasClick()) return;
+    if (e.button !== 0 || !controls.wasClick(e)) return;
     const ndc = controls.pointerLocked ? new THREE.Vector2(0, 0) : new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    // a second click/tap close by in time and place flies there
+    const now = performance.now();
+    const double = lastClick && now - lastClick.t < 380 && Math.hypot(e.clientX - lastClick.x, e.clientY - lastClick.y) < 30;
+    lastClick = double ? null : { t: now, x: e.clientX, y: e.clientY };
+    if (double && !buildMode) {
+      const hit = pickGround(ndc.x, ndc.y);
+      if (hit) { controls.flyTo(hit.lat, hit.lon); toast(`Flying to ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800); }
+      return;
+    }
     if (catapult && !buildMode) {
       raycaster.setFromCamera(ndc, camera);
       const hits = raycaster.intersectObject(catapult.site, true);
@@ -684,57 +694,84 @@ function wireUI() {
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
   });
 }
-// ------------------------------------------------------------------ touch controls
-function wireTouchUI() {
+// ------------------------------------------------------------------ controls card + touch controls
+const HELP_KEY = 'worldbuilder.helpHidden';
+function setHelp(show) {
+  $('help').classList.toggle('hidden', !show);
+  $('btn-help').classList.toggle('hidden', show);
+  document.body.classList.toggle('help-open', show);
+  try { localStorage.setItem(HELP_KEY, show ? '0' : '1'); } catch { /* storage unavailable */ }
+}
+
+function wireControlsUI() {
   const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
   const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   const isTouch = coarse || (hasTouch && window.innerWidth < 1100);
   if (isTouch) document.body.classList.add('touch');
   // show the touch UI the first time a finger touches the canvas, even on hybrid devices
   renderer.domElement.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') document.body.classList.add('touch'); }, { passive: true });
+  // iOS Safari: keep pinches and double-taps for the game rather than page zoom
+  for (const ev of ['gesturestart', 'gesturechange']) document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+  document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
+
+  // controls card: shown until dismissed, then a small button brings it back
+  let hidden = false;
+  try { hidden = localStorage.getItem(HELP_KEY) === '1'; } catch { /* storage unavailable */ }
+  setHelp(!hidden);
+  $('help-close').onclick = () => setHelp(false);
+  $('help-ok').onclick = () => setHelp(false);
+  $('btn-help').onclick = () => setHelp(true);
+  $('hud-more').onclick = () => { const on = $('hud').classList.toggle('expanded'); $('hud-more').textContent = on ? 'less' : 'more'; };
+
+  // speed and mouse look
+  const showSpeed = (m) => { $('speed-val').textContent = `×${m < 1 ? m.toFixed(2) : m.toFixed(1)}`; };
+  controls.onSpeed = (m) => { showSpeed(m); toast(`Speed ×${m < 1 ? m.toFixed(2) : m.toFixed(1)}`, 1000); };
+  showSpeed(controls.speedMul);
+  $('speed-up').onclick = () => controls.changeSpeed(1.5);
+  $('speed-down').onclick = () => controls.changeSpeed(1 / 1.5);
+  $('btn-mouselook').onclick = () => controls.toggleMouseLook();
+  controls.onMouseLook = (on) => {
+    $('btn-mouselook').classList.toggle('active', on);
+    if (on) toast('Mouse look: move the mouse to steer, click to pick · Esc to stop', 3000);
+  };
+  // any manual movement takes the camera back from following a catapult shot
+  controls.onInput = () => { if (follow) endFollow(); };
 
   // menu button toggles the world/build panel on small screens
   $('btn-menu').onclick = () => $('world-panel').classList.toggle('open');
 
-  // virtual joystick
-  const pad = $('joystick'), knob = $('joystick-knob');
-  let stickId = null;
-  const radius = 45;
-  const setStick = (e) => {
-    const rect = pad.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-    let dx = e.clientX - cx, dy = e.clientY - cy;
-    const len = Math.hypot(dx, dy);
-    if (len > radius) { dx *= radius / len; dy *= radius / len; }
-    knob.style.transform = `translate(${dx}px, ${dy}px)`;
-    controls.touchMove.x = dx / radius;
-    controls.touchMove.y = -dy / radius;
+  // floating thumbstick: drawn wherever the left thumb lands
+  const stick = $('stick'), knob = $('stick-knob');
+  controls.onStick = (st) => {
+    stick.classList.toggle('hidden', !st);
+    document.body.classList.toggle('sticking', !!st);
+    if (!st) return;
+    stick.style.left = `${st.x}px`; stick.style.top = `${st.y}px`;
+    knob.style.transform = `translate(${st.dx}px, ${st.dy}px)`;
   };
-  const resetStick = () => { stickId = null; knob.style.transform = ''; controls.touchMove.x = 0; controls.touchMove.y = 0; };
-  pad.addEventListener('pointerdown', (e) => { if (stickId !== null) return; stickId = e.pointerId; pad.setPointerCapture(e.pointerId); setStick(e); e.preventDefault(); });
-  pad.addEventListener('pointermove', (e) => { if (e.pointerId === stickId) setStick(e); });
-  pad.addEventListener('pointerup', (e) => { if (e.pointerId === stickId) resetStick(); });
-  pad.addEventListener('pointercancel', (e) => { if (e.pointerId === stickId) resetStick(); });
-  pad.addEventListener('lostpointercapture', (e) => { if (e.pointerId === stickId) resetStick(); });
 
-  // hold buttons map to key codes (climb / descend)
-  for (const btn of document.querySelectorAll('.tbtn[data-key]')) {
-    const key = btn.dataset.key;
-    const press = (e) => { controls.keys.add(key); btn.classList.add('active'); e.preventDefault(); };
-    const release = () => { controls.keys.delete(key); btn.classList.remove('active'); };
-    btn.addEventListener('pointerdown', press);
-    btn.addEventListener('pointerup', release);
-    btn.addEventListener('pointercancel', release);
-    btn.addEventListener('pointerleave', release);
-    btn.addEventListener('contextmenu', (e) => e.preventDefault());
-  }
-  // boost toggles; +/- change the speed multiplier
-  $('tbtn-boost').addEventListener('pointerdown', (e) => { e.preventDefault(); controls.boost = !controls.boost; $('tbtn-boost').classList.toggle('active', controls.boost); toast(controls.boost ? 'Boost on' : 'Boost off', 1200); });
-  $('tbtn-faster').addEventListener('pointerdown', (e) => { e.preventDefault(); controls.speedMul = Math.min(20, controls.speedMul * 1.5); toast(`Speed ×${controls.speedMul.toFixed(1)}`, 1000); });
-  $('tbtn-slower').addEventListener('pointerdown', (e) => { e.preventDefault(); controls.speedMul = Math.max(0.05, controls.speedMul / 1.5); toast(`Speed ×${controls.speedMul.toFixed(2)}`, 1000); });
-  for (const id of ['tbtn-boost', 'tbtn-faster', 'tbtn-slower']) $(id).addEventListener('contextmenu', (e) => e.preventDefault());
+  // climb lever: slide up to climb, down to descend; springs back when released
+  const lift = $('lift'), liftKnob = $('lift-knob');
+  let liftId = null, liftY = 0;
+  const setLift = (e) => {
+    const travel = lift.clientHeight / 2 - 28;
+    const dy = THREE.MathUtils.clamp(e.clientY - liftY, -travel, travel);
+    liftKnob.style.transform = `translateY(${dy}px)`;
+    controls.lift = -dy / travel;
+  };
+  const resetLift = () => { liftId = null; liftKnob.style.transform = ''; controls.lift = 0; lift.classList.remove('active'); };
+  lift.addEventListener('pointerdown', (e) => {
+    if (liftId !== null) return;
+    const r = lift.getBoundingClientRect();
+    liftId = e.pointerId; liftY = r.top + r.height / 2; lift.classList.add('active');
+    try { lift.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    setLift(e); e.preventDefault();
+  });
+  lift.addEventListener('pointermove', (e) => { if (e.pointerId === liftId) setLift(e); });
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) lift.addEventListener(ev, (e) => { if (e.pointerId === liftId) resetLift(); });
 
-  if (isTouch) setTimeout(() => toast('Touch: left stick moves · drag to look · pinch for altitude · ▲▼ climb/descend', 5000), 1200);
+  $('tbtn-boost').addEventListener('pointerdown', (e) => { e.preventDefault(); controls.boost = !controls.boost; $('tbtn-boost').classList.toggle('active', controls.boost); toast(controls.boost ? 'Boost on (4× speed)' : 'Boost off', 1200); });
+  for (const el of [lift, $('tbtn-boost')]) el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 function setBuildMode(on) {
@@ -811,7 +848,7 @@ function animate() {
     await store.load(worlds[0].id);
   }
   await buildWorld(store.current, hash && hash.world === store.current.id ? hash.view : null);
-  wireTouchUI();
+  wireControlsUI();
   gardenCtx.viewer = () => controls.position;
   renderer.domElement.style.cursor = 'grab';
   animate();

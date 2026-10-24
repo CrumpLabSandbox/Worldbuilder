@@ -8,26 +8,33 @@ from `main` by GitHub Actions.
 
 ## Exploring
 
+A **Controls** card at the bottom of the screen lists everything; hide it
+with `H` (or *hide*) and bring it back with the **? Controls** button.
+
 | Control | Action |
 | --- | --- |
-| `W` / `S` | fly forward / back |
+| `W` / `S` or `↑` / `↓` | fly forward / back (level, whatever way you are looking) |
 | `A` / `D` | strafe left / right |
-| `R` / `F` (or `Space` / `C`) | climb / descend |
-| `Q` / `E` or `←` / `→` | turn |
-| `↑` / `↓` | pitch |
+| `←` / `→` | turn |
+| `Space` / `C` (or `E` / `Q`) | climb / descend |
 | `Shift` | 4× boost |
-| drag mouse | look around (press `L` for pointer lock) |
-| scroll wheel | speed multiplier |
+| drag (left or right mouse button) | look around |
+| `L` or **Mouse look** | steer with the mouse without holding a button (Esc to stop) |
+| scroll wheel / trackpad pinch | glide down towards the ground or back up |
+| `+` / `−` or the card's speed buttons | speed multiplier |
+| double-click the globe | fly there |
 | click the globe | read the coordinates under the cursor (copied to clipboard) |
 | `G` | toggle lat/lon grid |
 | `B` | toggle build mode |
-| `H` | toggle help |
 
-**Touchscreen:** a virtual stick (bottom left) moves you forward, back, and
-sideways; drag one finger on the globe to look around; pinch to change
-altitude; the ▲ ▼ buttons climb and descend, ⚡ toggles boost, and − / +
-change the speed multiplier. Tap the globe to read coordinates, and use the
-☰ button for the world and build panel.
+**Touchscreen (iPhone etc.):** touch and slide anywhere on the left of the
+screen and a thumbstick appears under your thumb to fly. Drag on the right to
+look around. Slide the lever (bottom right) up or down to climb or descend,
+and ⚡ toggles boost. Pinch to zoom your altitude in or out, double-tap the
+ground to fly there, and tap it to read its coordinates. The ☰ button opens
+the world and build panel, **?** shows the controls again, and *more* on the
+position panel expands it. Starting and stopping are eased, so you glide
+rather than jolt.
 
 Speed scales with altitude, so you can cross the planet in seconds from orbit and
 creep along at walking pace near the ground.

@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Worldbuilder</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='7' fill='%232d7dd2'/><path d='M4 6c2-2 5-1 6 1s3 2 2 4-5 1-6-1-3-2-2-4z' fill='%2355b544'/></svg>" />
   <link rel="stylesheet" href="./src/style.css" />
@@ -15,15 +17,16 @@
   <div id="crosshair"></div>
 
   <div id="hud" class="panel">
-    <div class="title">Position</div>
+    <div class="title">Position <button id="hud-more" class="link" title="Show more">more</button></div>
     <table>
       <tr><td>Lat</td><td id="hud-lat">–</td></tr>
       <tr><td>Lon</td><td id="hud-lon">–</td></tr>
       <tr><td>Alt</td><td id="hud-alt">–</td></tr>
       <tr><td>Heading</td><td id="hud-heading">–</td></tr>
-      <tr><td>Ground</td><td id="hud-ground">–</td></tr>
+      <tr class="hud-extra"><td>Ground</td><td id="hud-ground">–</td></tr>
       <tr><td>Speed</td><td id="hud-speed">–</td></tr>
     </table>
+    <div class="hud-extra">
     <div class="row">
       <button id="btn-copy-pos" title="Copy camera position (lat, lon, alt) to clipboard">Copy position</button>
       <button id="btn-share" title="Copy a link to this exact view">Copy link</button>
@@ -35,6 +38,7 @@
     </div>
     <div class="title">Under cursor</div>
     <div id="hud-pick" class="mono">–</div>
+    </div>
   </div>
 
   <div id="world-panel" class="panel">
@@ -86,8 +90,36 @@
   </div>
 
   <div id="help" class="panel">
-    <b>Fly:</b> W/S forward · A/D strafe · R/F up/down · Q/E roll-free turn · Shift boost · drag mouse to look (click canvas, or press L for pointer lock) · scroll = speed · H toggles help · click globe to read coordinates · 🎢 Ride button appears near a coaster station · U photo mode
+    <div class="title">Controls <button id="help-close" class="link" title="Hide (H)">hide</button></div>
+    <div class="help-desktop">
+      <div class="help-grid">
+        <div><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>Fly</div>
+        <div><span class="keys"><kbd class="wide">Space</kbd><kbd>C</kbd></span>Up / down</div>
+        <div><span class="keys"><kbd>←</kbd><kbd>→</kbd></span>Turn</div>
+        <div><span class="keys"><kbd class="wide">Shift</kbd></span>Boost</div>
+        <div><span class="mouse">Drag</span>Look around</div>
+        <div><span class="mouse">Scroll</span>Altitude</div>
+        <div><span class="mouse">Double-click</span>Fly there</div>
+        <div><span class="mouse">Click</span>Coordinates</div>
+      </div>
+      <div class="row help-bottom">
+        <button id="btn-mouselook" title="Steer with the mouse without holding a button (L, Esc to stop)"><kbd>L</kbd> Mouse look</button>
+        <span class="speed">Speed <button id="speed-down" title="Slower (−)">−</button><span id="speed-val" class="mono">×1</span><button id="speed-up" title="Faster (+)">+</button></span>
+      </div>
+      <div class="help-more">More keys: <kbd>B</kbd> build · <kbd>G</kbd> grid · <kbd>U</kbd> photo mode · <kbd>H</kbd> this card · 🎢 Ride appears near a coaster</div>
+    </div>
+    <div class="help-touch">
+      <div class="help-list">
+        <div><span class="gesture">🕹️</span><span><b>Left thumb</b>: touch and slide anywhere on the left to fly</span></div>
+        <div><span class="gesture">👆</span><span><b>Drag</b> on the right to look around</span></div>
+        <div><span class="gesture">⇅</span><span><b>Slide the lever</b> up or down to climb or descend</span></div>
+        <div><span class="gesture">🤏</span><span><b>Pinch</b> to zoom your altitude in and out</span></div>
+        <div><span class="gesture">✨</span><span><b>Double-tap</b> the ground to fly there; tap for its coordinates</span></div>
+      </div>
+      <button id="help-ok" class="primary">Got it</button>
+    </div>
   </div>
+  <button id="btn-help" class="panel hidden" title="Show controls (H)">? <span class="help-label">Controls</span></button>
 
   <div id="catapult-panel" class="panel hidden">
     <div class="title"><span id="cat-name">Catapult</span><button id="cat-collapse" class="link">hide</button></div>
@@ -108,13 +140,12 @@
   <button id="btn-menu" class="panel" title="World &amp; build panel">☰</button>
 
   <div id="touch-ui">
-    <div id="joystick"><div id="joystick-knob"></div></div>
-    <div id="touch-buttons">
-      <button class="tbtn" data-key="KeyR" title="Climb">▲</button>
-      <button class="tbtn" data-key="KeyF" title="Descend">▼</button>
-      <button class="tbtn" id="tbtn-boost" title="Boost">⚡</button>
-      <button class="tbtn" id="tbtn-slower" title="Slower">−</button>
-      <button class="tbtn" id="tbtn-faster" title="Faster">+</button>
+    <div id="stick-hint"><div class="ring"><div class="dot"></div></div><span>Move</span></div>
+    <div id="stick" class="hidden"><div id="stick-knob"></div></div>
+    <div id="lift-wrap">
+      <button id="tbtn-boost" class="tbtn" title="Boost">⚡</button>
+      <div id="lift"><span class="arrow up">▲</span><div id="lift-knob"></div><span class="arrow down">▼</span></div>
+      <span class="lbl">Up / Down</span>
     </div>
   </div>
 
