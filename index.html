@@ -137,7 +137,16 @@
   </div>
 
   <button id="btn-ride" class="panel hidden">🎢 Ride</button>
-  <button id="btn-dial" class="panel hidden" title="Connect to the MEGAzine BBS on this computer">📞 Dial in to MEGAzine BBS</button>
+  <div id="computer-actions" class="hidden">
+    <button id="btn-type" class="panel" title="Sit at the giant keyboard: the hands type what you type">⌨️ Type</button>
+    <button id="btn-dial" class="panel" title="Connect to the MEGAzine BBS on this computer">📞 Dial in to MEGAzine BBS</button>
+  </div>
+  <div id="type-bar" class="panel">
+    <span class="bbs-status">⌨️ Typing on the MEGA 486</span>
+    <button id="type-dial" title="Call the board">📞 Dial in</button>
+    <button id="type-stand" title="Get up (Esc)">Stand up</button>
+  </div>
+  <input id="type-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Type on the giant keyboard" />
   <div id="bbs">
     <div id="bbs-bar" class="panel">
       <span class="bbs-status">📞 MEGAzine BBS · 14400 baud</span>

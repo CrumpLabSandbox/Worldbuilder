@@ -191,10 +191,17 @@ body.riding #btn-chat, body.photo #chat, body.photo #btn-chat { display: none !i
 body.chat-open:not(.touch) #help, body.chat-open:not(.touch) #btn-help { display: none; }
 
 /* ---- MEGAzine BBS computer ---- */
-#btn-dial { left: 50%; transform: translateX(-50%); bottom: 112px; padding: 10px 18px; white-space: nowrap; font-size: 15px; font-weight: 600; z-index: 12; border-color: rgba(85,255,255,.6); }
-#btn-dial:hover { background: rgba(85,255,255,.25); }
-body.help-open:not(.touch) #btn-dial { bottom: 218px; }
-body.touch #btn-dial { bottom: calc(272px + var(--safe-b)); }
+#computer-actions { position: fixed; left: 50%; transform: translateX(-50%); bottom: 112px; display: flex; gap: 8px; z-index: 12; }
+#computer-actions.hidden { display: none; }
+#computer-actions .panel { position: static; padding: 10px 18px; white-space: nowrap; font-size: 15px; font-weight: 600; border-color: rgba(85,255,255,.6); }
+#computer-actions .panel:hover { background: rgba(85,255,255,.25); }
+body.help-open:not(.touch) #computer-actions { bottom: 218px; }
+body.touch #computer-actions { bottom: calc(272px + var(--safe-b)); }
+#type-bar { display: none; top: calc(10px + var(--safe-t)); left: 50%; transform: translateX(-50%); gap: 10px; align-items: center; padding: 6px 8px 6px 14px; z-index: 41; white-space: nowrap; }
+body.typing-on #type-bar { display: flex; }
+#type-bar .bbs-status { color: #55ffff; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+#type-input { position: fixed; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; font-size: 16px; border: 0; padding: 0; pointer-events: none; }
+body.typing-on .panel:not(#type-bar), body.typing-on #touch-ui, body.typing-on #crosshair { display: none !important; }
 #bbs { display: none; }
 body.bbs-on #bbs { display: block; }
 #bbs-bar { top: calc(10px + var(--safe-t)); left: 50%; transform: translateX(-50%); display: flex; gap: 14px; align-items: center; padding: 6px 8px 6px 14px; z-index: 41; white-space: nowrap; }
@@ -206,4 +213,4 @@ body.bbs-on #bbs { display: block; }
 #bbs-slot iframe { width: 100%; height: 100%; border: 0; display: block; background: #000; }
 body.bbs-on .panel:not(#bbs-bar), body.bbs-on #touch-ui, body.bbs-on #crosshair,
 body.bbs-calling .panel:not(#hud), body.bbs-calling #touch-ui, body.bbs-calling #crosshair { display: none !important; }
-@media (max-width: 520px) { #bbs-bar .bbs-status { display: none; } }
+@media (max-width: 520px) { #bbs-bar .bbs-status, #type-bar .bbs-status { display: none; } }

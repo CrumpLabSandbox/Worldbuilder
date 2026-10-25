@@ -128,6 +128,13 @@ Terrain features reshape the planet itself rather than sitting on it:
   https://samuelling.github.io/BBS/) opens lined up with the glass, or full
   screen on small displays. **Hang up** or Esc returns you to flying. Logins
   inside the game are kept separately from visiting the BBS directly.
+  **⌨️ Type** sits you at the keyboard instead: giant skeletal hands from
+  [CognitiveHands](https://github.com/CrumpLabSandbox/CognitiveHands)
+  (kinematic hands and motor layer, copied into `src/hands/`, no cognitive
+  model) type whatever you type, onto a little MEGA-DOS prompt on the screen
+  (try `help`, `dir`, `ver`). On a phone the on-screen keyboard opens.
+  Keystrokes typed into the BBS itself can't reach the game, as browsers keep
+  another site's frame private, so the hands don't type there yet.
 
 Press **U** for photo mode, which hides the interface.
 

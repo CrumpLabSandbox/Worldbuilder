@@ -52,7 +52,7 @@ export class FlyControls {
   _bind() {
     const dom = this.dom;
     window.addEventListener('keydown', (e) => {
-      if (isTyping(e.target) || e.metaKey || e.ctrlKey) return;
+      if (!this.enabled || isTyping(e.target) || e.metaKey || e.ctrlKey) return;
       if (FLIGHT_KEYS.has(e.code)) e.preventDefault();
       this.keys.add(e.code);
       if (e.code === 'KeyL') this.toggleMouseLook();

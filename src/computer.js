@@ -4,6 +4,10 @@
 // opens the real BBS (a web app) framed inside the monitor.
 import * as THREE from 'three';
 import { R, latLonToDir, tangentFrame } from './planet.js';
+import { TypingHands, SCALE } from './typingHands.js';
+import { KEY_HEIGHT } from './hands/instrument/layout.js';
+
+const KEY_TOP = KEY_HEIGHT * SCALE; // key tops above the keyboard plate
 
 const DEG = Math.PI / 180;
 export const BBS_URL = 'https://samuelling.github.io/BBS/';
@@ -81,6 +85,7 @@ const DIAL = [
   [7, 'C:\\>TELIX'], [7, ''], [14, 'ATZ'], [7, 'OK'], [14, 'ATDT MEGAZINE'], [7, 'DIALING...'], [7, 'RINGING...'], [10, 'CONNECT 14400/ARQ/V42BIS'],
 ];
 const CYCLE = 46; // seconds per boot -> banner -> hang-up loop
+const PROMPT = 'C:\\MEGA>';
 
 class Screen {
   constructor() {
@@ -97,6 +102,32 @@ class Screen {
     this.draw();
   }
   setMode(mode) { this.mode = mode; this.modeT = 0; this.last = -1; }
+  // DOS prompt for typing at the giant keyboard
+  startTyping() {
+    this.setMode('typing');
+    this.out = [[14, 'MEGA-DOS 6.22  Type HELP for commands.'], [7, '']];
+    this.line = '';
+  }
+  typeChar(ch) {
+    this.last = -1;
+    if (ch === '\b') { this.line = this.line.slice(0, -1); return; }
+    if (ch !== '\n') { if (this.line.length < COLS - 10) this.line += ch; return; }
+    const cmd = this.line.trim();
+    this.out.push([7, `${PROMPT}${this.line}`]);
+    this.line = '';
+    const [word, ...rest] = cmd.split(/\s+/);
+    const w = (word || '').toLowerCase();
+    const say = (...lines) => lines.forEach((l) => this.out.push([7, l]));
+    if (!w) return;
+    if (w === 'cls') this.out = [];
+    else if (w === 'help') say('HELP  DIR  VER  ECHO  CLS', 'To call the board, press DIAL IN.');
+    else if (w === 'dir') say(' Volume in drive C is MEGAZINE', ' BBS      EXE    14,400', ' ISSUE1   TXT     2,048', ' HANDS    SYS    27,000', '        3 file(s)');
+    else if (w === 'ver') say('MEGA-DOS Version 6.22', 'Hands by CognitiveHands');
+    else if (w === 'echo') say(rest.join(' '));
+    else if (['dial', 'bbs', 'atdt', 'telix'].includes(w)) say('Press DIAL IN to call the board.');
+    else say('Bad command or file name');
+    this.out = this.out.slice(-(ROWS - 3));
+  }
   // back to the idle loop, starting at NO CARRIER
   hangUp() { this.setMode('idle'); this.t = Math.ceil(this.t / CYCLE) * CYCLE + CYCLE - 3; }
   text(col, row, s, color = 7, bg = null) {
@@ -129,7 +160,12 @@ class Screen {
     g.font = `${Math.round(CH * 0.86)}px "Courier New", Courier, monospace`;
     g.textBaseline = 'alphabetic';
     const blink = Math.floor(this.t * 2.2) % 2 === 0;
-    if (this.mode === 'calling') {
+    if (this.mode === 'typing') {
+      this.lines(this.out, this.out.length, 0);
+      const row = this.out.length;
+      this.text(1, row, `${PROMPT}${this.line}${blink ? '_' : ''}`, 7);
+      this.statusBar(false);
+    } else if (this.mode === 'calling') {
       const n = Math.min(DIAL.length, 1 + Math.floor(this.modeT * 4));
       this.lines(DIAL, n);
       this.statusBar(false);
@@ -249,7 +285,7 @@ function buildModel(screen) {
   plaque(g, 40, 7.5, 38, 64, -21.3, maker, Math.PI);
   cable(g, [[20, 100, 77], [26, 70, 86], [30, 46, 70], [34, 40, 61]], 2.2);   // monitor -> case
 
-  // keyboard, with instanced keycaps
+  // keyboard: CognitiveHands' QWERTY layout with its hands, scaled up to giant size
   const tilt = new THREE.Group();
   tilt.position.set(0, 0, -102);
   tilt.rotation.x = -0.05; // feet up at the back
@@ -257,35 +293,15 @@ function buildModel(screen) {
   const kb = new THREE.Group();
   kb.rotation.y = Math.PI; // laid out from the typist's side, who faces +z
   tilt.add(kb);
-  box(kb, 150, 7, 52, beige, 0, 3.5, 0);
-  box(kb, 146, 1, 48, dark, 0, 7.1, 0);
-  const u = 6.6, gap = 0.7;
-  const keys = [];
-  const row = (z, y, widths, x0 = -70, depth = u - gap, shade = null) => {
-    let x = x0;
-    for (const w of widths) {
-      if (w > 0) keys.push({ x: x + (w * u - gap) / 2, z, w: w * u - gap, d: depth, dark: shade ?? (w !== 1 && w !== 7) });
-      x += Math.abs(w) * u;
-    }
-  };
-  row(-19.5, 0, [1, -0.6, 1, 1, 1, 1, -0.4, 1, 1, 1, 1, -0.4, 1, 1, 1, 1], -70, 4.6, false);
-  row(-12, 0, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2]);
-  row(-5.4, 0, [1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5]);
-  row(1.2, 0, [1.75, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.25]);
-  row(7.8, 0, [2.25, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.75]);
-  row(14.4, 0, [1.5, 1, 1.5, 7, 1.5, 1, 1.5]);
-  for (let r = 0; r < 5; r++) row(-12 + r * 6.6, 0, r === 4 ? [2, 1] : [1, 1, 1, 1], 42, u - gap, true); // numpad
-  const capGeo = new THREE.BoxGeometry(1, 1, 1);
-  const caps = new THREE.InstancedMesh(capGeo, new THREE.MeshStandardMaterial({ roughness: 0.6 }), keys.length);
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), light = new THREE.Color(0xeee8d6), mod = new THREE.Color(0x9c968a);
-  keys.forEach((k, i) => {
-    m4.compose(new THREE.Vector3(k.x, 9, k.z), q, new THREE.Vector3(k.w, 3.4, k.d));
-    caps.setMatrixAt(i, m4);
-    caps.setColorAt(i, k.dark ? mod : light);
-  });
-  kb.add(caps);
-  for (const [x, c] of [[46, 0x33ff66], [52, 0x33ff66], [58, 0x335533]]) {
-    const l = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 6), glow(c)); l.position.set(x, 7.6, -22); kb.add(l);
+  const hands = new TypingHands();
+  const b = hands.bounds();
+  const kw = (b.maxX - b.minX) * SCALE + 8, kd = (b.maxZ - b.minZ) * SCALE + 10;
+  box(kb, kw, 7, kd, beige, 0, 3.5, 0);
+  box(kb, kw - 4, 1, kd - 4, dark, 0, 7.1, 0);
+  hands.group.position.set(-(b.minX + b.maxX) / 2 * SCALE, 7.2 + KEY_TOP, -(b.minZ + b.maxZ) / 2 * SCALE + 1.5);
+  kb.add(hands.group);
+  for (const [x, c] of [[kw / 2 - 18, 0x33ff66], [kw / 2 - 12, 0x33ff66], [kw / 2 - 6, 0x335533]]) {
+    const l = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 6), glow(c)); l.position.set(x, 7.6, -kd / 2 + 2.5); kb.add(l);
   }
   cable(g, [[0, 4, -76], [-6, 2, -70], [-14, 2, -64], [-20, 3, -61]], 1.4);
 
@@ -310,7 +326,7 @@ function buildModel(screen) {
   lab.rotation.x = -Math.PI / 2;
 
   for (const o of [g]) o.traverse((m) => { if (m.isMesh) m.castShadow = m.receiveShadow = true; });
-  return { group: g, screenMesh, hdd, screenSize: { w: sw, h: sh }, screenLocal: new THREE.Vector3(0, sy, -21.2 - 2.6) };
+  return { group: g, screenMesh, hdd, hands, screenSize: { w: sw, h: sh }, screenLocal: new THREE.Vector3(0, sy, -21.2 - 2.6) };
 }
 
 // Place the computer on its levelled site. `f` is the site feature (flattened pad).
@@ -334,6 +350,7 @@ export function buildComputer(rec, planet, f) {
   let hddT = 0;
   model.screenMesh.onBeforeRender = () => { screen.visible = true; };
   site.userData.update = (dt) => {
+    model.hands.update(dt);                // only simulates while there is typing to do
     if (screen.visible) screen.tick(dt);   // animate only while the screen was drawn last frame
     screen.visible = false;
     hddT -= dt;
@@ -356,6 +373,15 @@ export function buildComputer(rec, planet, f) {
     },
     // a camera spot `dist` metres out from the screen, level with it, looking at it
     viewPoint(dist) { return centerW.clone().addScaledVector(normal, dist); },
+    hands: model.hands,
+    // the typist's view: over the keyboard to the screen, backed off on narrow screens
+    typingView(aspect) {
+      const m = model.group.matrixWorld;
+      const target = new THREE.Vector3(0, 62, -66).applyMatrix4(m);
+      const eye = new THREE.Vector3(0, 100, -235).applyMatrix4(m);
+      eye.sub(target).multiplyScalar(Math.max(1, 1.05 / aspect)).add(target);
+      return { pos: eye, look: target.clone().sub(eye).normalize() };
+    },
   };
   return site;
 }

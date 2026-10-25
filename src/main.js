@@ -410,7 +410,7 @@ function updateRideButton() {
 // Near a BBS computer a Dial in button appears (clicking its screen works too).
 // The camera glides up to face the monitor, then the real BBS opens in a frame
 // lined up with the glass (or full screen when the glass would be too small).
-let bbs = null; // { c, phase: 'flying' | 'online', t, from, to }
+let bbs = null; // { c, phase: 'flying' | 'online' | 'typing', then, t, from, to } while at a BBS computer
 function computers() { return [...structureObjects.values()].map((g) => g.userData.computer).filter(Boolean); }
 function nearestComputer(maxDist = 900) {
   let best = null, bd = maxDist;
@@ -430,22 +430,60 @@ function setPose(pos, look) {
 }
 function updateDialButton() {
   const c = !bbs && !ride && !follow ? nearestComputer() : null;
-  $('btn-dial').classList.toggle('hidden', !c);
+  $('computer-actions').classList.toggle('hidden', !c);
 }
-function dialIn(c) {
-  if (bbs || !c) return;
+// glide the camera to a pose at the computer, then call `then`
+function glideTo(c, to, look, then) {
   if (ride) endRide();
   if (follow) endFollow();
+  bbs = { c, phase: 'flying', then, t: 0, from: controls.position.clone(), to, fromPose: { heading: controls.heading, pitch: controls.pitch }, toPose: lookPose(to, look) };
+  controls.cancelFlight();
+  controls.enabled = false;
+  updateDialButton();
+}
+function dialIn(c) {
+  if (!c || (bbs && bbs.phase !== 'typing')) return;
+  if (bbs) stopTyping(false);
   // stand back far enough that the whole screen fits the view
   const t = Math.tan(camera.fov * DEG / 2);
   const dist = Math.max(c.size.h / 2 / t, c.size.w / 2 / (t * camera.aspect)) * 1.04;
-  const to = c.viewPoint(dist);
-  bbs = { c, phase: 'flying', t: 0, from: controls.position.clone(), to, fromPose: { heading: controls.heading, pitch: controls.pitch }, toPose: lookPose(to, c.normal.clone().negate()) };
-  controls.cancelFlight();
-  controls.enabled = false;
+  glideTo(c, c.viewPoint(dist), c.normal.clone().negate(), openBBS);
   c.screen.setMode('calling');
   document.body.classList.add('bbs-calling');
-  updateDialButton();
+}
+// Sit at the giant keyboard: what the player types, the hands type.
+function sitToType(c) {
+  if (bbs || !c) return;
+  const v = c.typingView(camera.aspect);
+  glideTo(c, v.pos, v.look, startTyping);
+  // focus now, while this is still the player's tap, so phones open their keyboard
+  focusTypeInput();
+}
+function startTyping() {
+  bbs.phase = 'typing';
+  const { c } = bbs;
+  c.screen.startTyping();
+  c.hands.onType = (ch) => c.screen.typeChar(ch);
+  document.body.classList.add('typing-on');
+  focusTypeInput();
+}
+function stopTyping(restore = true) {
+  if (!bbs || bbs.phase !== 'typing') return;
+  bbs.c.hands.onType = null;
+  bbs.c.screen.setMode('idle');
+  document.body.classList.remove('typing-on');
+  $('type-input').blur();
+  if (restore) { bbs = null; controls.enabled = true; updateDialButton(); }
+}
+function focusTypeInput() {
+  const el = $('type-input');
+  el.value = ' '; // something for Backspace to delete, so phones report it
+  el.focus({ preventScroll: true });
+}
+function typeKey(ch) {
+  if (!bbs || bbs.phase !== 'typing') return;
+  const { c } = bbs;
+  if (ch === '\b' || !c.hands.press(ch)) c.screen.typeChar(ch); // no finger for it: straight to the screen
 }
 function stepDial(dt) {
   bbs.t = Math.min(1, bbs.t + dt / 2.2);
@@ -455,7 +493,7 @@ function stepDial(dt) {
   controls.heading = (bbs.fromPose.heading + dh * u + 360) % 360;
   controls.pitch = THREE.MathUtils.lerp(bbs.fromPose.pitch, bbs.toPose.pitch, u);
   controls.updateCamera();
-  if (bbs.t >= 1) openBBS();
+  if (bbs.t >= 1) bbs.then();
 }
 function openBBS() {
   bbs.phase = 'online';
@@ -716,6 +754,23 @@ function wireUI() {
   $('cat-follow').onchange = (e) => { if (catapult) catapult.follow = e.target.checked; };
   $('btn-ride').onclick = () => { if (ride) endRide(); else startRide(nearestCoaster()); updateRideButton(); };
   $('btn-dial').onclick = () => dialIn(nearestComputer());
+  $('btn-type').onclick = () => sitToType(nearestComputer());
+  $('type-dial').onclick = () => dialIn(bbs?.c);
+  $('type-stand').onclick = () => stopTyping();
+  // typing goes through a hidden text field, which also brings up a phone's keyboard
+  const ti = $('type-input');
+  ti.addEventListener('beforeinput', (e) => {
+    e.preventDefault();
+    if (e.inputType === 'insertText' && e.data) for (const ch of e.data) typeKey(ch);
+    else if (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph') typeKey('\n');
+    else if (e.inputType === 'deleteContentBackward') typeKey('\b');
+  });
+  ti.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); typeKey('\n'); }
+    if (e.key === 'Escape') { e.preventDefault(); stopTyping(); }
+  });
+  // clicking the scene while seated keeps the keyboard focused
+  renderer.domElement.addEventListener('pointerdown', () => { if (bbs?.phase === 'typing') setTimeout(focusTypeInput, 0); });
   $('bbs-hangup').onclick = hangUp;
   window.addEventListener('resize', placeBBS);
   $('btn-toggle-list').onclick = () => { const l = $('structure-list'); l.classList.toggle('hidden'); $('btn-toggle-list').textContent = l.classList.contains('hidden') ? 'show' : 'hide'; };
@@ -730,7 +785,7 @@ function wireUI() {
     if (e.code === 'KeyU') { document.body.classList.toggle('photo'); toast(document.body.classList.contains('photo') ? 'Photo mode: UI hidden (U to show)' : 'UI shown', 1500); }
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
     if (e.code === 'KeyB') setBuildMode(!buildMode);
-    if (bbs && e.code === 'Escape') { hangUp(); return; }
+    if (bbs && e.code === 'Escape') { if (bbs.phase === 'typing') stopTyping(); else hangUp(); return; }
     if (bbs) return;
     if (ride && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endRide(); updateRideButton(); return; }
     if (follow && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endFollow(); return; }
