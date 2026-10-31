@@ -10,6 +10,7 @@ import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './struct
 import { initChat } from './chat.js';
 import { ORGAN_KEYS, KEY_NOTES } from './organHands.js';
 import { mountOrganKeys } from './organKeys.js';
+import { track, trackOnce, sendStats, startStats } from './stats.js';
 import { OrbitTeleport } from './orbitaktTeleport.js';
 
 const $ = (id) => document.getElementById(id);
@@ -327,6 +328,9 @@ function renderStructureList() {
   }
 }
 
+// Going off to a piece's own site: count it first, as the page is about to go.
+function leaveFor(place, url) { track('out', place); sendStats(); location.assign(url); }
+
 function flyToStructure(s) {
   if (s.type === 'graffiti') {
     // stand outside the gateway on the approach road, looking in
@@ -435,6 +439,8 @@ function nearestCoaster(maxDist = 450) {
 }
 function startRide(c) {
   if (!c) return;
+  track('go', 'coaster');
+  track('enter', c.feature.rec.id);
   ride = c;
   c.onRideEnd = () => endRide(true);
   c.board();
@@ -507,6 +513,7 @@ function nearestStage(maxDist = 800) {
 // Sit at the organ: the seat sees the whole painting above both keyboards.
 function sitAtOrgan(st) {
   if (bbs || !st) return;
+  track('enter', 'thingsynth-stage');
   loadThingSynth();
   const touch = document.body.classList.contains('touch');
   const v = st.seatView(camera.aspect);
@@ -548,6 +555,7 @@ function placeOrganFrame() {
   Object.assign($('organ-frame').style, { left: `${x}px`, top: `${y}px`, width: `${Math.max(...xs) - x}px`, height: `${Math.max(...ys) - y}px` });
 }
 function organKeyDown(key) {
+  trackOnce('play', 'thingsynth-stage');
   bbs.c.hands.hold(key);
   if (!thingSynth) return;
   const note = 60 + organOctave + KEY_NOTES[key];
@@ -605,6 +613,7 @@ function enterUniversity(u) {
   controls.cancelFlight();
   controls.enabled = false;
   camera.getWorldDirection(_tmp);
+  track('enter', 'walking-university');
   uni = { u, phase: 'rising', t: 0, from: camera.position.clone(), lookFrom: camera.position.clone().addScaledVector(_tmp, 400) };
   document.body.classList.add('uni-on');
   u.start();
@@ -636,6 +645,8 @@ async function uniIntoOffice() {
   await uniWait(420);
   u.setOffice(true);
   uni.phase = 'office';
+  uni.since = performance.now();
+  track('arrive', 'walking-university');
   document.body.classList.add('uni-office');
   placeUniView();
   uniFade(false);
@@ -674,6 +685,7 @@ function placeUniView() {
 async function leaveUniversity() {
   if (uni?.phase !== 'office') return;
   const { u } = uni;
+  track('dwell', 'walking-university', Math.round((performance.now() - uni.since) / 1000));
   uni.phase = 'fading';
   uniFade(true);
   await uniWait(420);
@@ -702,6 +714,7 @@ function nearestAshland(maxDist = 3200) {
 }
 function ashlandGate(a) {
   if (ash || tele || uni || bbs || !a) return;
+  track('enter', 'ashland');
   $('ash-gate').classList.remove('hidden');
   controls.enabled = false;
   $('ash-go').onclick = () => { ashlandGateClose(); walkIntoAshland(a); };
@@ -712,7 +725,7 @@ function ashlandGateClose() {
   controls.enabled = true;
 }
 function walkIntoAshland(a) {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(a.url); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('ashland', a.url); return; }
   if (ride) endRide();
   if (follow) endFollow();
   controls.cancelFlight();
@@ -730,7 +743,7 @@ function stepAshland(dt) {
   camera.lookAt(ash.curve.getPoint(Math.min(1, e + 0.05)));
   controls.position.copy(camera.position);
   $('ash-fade').style.opacity = THREE.MathUtils.smoothstep(k, 0.8, 0.97);
-  if (k >= 1) { ash.left = true; location.assign(ash.a.url); }
+  if (k >= 1) { ash.left = true; leaveFor('ashland', ash.a.url); }
 }
 function stopAshland() {
   if (!ash) return;
@@ -753,6 +766,7 @@ function nearestOrbitakt(maxDist = 1600) {
 }
 function orbitGate(o) {
   if (tele || uni || bbs || !o) return;
+  track('enter', 'orbitakt-launchpad');
   $('orbit-gate').classList.remove('hidden');
   controls.enabled = false;
   $('orbit-go').onclick = () => { orbitGateClose(); launchOrbitakt(o); };
@@ -764,7 +778,7 @@ function orbitGateClose() {
 }
 function launchOrbitakt(o) {
   // no flight for those who'd rather not: straight there
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(o.url); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('orbitakt-launchpad', o.url); return; }
   if (ride) endRide();
   if (follow) endFollow();
   controls.cancelFlight();
@@ -777,7 +791,7 @@ function stepTeleport(dt) {
   const done = tele.step(dt);
   $('orbit-fade').style.opacity = tele.flash;
   controls.position.copy(camera.position);
-  if (done) { teleLeft = true; location.assign(tele.o.url); }
+  if (done) { teleLeft = true; leaveFor('orbitakt-launchpad', tele.o.url); }
 }
 function stopTeleport() {
   if (!tele) return;
@@ -798,7 +812,7 @@ function stopTeleport() {
 function nearestComic(maxDist = 1200) {
   return [...structureObjects.values()].map((g) => g.userData.comicStatue).find((c) => c && c.center.distanceTo(controls.position) < maxDist) || null;
 }
-function openComic(c) { if (c) window.open(c.url, '_blank', 'noopener'); }
+function openComic(c) { if (c) { track('out', 'comic-statue'); window.open(c.url, '_blank', 'noopener'); } }
 
 // ------------------------------------------------------------------ Last Skip
 // A stone skips out across the sea with the camera after it, the view fades, and
@@ -809,8 +823,9 @@ function nearestSkip(maxDist = 1400) {
 }
 function tryLastSkip(ls) {
   if (skip || tele || uni || bbs || !ls) return;
+  track('enter', 'last-skip');
   // no flight for those who'd rather not: straight there
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(ls.url); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('last-skip', ls.url); return; }
   if (ride) endRide();
   if (follow) endFollow();
   controls.cancelFlight();
@@ -825,7 +840,7 @@ function stepSkip(dt) {
   if (done && !skip.leaving) {
     skip.leaving = true;
     uniFade(true);
-    uniWait(650).then(() => location.assign(skip.ls.url));
+    uniWait(650).then(() => leaveFor('last-skip', skip.ls.url));
   }
 }
 // back from the game: the browser may restore this page just as it was left
@@ -851,8 +866,9 @@ function nearestPaperMachine(maxDist = 1300) {
 }
 function runPaperMachine(pm) {
   if (paper || ash || skip || tele || uni || bbs || !pm) return;
+  track('enter', 'paper-machine');
   // no flight for those who'd rather not: straight there
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(pm.url); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('paper-machine', pm.url); return; }
   if (ride) endRide();
   if (follow) endFollow();
   controls.cancelFlight();
@@ -867,7 +883,7 @@ function stepPaperMachine(dt) {
   const done = paper.pm.step(dt, camera);
   $('orbit-fade').style.opacity = paper.pm.flash;
   controls.position.copy(camera.position);
-  if (done) { paper.left = true; location.assign(paper.pm.url); }
+  if (done) { paper.left = true; leaveFor('paper-machine', paper.pm.url); }
 }
 function stopPaperMachine() {
   if (!paper) return;
@@ -895,6 +911,7 @@ function glideTo(c, to, look, then) {
 }
 function dialIn(c) {
   if (!c || (bbs && bbs.phase !== 'typing')) return;
+  track('enter', 'megazine-bbs');
   if (bbs) stopTyping(false);
   // stand back far enough that the whole screen fits the view
   const t = Math.tan(camera.fov * DEG / 2);
@@ -1049,6 +1066,7 @@ function updateCatapultPanel() {
 }
 function fireCatapult() {
   if (!catapult || !catapult.canFire()) return;
+  track('go', 'catapult');
   catapult.fire();
   renderCatapultPanel();
 }
@@ -1272,6 +1290,8 @@ function wireUI() {
     if (!s || bbs) return;
     if (ride) endRide();
     if (follow) endFollow();
+    track('go', 'menu');
+    track('visit', s.id);
     flyToStructure(s);
     toast(s.name || STRUCTURES[s.type]?.label || s.type, 1800);
   };
@@ -1331,7 +1351,7 @@ function wireUI() {
     lastClick = double ? null : { t: now, x: e.clientX, y: e.clientY };
     if (double && !buildMode) {
       const hit = pickGround(ndc.x, ndc.y);
-      if (hit) { controls.flyTo(hit.lat, hit.lon); toast(`Flying to ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800); }
+      if (hit) { track('go', 'double-click'); controls.flyTo(hit.lat, hit.lon); toast(`Flying to ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800); }
       return;
     }
     if (!buildMode && !bbs && !uni && !tele && !skip && !ash) {
@@ -1655,6 +1675,11 @@ function animate() {
   wireControlsUI();
   wireChat();
   gardenCtx.viewer = () => controls.position;
+  startStats({
+    dirOf: (p) => latLonToDir(p.lat, p.lon),
+    where: () => (uni ? null : { ...dirToLatLon(controls.position.clone().normalize()), alt: controls.altitude }),
+    places: () => (store.current.id === 'home' ? store.current.structures.filter((s) => s.lat != null && s.createdBy !== 'claude') : []),
+  });
   renderer.domElement.style.cursor = 'grab';
   animate();
   window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, get tele() { return tele; }, get ash() { return ash; }, ashlandGate, walkIntoAshland, stopAshland, get skip() { return skip; }, tryLastSkip, endSkip, get paper() { return paper; }, runPaperMachine, stopPaperMachine, orbitGate, launchOrbitakt, stopTeleport, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };

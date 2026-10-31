@@ -7,6 +7,7 @@
 //   CLAUDE_EFFORT         low | medium | high (default medium)
 //   CHAT_LIMIT_PER_HOUR   messages per visitor per hour (default 30)
 //   CHAT_LIMIT_PER_DAY    messages for the whole site per day (default 500)
+//   STATS_KEY             password for the /stats page (no key, no page)
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import Anthropic from '@anthropic-ai/sdk';
 import { WorldStore } from './worldStore.js';
 import { BuilderChat } from './claude.js';
+import { Stats, statsPage } from './stats.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -27,16 +29,24 @@ const store = new WorldStore({ dataDir: DATA_DIR, worldsDirs: [path.join(DIST, '
 await store.init();
 
 const logFile = path.join(DATA_DIR, 'chat-log.jsonl');
+const stats = new Stats({ dir: path.join(DATA_DIR, 'stats'), places: () => new Set((store.base('home')?.structures || []).map((s) => s.id)) });
+stats.init();
+for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => { stats.stop(); process.exit(0); });
 const chat = new BuilderChat(store, {
-  log: (entry) => fs.appendFile(logFile, JSON.stringify({ at: new Date().toISOString(), ...entry }) + '\n', () => {}),
+  log: (entry) => {
+    fs.appendFile(logFile, JSON.stringify({ at: new Date().toISOString(), ...entry }) + '\n', () => {});
+    for (const c of entry.changes || []) stats.add('chat', c.op === 'remove' ? 'removed' : 'built');
+    if (entry.usage?.input_tokens) stats.add('chat', 'input-tokens', entry.usage.input_tokens);
+    if (entry.usage?.output_tokens) stats.add('chat', 'output-tokens', entry.usage.output_tokens);
+  },
 });
 
 // ---- rate limits (in memory; reset on restart)
 const hits = new Map(); // visitor hash -> timestamps in the last hour
 let day = { date: '', count: 0 };
+const address = (req) => req.get('cf-connecting-ip') || req.get('x-forwarded-for')?.split(',')[0].trim() || req.socket.remoteAddress || '';
 function visitor(req) {
-  const ip = req.get('cf-connecting-ip') || req.get('x-forwarded-for')?.split(',')[0].trim() || req.socket.remoteAddress || '';
-  return crypto.createHash('sha256').update(ip).digest('hex').slice(0, 16);
+  return crypto.createHash('sha256').update(address(req)).digest('hex').slice(0, 16);
 }
 function allow(who) {
   const today = new Date().toISOString().slice(0, 10);
@@ -73,18 +83,38 @@ app.post('/api/chat', async (req, res) => {
   if (typeof sessionId !== 'string' || !/^[a-z0-9-]{8,64}$/i.test(sessionId)) return res.status(400).json({ error: 'Bad session.' });
   const who = visitor(req);
   const blocked = allow(who);
-  if (blocked) return res.status(429).json({ error: blocked });
+  if (blocked) { stats.add('chat', 'limited'); return res.status(429).json({ error: blocked }); }
+  stats.add('chat', 'sent');
   try {
     const out = await chat.chat({ sessionId: `${who}:${sessionId}`, worldId, text, context });
     res.json({ ...out, edits: await store.getEdits(worldId) });
   } catch (e) {
     console.error('chat failed', e);
+    stats.add('chat', 'failed');
     const busy = e instanceof Anthropic.RateLimitError || e instanceof Anthropic.InternalServerError;
     res.status(busy ? 503 : 500).json({
       error: busy ? 'Claude is busy right now. Try again in a moment.' : 'Something went wrong talking to Claude.',
       edits: await store.getEdits(worldId),
     });
   }
+});
+
+// ---- visitor stats
+app.post('/api/stats', (req, res) => { stats.record(address(req), req.body); res.status(204).end(); });
+const sameKey = (a, b) => {
+  const hash = (s) => crypto.createHash('sha256').update(String(s)).digest();
+  return crypto.timingSafeEqual(hash(a), hash(b));
+};
+app.get('/stats', (req, res) => {
+  const key = process.env.STATS_KEY;
+  if (!key || !sameKey(req.query.key ?? '', key)) return res.status(404).type('text').send('Not found');
+  const days = req.query.days === '7' ? 7 : req.query.days === '0' ? 0 : 30;
+  let issue = null;
+  for (const dir of [DIST, path.join(ROOT, 'public')]) {
+    try { issue = JSON.parse(fs.readFileSync(path.join(dir, 'issues', 'november.json'), 'utf8')); break; } catch { /* try the next */ }
+  }
+  res.set({ 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
+  res.type('html').send(statsPage(stats.summary(days), { days, key, world: store.base('home'), issue }));
 });
 
 // ---- the built game

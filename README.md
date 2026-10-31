@@ -201,6 +201,17 @@ To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight
 from the Position panel or from clicking the globe.
 
+## Stats
+
+The game reports anonymous counts to its own server: visits, time, the places
+people reach, what they click, and chat use. They're kept per day in
+`DATA_DIR/stats`, with nothing that identifies anyone, and a visitor can't be
+followed from one day to the next. Set `STATS_KEY` and the page is at
+`/stats?key=YOUR_KEY`. Local copies send nothing unless you add `?stats=test`.
+
+Any button or link with an `id` is counted automatically, and so is getting near
+a published place. To count going in, call `track('enter', 'place-id')`.
+
 ## Worlds
 
 - Terrain is generated from a **seed** (continents, mountain ranges, climate
