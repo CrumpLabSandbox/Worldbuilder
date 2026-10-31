@@ -176,7 +176,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;colo
 svg{display:block;width:100%;height:auto}.chart rect{fill:#4d9fff}.chart text{fill:#8a97ad;font-size:11px}.map{border-radius:8px}.map circle{fill:#ff6a3d;stroke:#fff;stroke-width:.6}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 28px}footer{margin-top:40px;color:#74819a;font-size:13px}`;
 
-const CLICK_NAMES = { 'intro-start': 'Start exploring', 'intro-more': 'Learn more', 'about-start': 'Start exploring (About)', 'btn-ride': 'Ride the coaster', 'btn-dial': 'Dial in to the BBS', 'btn-type': 'Type on the computer', 'btn-organ': 'Play the organ', 'btn-university': 'Enter the University', 'uni-window': 'Look out the window', 'uni-leave': 'Leave the office' };
+const CLICK_NAMES = { 'intro-start': 'Start exploring', 'intro-more': 'Learn more', 'about-start': 'Start exploring (About)', 'btn-ride': 'Ride the coaster', 'btn-dial': 'Dial in to the BBS', 'btn-type': 'Type on the computer', 'btn-organ': 'Play the organ', 'btn-university': 'Enter the University', 'uni-window': 'Look out the window', 'uni-leave': 'Leave the office', 'btn-hands': 'About Cognitive Hands', 'organ-hands': 'About the hands (organ)', 'type-hands': 'About the hands (typing)', 'hands-link': 'Go to Cognitive Hands' };
 
 // `world` is the published world file; `issue` is the November list.
 export function statsPage(s, { days, key, world, issue }) {
@@ -187,7 +187,8 @@ export function statsPage(s, { days, key, world, issue }) {
   const pieces = (issue?.pieces || []).map((p) => {
     const id = p.place || (names.has(p.id) ? p.id : null);
     const n = (name) => num(id ? ev[name]?.[id] : 0);
-    return [`${esc(p.title)}${id ? '' : ' <span class="none">(no place yet)</span>'}`, n('near'), n('enter'), n('arrive'), n('out'), id ? clock(ev.dwell?.[id] || 0) : '0 s'];
+    const out = p.id === 'cognitive-hands' ? num(ev.click?.['hands-link']) : n('out'); // its link is on an info card, at two places
+    return [`${esc(p.title)}${id ? '' : ' <span class="none">(no place yet)</span>'}`, n('near'), n('enter'), n('arrive'), out, id ? clock(ev.dwell?.[id] || 0) : '0 s'];
   });
   const chat = ev.chat || {};
   const clicks = sorted(ev.click).slice(0, 25).map(([k, n]) => [CLICK_NAMES[k] || k, n]);
@@ -204,7 +205,7 @@ ${card('Visitors', num(s.visitors), 'each person once per day, added up')}${card
 <h2>Where people flew</h2>${heatMap(s.grid, world?.structures?.filter((p) => p.lat != null) || [])}
 <p class="sub">Brighter squares had more time spent in them. Dots are the published places.</p>
 <div class="two"><div><h2>Top clicks</h2>${bars(clicks)}</div>
-<div><h2>Getting around</h2>${bars([['Visit place menu', go.menu || 0], ['Double-click on the globe', go['double-click'] || 0], ['Catapult shots', go.catapult || 0], ['Coaster rides', go.coaster || 0]].filter((r) => r[1]))}<p class="sub">Minutes flying by hand: ${num((go.flying || 0) / 60)}</p>
+<div><h2>Getting around</h2>${bars([['Visit place menu', go.menu || 0], ['Double-click on the globe', go['double-click'] || 0], ['Catapult shots', go.catapult || 0], ['Coaster rides', go.coaster || 0], ['Visits using a gamepad', go.gamepad || 0]].filter((r) => r[1]))}<p class="sub">Minutes flying by hand: ${num((go.flying || 0) / 60)}</p>
 <h2>Played from the menu</h2>${bars(sorted(ev.visit).slice(0, 12).map(([k, n]) => [names.get(k) || k, n]))}</div></div>
 <div class="two"><div><h2>Claude chat</h2>${table(['', 'Count'], [['Messages', num(chat.sent)], ['Things built', num(chat.built)], ['Things removed', num(chat.removed)], ['Rate limited', num(chat.limited)], ['Failed', num(chat.failed)], ['Input tokens', num(chat['input-tokens'])], ['Output tokens', num(chat['output-tokens'])]])}</div>
 <div><h2>How long people stayed</h2>${bars(DURATIONS.map(([label], i) => [label, s.durations[i]]))}<h2>Came from</h2>${bars(sorted(s.from).slice(0, 12))}</div></div>

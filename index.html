@@ -85,6 +85,7 @@
     </div>
     <div class="row small">
       <label class="chk"><input id="opt-clouds" type="checkbox" checked /> Clouds</label>
+      <label class="chk"><input id="opt-gamepad" type="checkbox" checked /> Gamepad</label>
       <label class="chk"><input id="opt-wire" type="checkbox" /> Wireframe</label>
     </div>
   </div>
@@ -137,6 +138,7 @@
   </div>
 
   <button id="btn-ride" class="panel hidden">🎢 Ride</button>
+  <button id="btn-hands" class="panel hidden hands-info" title="About the hands">✋ About Cognitive Hands</button>
   <div id="computer-actions" class="hidden">
     <button id="btn-type" class="panel" title="Sit at the giant keyboard: the hands type what you type">⌨️ Type</button>
     <button id="btn-dial" class="panel" title="Connect to the MEGAzine BBS on this computer">📞 Dial in to MEGAzine BBS</button>
@@ -180,6 +182,29 @@
     <div id="night-bar"><span>A window in the city</span><button id="night-leave" title="Back down to the street (Esc)">Back to the street</button></div>
     <div id="night-slot"></div>
   </div>
+  <button id="btn-mneme" class="panel hidden" title="Let the world dissolve into the mnemic substrate">✨ Enter the substrate</button>
+  <div id="mn-gate" class="hidden" role="dialog" aria-modal="true" aria-labelledby="mn-gate-title">
+    <div id="mn-card" tabindex="-1">
+      <div class="mn-kicker">THE MNEME</div>
+      <h1 id="mn-gate-title">Ecphory</h1>
+      <p>A game set inside Richard Semon's forgotten theory of memory. These summits are the past, and this sea of light is the present. Past here the world dissolves, and Ecphory is its own game on another website, so you'll leave Worldbuilder. Headphones help.</p>
+      <div class="mn-actions">
+        <button id="mn-go" class="primary">Dissolve</button>
+        <button id="mn-stay">Stay here</button>
+      </div>
+    </div>
+  </div>
+  <div id="hands-gate" class="hidden" role="dialog" aria-modal="true" aria-labelledby="hands-title">
+    <div id="hands-card" class="panel" tabindex="-1">
+      <div class="hands-kicker">FROM THE NOVEMBER ISSUE</div>
+      <h1 id="hands-title">Cognitive Hands</h1>
+      <p>These are the hands from Cognitive Hands. There, two virtual hands try to type a sentence, run by theories of how the mind orders its actions. You pick one of four models and watch it steer the same fingers, which have real joint limits, on a keyboard where a slip lands on the wrong key. Here they play the organ and type on the giant computer, following your keys.</p>
+      <div class="hands-actions">
+        <a id="hands-link" class="primary" href="https://crumplabsandbox.github.io/CognitiveHands/" target="_blank" rel="noopener">Go to Cognitive Hands ↗</a>
+        <button id="hands-close">Back</button>
+      </div>
+    </div>
+  </div>
   <div id="uni-fade"></div>
   <div id="uni-game"></div>
   <div id="uni-bar" class="panel">
@@ -191,11 +216,13 @@
   <div id="organ-keys"></div>
   <div id="organ-bar" class="panel">
     <span id="organ-status" class="bbs-status">🎹 Warming up the organ…</span>
+    <button id="organ-hands" class="hands-info" title="About the hands">✋ About the hands</button>
     <button id="organ-stand" title="Get up (Esc)">Stand up</button>
   </div>
   <div id="type-bar" class="panel">
     <span class="bbs-status">⌨️ Typing on the MEGA 486</span>
     <button id="type-dial" title="Call the board">📞 Dial in</button>
+    <button id="type-hands" class="hands-info" title="About the hands">✋ About the hands</button>
     <button id="type-stand" title="Get up (Esc)">Stand up</button>
   </div>
   <input id="type-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Type on the giant keyboard" />
@@ -247,6 +274,7 @@
       <p>Orbitakt, Sam's drum machine played by the satellites overhead, has a launchpad far up in the northern desert. Stand on the ring in front of the giant machine and you'll evaporate into the stars, and it hands you over to Orbitakt on its own website.</p>
       <p>Metamers, Sam's Large Ling Model, has a machine all its own on the equator: a mainframe in a clearing that fells its own forest, pulps it into reams and prints Sam's papers on to stacks the size of office blocks. Run it and you ride a tree through the whole thing in ten seconds, then a page comes out of the printer and you're on Metamers.</p>
       <p>HomeBlocks gives every simulated tenant of Big Apple Sam a homepage, and lets you click through to their window in the skyline. Here that goes the other way: find the block where it's always night, and fly up the beam of light through the one open window.</p>
+      <p>Ecphory is a game set inside Richard Semon's forgotten theory of memory, where you cross a luminous sea whose islands are the summits of a drowned mountain range. Its range stands here too, in a bowl of its own. Go down to the sea of light and let the world dissolve into it.</p>
       <p>The game keeps anonymous counts of visits and which places get used, so we can see what people enjoy. It doesn't store anything that identifies you.</p>
       <p>The plan is to add more of the articles published in megaZINE to this world, so you might see more here too.</p>
 

@@ -49,6 +49,29 @@ and what is directly below you. **Copy position** copies
 `lat …, lon …, alt …, heading …` and **Copy link** copies a URL that reopens the
 exact same view (world, position, and look direction live in the URL hash).
 
+### Gamepads
+
+Xbox, PlayStation and Nintendo Switch controllers (Pro Controller and Joy-Con) work
+over Bluetooth or USB. Press any button so the browser sees the controller. **Gamepad**
+under View turns this off. A is the bottom button on Xbox and the right one on Nintendo.
+
+| Control | Does |
+| --- | --- |
+| Left stick | Fly |
+| Right stick | Look around |
+| ZR / ZL (RT / LT) | Up / down |
+| R or L (RB / LB) | Boost |
+| A | Whatever button is showing: go in, ride, dial, or fire the catapult |
+| B | Leave, stay here, or cancel |
+| D-pad up / down | Pick a place |
+| X on Nintendo (Y on Xbox) | Go to that place |
+| Y on Nintendo (X on Xbox) | Build mode |
+| Plus | Controls card |
+| Minus | Photo mode |
+
+A single Joy-Con held sideways has one stick, so its shoulder buttons turn, the top
+and left buttons climb and descend, and minus goes to the place picked.
+
 ## Building
 
 Structures are placed by coordinates. Two ways to build:
@@ -153,6 +176,12 @@ Terrain features reshape the planet itself rather than sitting on it:
   an on-screen keyboard with chords, sliding and octave buttons. ThingSynth runs
   as its own page (a built copy in `public/thingsynth`) laid over the painting.
 
+- `drownedrange` — the Drowned Range, the way in to Ecphory: a ring of inked peaks
+  round a sea of points of light like the game's mnemic substrate (`pad`, `band`,
+  `level`, `url`, and `heading` is the way to the great peak). Inside the ring it has
+  its own sky, with the peaks reflected. **✨ Enter the substrate** breaks the view up
+  into points of light, then goes to `url`.
+
 - `nightwindow` — the Night Window, the way in to HomeBlocks: a block of towers
   where it's always night (`pad`, `band`, `raise`, `url`, and `heading` is the way
   the street runs). Click it, or use **🪟 Fly to the window**, to follow the beam
@@ -194,6 +223,9 @@ place it has here, if any.
   all runs by itself. **📄 Run the Paper Machine**, or clicking the mainframe, is a ten
   second ride through it that ends with a page filling the screen, and the page goes
   to `url`. Esc stays. `viewBack` and `viewAlt` set where **Visit place** puts you.
+
+Near the BBS computer and the thingsynth stage, **✋ About Cognitive Hands** says
+where the hands come from and links to that piece.
 
 Press **U** for photo mode, which hides the interface.
 

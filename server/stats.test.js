@@ -8,21 +8,21 @@ import { Stats, statsPage } from './stats.js';
 
 const fresh = () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'stats-'));
-  const s = new Stats({ dir, places: () => new Set(['walking-university']) });
+  const s = new Stats({ dir, places: () => new Set(['chairquest']) });
   s.init();
   return s;
 };
 
 test('counts a visit once and keeps real events', () => {
   const s = fresh();
-  s.record('1.2.3.4', { sid: 'abcdefgh', device: 'phone', from: 'megazine.org', secs: 20, ev: [['enter', 'walking-university', 1], ['click', 'btn-ride', 2]], grid: [[100, 3]] });
-  s.record('1.2.3.4', { sid: 'abcdefgh', secs: 30, ev: [['enter', 'walking-university', 1]] });
+  s.record('1.2.3.4', { sid: 'abcdefgh', device: 'phone', from: 'megazine.org', secs: 20, ev: [['enter', 'chairquest', 1], ['click', 'btn-ride', 2]], grid: [[100, 3]] });
+  s.record('1.2.3.4', { sid: 'abcdefgh', secs: 30, ev: [['enter', 'chairquest', 1]] });
   const t = s.summary();
   assert.equal(t.visits, 1);
   assert.equal(t.visitors, 1);
   assert.equal(t.phone, 1);
   assert.equal(t.secs, 50);
-  assert.equal(t.events.enter['walking-university'], 2);
+  assert.equal(t.events.enter['chairquest'], 2);
   assert.equal(t.events.click['btn-ride'], 2);
   assert.equal(t.from['megazine.org'], 1);
   assert.equal(t.durations[1], 1);

@@ -244,7 +244,7 @@
       "name": "MEGAzine BBS"
     },
     {
-      "id": "thingsynth-stage",
+      "id": "thingsynth",
       "type": "organstage",
       "lat": 38.295,
       "lon": 29.7972,
@@ -253,10 +253,10 @@
       "band": 90,
       "raise": 6,
       "issue": "november",
-      "name": "ThingSynth Stage"
+      "name": "thingsynth"
     },
     {
-      "id": "walking-university",
+      "id": "chairquest",
       "type": "university",
       "lat": 14.8889,
       "lon": 147.834,
@@ -266,7 +266,7 @@
       "raise": 0,
       "url": "https://www.crumplab.com/ChairQuest/",
       "issue": "november",
-      "name": "The Walking University"
+      "name": "ChairQuest"
     },
     {
       "id": "ashland",
@@ -280,7 +280,7 @@
       "name": "Ashland"
     },
     {
-      "id": "orbitakt-launchpad",
+      "id": "orbitakt",
       "type": "orbitakt",
       "lat": 74.3968,
       "lon": -146.5798,
@@ -290,7 +290,7 @@
       "raise": 3,
       "url": "https://samuelling.github.io/Orbitakt/play/",
       "issue": "november",
-      "name": "Orbitakt Launchpad"
+      "name": "Orbitakt"
     },
     {
       "id": "last-skip",
@@ -306,7 +306,7 @@
       "name": "Last Skip"
     },
     {
-      "id": "comic-statue",
+      "id": "comic-booklet",
       "type": "comicstatue",
       "lat": -20.0804,
       "lon": -111.317,
@@ -319,7 +319,7 @@
       "name": "Comic Booklet"
     },
     {
-      "id": "paper-machine",
+      "id": "metamers",
       "type": "papermachine",
       "lat": 0.9583,
       "lon": -116.6623,
@@ -331,10 +331,10 @@
       "viewAlt": 180,
       "url": "https://samuelling.github.io/LargeLingModel/",
       "issue": "november",
-      "name": "The Paper Machine"
+      "name": "Metamers"
     },
     {
-      "id": "night-window",
+      "id": "homeblocks",
       "type": "nightwindow",
       "lat": -25.0642,
       "lon": 16.1625,
@@ -344,7 +344,20 @@
       "raise": 0,
       "url": "https://samuelling.github.io/Big-Apple-Sam/web/",
       "issue": "november",
-      "name": "The Night Window"
+      "name": "HomeBlocks"
+    },
+    {
+      "id": "ecphory",
+      "type": "drownedrange",
+      "lat": -16.0738,
+      "lon": 101.6483,
+      "heading": 15,
+      "pad": 1600,
+      "band": 400,
+      "level": 40,
+      "url": "https://ecphory.megazine.org/",
+      "issue": "november",
+      "name": "Ecphory"
     }
   ]
 }

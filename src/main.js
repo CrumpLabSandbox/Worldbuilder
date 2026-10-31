@@ -11,6 +11,8 @@ import { initChat } from './chat.js';
 import { ORGAN_KEYS, KEY_NOTES } from './organHands.js';
 import { mountOrganKeys } from './organKeys.js';
 import { track, trackOnce, sendStats, startStats } from './stats.js';
+import { Gamepads } from './gamepad.js';
+import { dissolveToLight } from './drownedRange.js';
 import { OrbitTeleport } from './orbitaktTeleport.js';
 
 const $ = (id) => document.getElementById(id);
@@ -92,6 +94,15 @@ const spinners = [];
 const animated = []; // objects with userData.update(dt)
 let controls = null;
 let buildMode = false;
+
+// ------------------------------------------------------------------ gamepads
+const gamepads = new Gamepads({
+  controls: () => controls,
+  places: () => [...$('visit-select').querySelectorAll('option')].filter((o) => o.value).map((o) => ({ id: o.value, name: o.textContent })),
+  go: (id) => { const sel = $('visit-select'); sel.value = id; sel.onchange({ target: sel }); },
+  say: (text, ms) => toast(text, ms),
+  used: () => trackOnce('go', 'gamepad'),
+});
 
 function toast(msg, ms = 2200) {
   const el = $('toast'); el.textContent = msg; el.classList.add('show');
@@ -354,6 +365,10 @@ function flyToStructure(s) {
     const o = structureObjects.get(s.id)?.userData.orbitakt;
     if (o) { const v = o.view(); setPose(v.pos, v.look); return; }
   }
+  if (s.type === 'drownedrange') {
+    const m = structureObjects.get(s.id)?.userData.drownedRange;
+    if (m) { const v = m.view(); setPose(v.pos, v.look); return; }
+  }
   if (s.type === 'nightwindow') {
     const n = structureObjects.get(s.id)?.userData.nightWindow;
     if (n) { const v = n.view(); setPose(v.pos, v.look); return; }
@@ -503,6 +518,8 @@ function updateDialButton() {
   const c = !bbs && !ride && !follow ? nearestComputer() : null;
   $('computer-actions').classList.toggle('hidden', !c);
   $('btn-organ').classList.toggle('hidden', !!bbs || !!ride || !!follow || !nearestStage());
+  updateRange();
+  $('btn-hands').classList.toggle('hidden', !!bbs || !!ride || !!follow || !!uni || !!night || !(nearestComputer() || nearestStage()));
   $('btn-night').classList.toggle('hidden', !!night || !!uni || !!bbs || !!ride || !!follow || !nearestNight());
   $('btn-university').classList.toggle('hidden', !!uni || !!bbs || !!ride || !!follow || !nearestUniversity());
   $('btn-ashland').classList.toggle('hidden', !!ash || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestAshland());
@@ -518,7 +535,7 @@ function nearestStage(maxDist = 800) {
 // Sit at the organ: the seat sees the whole painting above both keyboards.
 function sitAtOrgan(st) {
   if (bbs || !st) return;
-  track('enter', 'thingsynth-stage');
+  track('enter', 'thingsynth');
   loadThingSynth();
   const touch = document.body.classList.contains('touch');
   const v = st.seatView(camera.aspect);
@@ -560,7 +577,7 @@ function placeOrganFrame() {
   Object.assign($('organ-frame').style, { left: `${x}px`, top: `${y}px`, width: `${Math.max(...xs) - x}px`, height: `${Math.max(...ys) - y}px` });
 }
 function organKeyDown(key) {
-  trackOnce('play', 'thingsynth-stage');
+  trackOnce('play', 'thingsynth');
   bbs.c.hands.hold(key);
   if (!thingSynth) return;
   const note = 60 + organOctave + KEY_NOTES[key];
@@ -618,7 +635,7 @@ function enterUniversity(u) {
   controls.cancelFlight();
   controls.enabled = false;
   camera.getWorldDirection(_tmp);
-  track('enter', 'walking-university');
+  track('enter', 'chairquest');
   uni = { u, phase: 'rising', t: 0, from: camera.position.clone(), lookFrom: camera.position.clone().addScaledVector(_tmp, 400) };
   document.body.classList.add('uni-on');
   u.start();
@@ -651,7 +668,7 @@ async function uniIntoOffice() {
   u.setOffice(true);
   uni.phase = 'office';
   uni.since = performance.now();
-  track('arrive', 'walking-university');
+  track('arrive', 'chairquest');
   document.body.classList.add('uni-office');
   placeUniView();
   uniFade(false);
@@ -690,7 +707,7 @@ function placeUniView() {
 async function leaveUniversity() {
   if (uni?.phase !== 'office') return;
   const { u } = uni;
-  track('dwell', 'walking-university', Math.round((performance.now() - uni.since) / 1000));
+  track('dwell', 'chairquest', Math.round((performance.now() - uni.since) / 1000));
   uni.phase = 'fading';
   uniFade(true);
   await uniWait(420);
@@ -708,6 +725,56 @@ async function leaveUniversity() {
   updateDialButton();
   uniFade(false);
 }
+
+// ------------------------------------------------------------------ the Drowned Range
+// The way in to Ecphory. Inside the ring of peaks the range has its own sky and sea,
+// so the planet steps aside. Going in breaks the view itself up into points of light.
+let mneme = null, rangeInside = null; // the range being entered; the range we're inside
+const RANGE_REACH = 3100;
+function ranges() { return [...structureObjects.values()].map((g) => g.userData.drownedRange).filter(Boolean); }
+function nearestRange(maxDist = RANGE_REACH) {
+  return ranges().find((m) => m.center.distanceTo(controls.position) < maxDist) || null;
+}
+function updateRange() {
+  const m = uni || night || bbs ? null : nearestRange();
+  $('btn-mneme').classList.toggle('hidden', !m || !!mneme || !!ride || !!follow || m.center.distanceTo(controls.position) > 2300);
+  if (m === rangeInside) return;
+  rangeInside?.setInside(false);
+  m?.setInside(true);
+  rangeInside = m;
+  if (planetGroup) planetGroup.visible = !m;
+}
+function mnemeGate(m) {
+  if (mneme || uni || night || bbs || ash || tele || skip || paper || !m) return;
+  track('enter', 'ecphory');
+  $('mn-gate').classList.remove('hidden');
+  controls.enabled = false;
+  $('mn-go').onclick = () => { mnemeGateClose(); dissolveRange(m); };
+  $('mn-go').focus();
+}
+function mnemeGateClose() {
+  $('mn-gate').classList.add('hidden');
+  controls.enabled = true;
+}
+function dissolveRange(m) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('ecphory', m.url); return; }
+  if (ride) endRide();
+  if (follow) endFollow();
+  controls.cancelFlight();
+  controls.enabled = false;
+  mneme = m;
+  document.body.classList.add('uni-on');
+  renderer.render(scene, camera); // so the canvas still holds this frame to break up
+  dissolveToLight(renderer.domElement, () => leaveFor('ecphory', m.url));
+}
+// back from Ecphory by the browser's back button: the page may come back as it was
+window.addEventListener('pageshow', (e) => {
+  if (!e.persisted || !mneme) return;
+  $('mn-dissolve')?.remove();
+  document.body.classList.remove('uni-on');
+  mneme = null;
+  controls.enabled = true;
+});
 
 // ------------------------------------------------------------------ the Night Window
 // The way in to HomeBlocks. The world gives way to night, the visitor flies up the
@@ -727,7 +794,7 @@ function enterNight(n) {
   camera.getWorldDirection(_tmp);
   night = { n, phase: 'turning', t: 0, from: camera.position.clone(), lookFrom: camera.position.clone().addScaledVector(_tmp, 400) };
   document.body.classList.add('uni-on');
-  track('enter', 'night-window');
+  track('enter', 'homeblocks');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) nightIn();
 }
 async function nightStreet() {
@@ -748,7 +815,7 @@ async function nightIn() {
   night.phase = 'in';
   night.since = performance.now();
   document.body.classList.add('night-in');
-  track('arrive', 'night-window');
+  track('arrive', 'homeblocks');
   if (!$('night-slot').firstChild) {
     // loaded on arrival, since HomeBlocks won't start while hidden; it has its own dial-up screen
     const frame = document.createElement('iframe');
@@ -782,7 +849,7 @@ function stepNight(dt) {
 async function leaveNight() {
   if (night?.phase !== 'in') return;
   const { n } = night;
-  track('dwell', 'night-window', Math.round((performance.now() - night.since) / 1000));
+  track('dwell', 'homeblocks', Math.round((performance.now() - night.since) / 1000));
   night.phase = 'fading';
   uniFade(true);
   await uniWait(420);
@@ -859,7 +926,7 @@ function nearestOrbitakt(maxDist = 1600) {
 }
 function orbitGate(o) {
   if (tele || uni || bbs || !o) return;
-  track('enter', 'orbitakt-launchpad');
+  track('enter', 'orbitakt');
   $('orbit-gate').classList.remove('hidden');
   controls.enabled = false;
   $('orbit-go').onclick = () => { orbitGateClose(); launchOrbitakt(o); };
@@ -871,7 +938,7 @@ function orbitGateClose() {
 }
 function launchOrbitakt(o) {
   // no flight for those who'd rather not: straight there
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('orbitakt-launchpad', o.url); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('orbitakt', o.url); return; }
   if (ride) endRide();
   if (follow) endFollow();
   controls.cancelFlight();
@@ -884,7 +951,7 @@ function stepTeleport(dt) {
   const done = tele.step(dt);
   $('orbit-fade').style.opacity = tele.flash;
   controls.position.copy(camera.position);
-  if (done) { teleLeft = true; leaveFor('orbitakt-launchpad', tele.o.url); }
+  if (done) { teleLeft = true; leaveFor('orbitakt', tele.o.url); }
 }
 function stopTeleport() {
   if (!tele) return;
@@ -905,7 +972,7 @@ function stopTeleport() {
 function nearestComic(maxDist = 1200) {
   return [...structureObjects.values()].map((g) => g.userData.comicStatue).find((c) => c && c.center.distanceTo(controls.position) < maxDist) || null;
 }
-function openComic(c) { if (c) { track('out', 'comic-statue'); window.open(c.url, '_blank', 'noopener'); } }
+function openComic(c) { if (c) { track('out', 'comic-booklet'); window.open(c.url, '_blank', 'noopener'); } }
 
 // ------------------------------------------------------------------ Last Skip
 // A stone skips out across the sea with the camera after it, the view fades, and
@@ -959,9 +1026,9 @@ function nearestPaperMachine(maxDist = 1300) {
 }
 function runPaperMachine(pm) {
   if (paper || ash || skip || tele || uni || bbs || !pm) return;
-  track('enter', 'paper-machine');
+  track('enter', 'metamers');
   // no flight for those who'd rather not: straight there
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('paper-machine', pm.url); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('metamers', pm.url); return; }
   if (ride) endRide();
   if (follow) endFollow();
   controls.cancelFlight();
@@ -976,7 +1043,7 @@ function stepPaperMachine(dt) {
   const done = paper.pm.step(dt, camera);
   $('orbit-fade').style.opacity = paper.pm.flash;
   controls.position.copy(camera.position);
-  if (done) { paper.left = true; leaveFor('paper-machine', paper.pm.url); }
+  if (done) { paper.left = true; leaveFor('metamers', paper.pm.url); }
 }
 function stopPaperMachine() {
   if (!paper) return;
@@ -1338,6 +1405,11 @@ function wireUI() {
   window.addEventListener('pageshow', (e) => { if (e.persisted) stopPaperMachine(); });
   $('uni-leave').onclick = leaveUniversity;
   $('btn-night').onclick = () => enterNight(nearestNight());
+  $('btn-mneme').onclick = () => mnemeGate(nearestRange());
+  for (const el of document.querySelectorAll('.hands-info')) el.onclick = () => { $('hands-gate').classList.remove('hidden'); $('hands-close').focus(); };
+  $('hands-close').onclick = () => { $('hands-gate').classList.add('hidden'); document.activeElement?.blur(); };
+  $('hands-gate').addEventListener('pointerdown', (e) => { if (e.target === $('hands-gate')) $('hands-close').click(); });
+  $('mn-stay').onclick = mnemeGateClose;
   $('night-leave').onclick = leaveNight;
   $('uni-window').onclick = () => {
     const on = document.body.classList.toggle('uni-gazing');
@@ -1392,6 +1464,8 @@ function wireUI() {
   };
   $('btn-toggle-list').onclick = () => { const l = $('structure-list'); l.classList.toggle('hidden'); $('btn-toggle-list').textContent = l.classList.contains('hidden') ? 'show' : 'hide'; };
   $('opt-grid').onchange = (e) => { if (gridGroup) gridGroup.visible = e.target.checked; };
+  $('opt-gamepad').checked = gamepads.enabled;
+  $('opt-gamepad').onchange = (e) => gamepads.setEnabled(e.target.checked);
   $('opt-clouds').onchange = (e) => { if (cloudMesh) cloudMesh.visible = e.target.checked; };
   $('opt-wire').onchange = (e) => { if (terrain) terrain.material.wireframe = e.target.checked; };
   $('opt-labels').onchange = () => { /* handled per-frame */ };
@@ -1405,6 +1479,8 @@ function wireUI() {
     if (ash) { if (e.code === 'Escape') stopAshland(); return; }
     if (tele) { if (e.code === 'Escape') stopTeleport(); return; }
     if (paper) { if (e.code === 'Escape') stopPaperMachine(); return; }
+    if (!$('hands-gate').classList.contains('hidden')) { if (e.code === 'Escape') $('hands-close').click(); return; }
+    if (!$('mn-gate').classList.contains('hidden')) { if (e.code === 'Escape') mnemeGateClose(); return; }
     if (uni) { if (e.code === 'Escape') leaveUniversity(); return; }
     if (night) { if (e.code === 'Escape') leaveNight(); return; }
     if (bbs?.phase === 'organ') {
@@ -1703,6 +1779,7 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
+  gamepads.update(dt);
   if (night) {
     stepNight(dt);
   } else if (ash) {
@@ -1791,5 +1868,5 @@ function animate() {
   });
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { get night() { return night; }, enterNight, leaveNight, store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, get tele() { return tele; }, get ash() { return ash; }, ashlandGate, walkIntoAshland, stopAshland, get skip() { return skip; }, tryLastSkip, endSkip, get paper() { return paper; }, runPaperMachine, stopPaperMachine, orbitGate, launchOrbitakt, stopTeleport, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
+  window.worldbuilder = { gamepads, get mneme() { return mneme; }, mnemeGate, get night() { return night; }, enterNight, leaveNight, store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, get tele() { return tele; }, get ash() { return ash; }, ashlandGate, walkIntoAshland, stopAshland, get skip() { return skip; }, tryLastSkip, endSkip, get paper() { return paper; }, runPaperMachine, stopPaperMachine, orbitGate, launchOrbitakt, stopTeleport, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
 })();
