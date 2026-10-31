@@ -11,6 +11,7 @@ import { buildGraffitiGarden } from './graffiti.js';
 import { buildMushroomTree } from './mushroomTree.js';
 import { buildComputer } from './computer.js';
 import { buildOrganStage } from './organStage.js';
+import { buildUniversity } from './university.js';
 import { buildBlueprint } from './blueprint.js';
 
 const geoCache = new Map();
@@ -350,6 +351,10 @@ export const STRUCTURES = {
   organstage: {
     label: 'Organ stage', feature: true, menu: false,
     place: (rec, planet) => buildOrganStage(rec, planet, planet.featureById(rec.id)),
+  },
+  university: {
+    label: 'Walking university', feature: true, menu: false,
+    place: (rec, planet) => buildUniversity(rec, planet, planet.featureById(rec.id)),
   },
   computer: {
     label: 'BBS computer', feature: true, menu: false,

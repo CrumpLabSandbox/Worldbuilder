@@ -240,6 +240,7 @@
       "band": 90,
       "raise": 62,
       "url": "https://samuelling.github.io/BBS/",
+      "issue": "november",
       "name": "MEGAzine BBS"
     },
     {
@@ -251,7 +252,21 @@
       "pad": 245,
       "band": 90,
       "raise": 6,
+      "issue": "november",
       "name": "ThingSynth Stage"
+    },
+    {
+      "id": "walking-university",
+      "type": "university",
+      "lat": 14.8889,
+      "lon": 147.834,
+      "heading": 352,
+      "pad": 1020,
+      "band": 320,
+      "raise": 0,
+      "url": "https://www.crumplab.com/ChairQuest/",
+      "issue": "november",
+      "name": "The Walking University"
     }
   ]
 }

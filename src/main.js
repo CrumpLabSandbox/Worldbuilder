@@ -288,7 +288,7 @@ function renderVisitMenu() {
   sel.replaceChildren(new Option('Visit place…', ''));
   const name = (s) => s.name || STRUCTURES[s.type]?.label || s.type;
   const list = store.current.structures.filter((s) => s.lat != null).sort((a, b) => name(a).localeCompare(name(b)));
-  const groups = [['Places', list.filter((s) => s.createdBy !== 'claude')], ['Built by visitors', list.filter((s) => s.createdBy === 'claude')]];
+  const groups = [['megaZINE November', list.filter((s) => s.issue === 'november')], ['Places', list.filter((s) => s.createdBy !== 'claude' && s.issue !== 'november')], ['Built by visitors', list.filter((s) => s.createdBy === 'claude')]];
   for (const [label, items] of groups) {
     if (!items.length) continue;
     const g = document.createElement('optgroup');
@@ -339,6 +339,10 @@ function flyToStructure(s) {
   if (s.type === 'organstage') {
     const st = structureObjects.get(s.id)?.userData.organStage;
     if (st) { const v = st.view(0, 230, 520, 0, 200, 0); setPose(v.pos, v.look); return; }
+  }
+  if (s.type === 'university') {
+    const u = structureObjects.get(s.id)?.userData.university;
+    if (u) { const v = u.view(); setPose(v.pos, v.look); return; }
   }
   if (s.type === 'catapult') {
     const h = (s.heading ?? 0) * DEG, back = 70 / (R * DEG);
@@ -467,6 +471,7 @@ function updateDialButton() {
   const c = !bbs && !ride && !follow ? nearestComputer() : null;
   $('computer-actions').classList.toggle('hidden', !c);
   $('btn-organ').classList.toggle('hidden', !!bbs || !!ride || !!follow || !nearestStage());
+  $('btn-university').classList.toggle('hidden', !!uni || !!bbs || !!ride || !!follow || !nearestUniversity());
 }
 function organStages() { return [...structureObjects.values()].map((g) => g.userData.organStage).filter(Boolean); }
 function nearestStage(maxDist = 800) {
@@ -540,7 +545,7 @@ function showScene(st, on) {
   // the scene has its own ground and sky, and is the only thing in view
   if (planetGroup) planetGroup.visible = !on;
   if (gridGroup) gridGroup.visible = !on && $('opt-grid').checked;
-  for (const g of structureObjects.values()) if (!g.userData.organStage) g.visible = !on;
+  for (const g of structureObjects.values()) if (g !== st.site) g.visible = !on;
 }
 function leaveOrgan() {
   if (!bbs || bbs.phase !== 'organ') return;
@@ -553,6 +558,112 @@ function leaveOrgan() {
   controls.enabled = true;
   updateDialButton();
 }
+// ------------------------------------------------------------------ the Walking University
+// Going in: the campus gets up and starts to walk, the world gives way to the salt
+// flats, and the visitor flies round it and in through the lit tower window to the
+// Chair's desk. The office is really up there, so its window shows the campus below.
+let uni = null; // { u, phase: 'rising' | 'flying' | 'office', t, curve }
+const RISE = 3, FLY = 9;
+function universities() { return [...structureObjects.values()].map((g) => g.userData.university).filter(Boolean); }
+function nearestUniversity(maxDist = 3200) {
+  return universities().find((u) => u.center.distanceTo(controls.position) < maxDist) || null;
+}
+const uniFade = (on) => $('uni-fade').classList.toggle('on', on);
+const uniWait = (ms) => new Promise((r) => setTimeout(r, ms));
+function enterUniversity(u) {
+  if (uni || bbs || !u) return;
+  if (ride) endRide();
+  if (follow) endFollow();
+  controls.cancelFlight();
+  controls.enabled = false;
+  camera.getWorldDirection(_tmp);
+  uni = { u, phase: 'rising', t: 0, from: camera.position.clone(), lookFrom: camera.position.clone().addScaledVector(_tmp, 400) };
+  document.body.classList.add('uni-on');
+  u.start();
+  toast('The University is getting up…', 2800);
+  if (!$('uni-game').firstChild) {
+    // load the game early, so it's ready on the desk when the visitor lands
+    const frame = document.createElement('iframe');
+    frame.src = u.url;
+    frame.title = 'ChairQuest';
+    frame.allow = 'fullscreen';
+    $('uni-game').append(frame);
+  }
+}
+async function uniIntoScene() {
+  const { u } = uni;
+  uni.phase = 'fading';
+  uniFade(true);
+  await uniWait(420);
+  showScene(u, true);
+  uni.curve = u.path(camera.position);
+  uni.phase = 'flying';
+  uni.t = 0;
+  uniFade(false);
+}
+async function uniIntoOffice() {
+  const { u } = uni;
+  uni.phase = 'fading';
+  uniFade(true);
+  await uniWait(420);
+  u.setOffice(true);
+  uni.phase = 'office';
+  document.body.classList.add('uni-office');
+  placeUniView();
+  uniFade(false);
+}
+function stepUniversity(dt) {
+  const { u } = uni;
+  uni.t += dt;
+  camera.up.copy(u.up);
+  if (uni.phase === 'rising') {
+    const k = Math.min(1, uni.t / RISE), e = k * k * (3 - 2 * k);
+    camera.position.copy(uni.from);
+    camera.lookAt(_tmp.copy(uni.lookFrom).lerp(u.towerTop(), e));
+    if (uni.t >= RISE) uniIntoScene();
+  } else if (uni.phase === 'flying') {
+    const k = Math.min(1, uni.t / FLY), e = k * k * (3 - 2 * k);
+    camera.position.copy(u.localToWorld(uni.curve.getPoint(e)));
+    // look at the tower, then down the last stretch at the window itself
+    const ahead = u.localToWorld(uni.curve.getPoint(Math.min(1, e + 0.1)));
+    camera.lookAt(_tmp.copy(u.towerTop()).lerp(ahead, THREE.MathUtils.smoothstep(e, 0.55, 0.85)));
+    if (uni.t >= FLY) uniIntoOffice();
+  } else if (uni.phase === 'office') {
+    const s = u.seat();
+    camera.position.copy(s.pos);
+    camera.lookAt(s.look);
+  }
+  controls.position.copy(camera.position);
+}
+// Centre the view on whatever part of the screen the game leaves showing.
+function placeUniView() {
+  if (uni?.phase !== 'office') return;
+  const W = window.innerWidth, H = window.innerHeight, r = $('uni-game').getBoundingClientRect();
+  const gazing = document.body.classList.contains('uni-gazing'), wide = W > H;
+  const x = gazing || !wide ? 0 : -r.right / 2, y = gazing || wide ? 0 : (H - r.top) / 2;
+  camera.setViewOffset(W, H, x, y, W, H);
+}
+async function leaveUniversity() {
+  if (uni?.phase !== 'office') return;
+  const { u } = uni;
+  uni.phase = 'fading';
+  uniFade(true);
+  await uniWait(420);
+  document.body.classList.remove('uni-on', 'uni-office', 'uni-gazing');
+  $('uni-window').textContent = '🪟 Look out the window';
+  camera.clearViewOffset();
+  u.setOffice(false);
+  u.stop();
+  showScene(u, false);
+  const v = u.view();
+  camera.up.set(0, 1, 0);
+  setPose(v.pos, v.look);
+  controls.enabled = true;
+  uni = null;
+  updateDialButton();
+  uniFade(false);
+}
+
 // glide the camera to a pose at the computer, then call `then`
 function glideTo(c, to, look, then) {
   if (ride) endRide();
@@ -877,6 +988,14 @@ function wireUI() {
   $('btn-dial').onclick = () => dialIn(nearestComputer());
   $('btn-type').onclick = () => sitToType(nearestComputer());
   $('btn-organ').onclick = () => sitAtOrgan(nearestStage());
+  $('btn-university').onclick = () => enterUniversity(nearestUniversity());
+  $('uni-leave').onclick = leaveUniversity;
+  $('uni-window').onclick = () => {
+    const on = document.body.classList.toggle('uni-gazing');
+    $('uni-window').textContent = on ? '📄 Back to the memo' : '🪟 Look out the window';
+    placeUniView();
+  };
+  window.addEventListener('resize', placeUniView);
   $('organ-stand').onclick = leaveOrgan;
   window.addEventListener('keyup', (e) => { if (bbs?.phase === 'organ' && ORGAN_KEYS[e.code]) organKeyUp(ORGAN_KEYS[e.code]); });
   window.addEventListener('resize', placeOrganFrame);
@@ -929,6 +1048,7 @@ function wireUI() {
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) return;
     if (!$('about').classList.contains('hidden') || document.body.classList.contains('intro-open')) return;
+    if (uni) { if (e.code === 'Escape') leaveUniversity(); return; }
     if (bbs?.phase === 'organ') {
       if (e.code === 'Escape') { leaveOrgan(); return; }
       const key = ORGAN_KEYS[e.code];
@@ -972,8 +1092,12 @@ function wireUI() {
       if (hit) { controls.flyTo(hit.lat, hit.lon); toast(`Flying to ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800); }
       return;
     }
-    if (!buildMode && !bbs) {
+    if (!buildMode && !bbs && !uni) {
       raycaster.setFromCamera(ndc, camera);
+      const campus = nearestUniversity();
+      const hitCampus = campus && raycaster.intersectObject(campus.hit, false)[0];
+      const land = hitCampus && pickGround(ndc.x, ndc.y);
+      if (hitCampus && (!land || hitCampus.distance < land.distance + 5)) { enterUniversity(campus); return; }
       const screens = computers().map((c) => c.screenMesh);
       const hitScreen = screens.length && raycaster.intersectObjects(screens, false)[0];
       const ground = hitScreen && pickGround(ndc.x, ndc.y);
@@ -1191,7 +1315,9 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
-  if (bbs) {
+  if (uni) {
+    stepUniversity(dt);
+  } else if (bbs) {
     if (bbs.phase === 'flying') stepDial(dt);
   } else if (follow) {
     updateFollow(dt);
@@ -1219,7 +1345,7 @@ function animate() {
   for (const g of structureObjects.values()) {
     const lo = g.userData.label;
     if (!lo) continue;
-    let vis = showLabels;
+    let vis = showLabels && !uni;
     if (vis) {
       _tmp.copy(g.position).sub(camera.position);
       const dist = _tmp.length();
@@ -1258,5 +1384,5 @@ function animate() {
   gardenCtx.viewer = () => controls.position;
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
+  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
 })();

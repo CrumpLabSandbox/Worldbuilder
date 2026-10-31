@@ -188,6 +188,7 @@ export function buildOrganStage(rec, planet, f) {
   site.userData.labelRange = 9000;
   const toWorld = (v) => v.clone().applyMatrix4(g.matrixWorld);
   site.userData.organStage = {
+    site,
     painting,
     hands,
     center: site.position.clone(),

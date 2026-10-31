@@ -153,6 +153,18 @@ Terrain features reshape the planet itself rather than sitting on it:
   an on-screen keyboard with chords, sliding and octave buttons. ThingSynth runs
   as its own page (a built copy in `public/thingsynth`) laid over the painting.
 
+- `university` — the Walking University: a campus on six jointed legs (`pad`,
+  `band`, `raise`, `url`, and `heading` is the way it walks). Click it, or use
+  **🎓 Enter the University**, and it gets up and walks; the world gives way to
+  salt flats and you fly in through a lit tower window to the Chair's office,
+  where the game at `url` (ChairQuest) lies on the desk. The office is really on
+  the moving tower, so its window shows the campus. The game stays loaded for
+  the visit, so you can leave and come back to it.
+
+Records with `"issue": "november"` are listed first in **Visit place**.
+`public/issues/november.json` lists every piece in the November issue and the
+place it has here, if any.
+
 Press **U** for photo mode, which hides the interface.
 
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
