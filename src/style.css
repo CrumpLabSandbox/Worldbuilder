@@ -291,6 +291,19 @@ body.ash-on .panel:not(#ash-stop), body.ash-on #touch-ui, body.ash-on #crosshair
 body.orbit-on #orbit-stop { display: block; }
 body.orbit-on .panel:not(#orbit-stop), body.orbit-on #touch-ui, body.orbit-on #crosshair, body.orbit-on .label { display: none !important; }
 
+/* ---- the Night Window ---- */
+#btn-night { left: 50%; transform: translateX(-50%); bottom: 112px; padding: 10px 18px; white-space: nowrap; font-size: 15px; font-weight: 600; z-index: 12; border-color: rgba(255,215,106,.8); }
+#btn-night:hover { background: rgba(255,215,106,.25); }
+body.help-open:not(.touch) #btn-night { bottom: 218px; }
+body.touch #btn-night { bottom: calc(272px + var(--safe-b)); }
+#night-win { visibility: hidden; position: fixed; z-index: 40; left: max(12px, 8vw); right: max(12px, 8vw); top: calc(24px + var(--safe-t)); bottom: calc(24px + var(--safe-b)); display: flex; flex-direction: column; background: #c0c0c0; border: 2px outset #fff; box-shadow: 0 10px 50px rgba(255,215,106,.35); font: 13px Arial, Helvetica, sans-serif; }
+body.night-in #night-win { visibility: visible; }
+#night-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 3px; padding: 3px 3px 3px 8px; background: #000080; color: #fff; font-weight: 700; }
+#night-bar button { background: #c0c0c0; color: #000; border: 2px outset #fff; border-radius: 0; padding: 2px 8px; font: 12px Arial, Helvetica, sans-serif; cursor: pointer; }
+#night-slot { flex: 1; min-height: 0; margin: 0 3px 3px; background: #fff; }
+#night-slot iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+@media (max-width: 720px) { #night-win { left: 0; right: 0; top: var(--safe-t); bottom: 0; } }
+
 /* ---- the Walking University ---- */
 #btn-university { left: 50%; transform: translateX(-50%); bottom: 112px; padding: 10px 18px; white-space: nowrap; font-size: 15px; font-weight: 600; z-index: 12; border-color: rgba(232,178,74,.8); }
 #btn-university:hover { background: rgba(232,178,74,.25); }

@@ -240,7 +240,7 @@ export class ClearingFeature {
   clearance(dir) { return Math.max(0, Math.acos(clamp(dir.dot(this.center), -1, 1)) * R - this.radius); }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree', 'computer', 'organstage', 'university', 'orbitakt', 'lastskip', 'papermachine', 'ashland', 'comicstatue']);
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree', 'computer', 'organstage', 'university', 'nightwindow', 'orbitakt', 'lastskip', 'papermachine', 'ashland', 'comicstatue']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -254,7 +254,7 @@ export function createFeatures(records, planet) {
     planet.setFeatures([...volcs, ...roads]);
   }
   // levelled sites: the catapult's hill, the graffiti plaza, the BBS computer's pad, the organ stage
-  const sites = records.filter((r) => ['catapult', 'graffiti', 'computer', 'organstage', 'university', 'orbitakt', 'lastskip', 'papermachine', 'comicstatue'].includes(r.type)).map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
+  const sites = records.filter((r) => ['catapult', 'graffiti', 'computer', 'organstage', 'university', 'nightwindow', 'orbitakt', 'lastskip', 'papermachine', 'comicstatue'].includes(r.type)).map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
   // the organ stage's long avenue: more of the same level ground out to the painting
   for (const st of sites.filter((f) => f.rec.type === 'organstage')) {
     const r = st.rec, h = (r.heading ?? 0) * Math.PI / 180, mPerDeg = (R * Math.PI) / 180;

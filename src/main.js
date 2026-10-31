@@ -354,6 +354,10 @@ function flyToStructure(s) {
     const o = structureObjects.get(s.id)?.userData.orbitakt;
     if (o) { const v = o.view(); setPose(v.pos, v.look); return; }
   }
+  if (s.type === 'nightwindow') {
+    const n = structureObjects.get(s.id)?.userData.nightWindow;
+    if (n) { const v = n.view(); setPose(v.pos, v.look); return; }
+  }
   if (s.type === 'university') {
     const u = structureObjects.get(s.id)?.userData.university;
     if (u) { const v = u.view(); setPose(v.pos, v.look); return; }
@@ -499,6 +503,7 @@ function updateDialButton() {
   const c = !bbs && !ride && !follow ? nearestComputer() : null;
   $('computer-actions').classList.toggle('hidden', !c);
   $('btn-organ').classList.toggle('hidden', !!bbs || !!ride || !!follow || !nearestStage());
+  $('btn-night').classList.toggle('hidden', !!night || !!uni || !!bbs || !!ride || !!follow || !nearestNight());
   $('btn-university').classList.toggle('hidden', !!uni || !!bbs || !!ride || !!follow || !nearestUniversity());
   $('btn-ashland').classList.toggle('hidden', !!ash || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestAshland());
   $('btn-orbitakt').classList.toggle('hidden', !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestOrbitakt());
@@ -700,6 +705,94 @@ async function leaveUniversity() {
   setPose(v.pos, v.look);
   controls.enabled = true;
   uni = null;
+  updateDialButton();
+  uniFade(false);
+}
+
+// ------------------------------------------------------------------ the Night Window
+// The way in to HomeBlocks. The world gives way to night, the visitor flies up the
+// beam and in through the open window, and HomeBlocks opens in a frame there.
+let night = null; // { n, phase: 'turning' | 'fading' | 'flying' | 'in', t }
+const NIGHT_TURN = 1.4, NIGHT_FLY = 6;
+function nightWindows() { return [...structureObjects.values()].map((g) => g.userData.nightWindow).filter(Boolean); }
+function nearestNight(maxDist = 2200) {
+  return nightWindows().find((n) => n.center.distanceTo(controls.position) < maxDist) || null;
+}
+function enterNight(n) {
+  if (night || uni || bbs || ash || tele || skip || paper || !n) return;
+  if (ride) endRide();
+  if (follow) endFollow();
+  controls.cancelFlight();
+  controls.enabled = false;
+  camera.getWorldDirection(_tmp);
+  night = { n, phase: 'turning', t: 0, from: camera.position.clone(), lookFrom: camera.position.clone().addScaledVector(_tmp, 400) };
+  document.body.classList.add('uni-on');
+  track('enter', 'night-window');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) nightIn();
+}
+async function nightStreet() {
+  night.phase = 'fading';
+  uniFade(true);
+  await uniWait(420);
+  showScene(night.n, true);
+  night.phase = 'flying';
+  night.t = 0;
+  uniFade(false);
+}
+async function nightIn() {
+  const { n } = night;
+  night.phase = 'fading';
+  uniFade(true);
+  await uniWait(420);
+  showScene(n, true);
+  night.phase = 'in';
+  night.since = performance.now();
+  document.body.classList.add('night-in');
+  track('arrive', 'night-window');
+  if (!$('night-slot').firstChild) {
+    // loaded on arrival, since HomeBlocks won't start while hidden; it has its own dial-up screen
+    const frame = document.createElement('iframe');
+    frame.src = n.url;
+    frame.title = 'HomeBlocks';
+    $('night-slot').append(frame);
+  }
+  uniFade(false);
+}
+function stepNight(dt) {
+  const { n } = night;
+  night.t += dt;
+  camera.up.copy(n.up);
+  if (night.phase === 'turning') {
+    const k = Math.min(1, night.t / NIGHT_TURN), e = k * k * (3 - 2 * k);
+    camera.position.copy(night.from);
+    camera.lookAt(_tmp.copy(night.lookFrom).lerp(n.pane(), e));
+    if (night.t >= NIGHT_TURN) nightStreet();
+  } else if (night.phase === 'flying') {
+    const k = Math.min(1, night.t / NIGHT_FLY), v = n.flight(k * k * (3 - 2 * k));
+    camera.position.copy(v.pos);
+    camera.lookAt(v.look);
+    if (night.t >= NIGHT_FLY) nightIn();
+  } else if (night.phase === 'in') {
+    const v = n.inside();
+    camera.position.copy(v.pos);
+    camera.lookAt(v.look);
+  }
+  controls.position.copy(camera.position);
+}
+async function leaveNight() {
+  if (night?.phase !== 'in') return;
+  const { n } = night;
+  track('dwell', 'night-window', Math.round((performance.now() - night.since) / 1000));
+  night.phase = 'fading';
+  uniFade(true);
+  await uniWait(420);
+  document.body.classList.remove('uni-on', 'night-in');
+  showScene(n, false);
+  const v = n.view();
+  camera.up.set(0, 1, 0);
+  setPose(v.pos, v.look);
+  controls.enabled = true;
+  night = null;
   updateDialButton();
   uniFade(false);
 }
@@ -1244,6 +1337,8 @@ function wireUI() {
   $('btn-paper').onclick = () => runPaperMachine(nearestPaperMachine());
   window.addEventListener('pageshow', (e) => { if (e.persisted) stopPaperMachine(); });
   $('uni-leave').onclick = leaveUniversity;
+  $('btn-night').onclick = () => enterNight(nearestNight());
+  $('night-leave').onclick = leaveNight;
   $('uni-window').onclick = () => {
     const on = document.body.classList.toggle('uni-gazing');
     $('uni-window').textContent = on ? '📄 Back to the memo' : '🪟 Look out the window';
@@ -1311,6 +1406,7 @@ function wireUI() {
     if (tele) { if (e.code === 'Escape') stopTeleport(); return; }
     if (paper) { if (e.code === 'Escape') stopPaperMachine(); return; }
     if (uni) { if (e.code === 'Escape') leaveUniversity(); return; }
+    if (night) { if (e.code === 'Escape') leaveNight(); return; }
     if (bbs?.phase === 'organ') {
       if (e.code === 'Escape') { leaveOrgan(); return; }
       const key = ORGAN_KEYS[e.code];
@@ -1353,6 +1449,13 @@ function wireUI() {
       const hit = pickGround(ndc.x, ndc.y);
       if (hit) { track('go', 'double-click'); controls.flyTo(hit.lat, hit.lon); toast(`Flying to ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800); }
       return;
+    }
+    if (!buildMode && !bbs && !uni && !night && !tele && !skip && !ash && !paper) {
+      raycaster.setFromCamera(ndc, camera);
+      const block = nearestNight();
+      const hitBlock = block && raycaster.intersectObject(block.hit, false)[0];
+      const street = hitBlock && pickGround(ndc.x, ndc.y);
+      if (hitBlock && (!street || hitBlock.distance < street.distance + 5)) { enterNight(block); return; }
     }
     if (!buildMode && !bbs && !uni && !tele && !skip && !ash) {
       const park = nearestAshland();
@@ -1600,7 +1703,9 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
-  if (ash) {
+  if (night) {
+    stepNight(dt);
+  } else if (ash) {
     stepAshland(dt);
   } else if (paper) {
     if (!paper.left) stepPaperMachine(dt);
@@ -1638,7 +1743,7 @@ function animate() {
   for (const g of structureObjects.values()) {
     const lo = g.userData.label;
     if (!lo) continue;
-    let vis = showLabels && !paper && !uni && !tele && !skip;
+    let vis = showLabels && !paper && !uni && !night && !tele && !skip;
     if (vis) {
       _tmp.copy(g.position).sub(camera.position);
       const dist = _tmp.length();
@@ -1677,10 +1782,10 @@ function animate() {
   gardenCtx.viewer = () => controls.position;
   startStats({
     dirOf: (p) => latLonToDir(p.lat, p.lon),
-    where: () => (uni ? null : { ...dirToLatLon(controls.position.clone().normalize()), alt: controls.altitude }),
+    where: () => (uni || night ? null : { ...dirToLatLon(controls.position.clone().normalize()), alt: controls.altitude }),
     places: () => (store.current.id === 'home' ? store.current.structures.filter((s) => s.lat != null && s.createdBy !== 'claude') : []),
   });
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, get tele() { return tele; }, get ash() { return ash; }, ashlandGate, walkIntoAshland, stopAshland, get skip() { return skip; }, tryLastSkip, endSkip, get paper() { return paper; }, runPaperMachine, stopPaperMachine, orbitGate, launchOrbitakt, stopTeleport, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
+  window.worldbuilder = { get night() { return night; }, enterNight, leaveNight, store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, get tele() { return tele; }, get ash() { return ash; }, ashlandGate, walkIntoAshland, stopAshland, get skip() { return skip; }, tryLastSkip, endSkip, get paper() { return paper; }, runPaperMachine, stopPaperMachine, orbitGate, launchOrbitakt, stopTeleport, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
 })();

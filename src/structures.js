@@ -12,6 +12,7 @@ import { buildMushroomTree } from './mushroomTree.js';
 import { buildComputer } from './computer.js';
 import { buildOrganStage } from './organStage.js';
 import { buildUniversity } from './university.js';
+import { buildNightWindow } from './nightWindow.js';
 import { buildLastSkip } from './lastSkip.js';
 import { buildComicStatue } from './comicStatue.js';
 import { buildOrbitakt } from './orbitakt.js';
@@ -356,6 +357,10 @@ export const STRUCTURES = {
   organstage: {
     label: 'Organ stage', feature: true, menu: false,
     place: (rec, planet) => buildOrganStage(rec, planet, planet.featureById(rec.id)),
+  },
+  nightwindow: {
+    label: 'Night window', feature: true, menu: false,
+    place: (rec, planet) => buildNightWindow(rec, planet, planet.featureById(rec.id)),
   },
   university: {
     label: 'Walking university', feature: true, menu: false,

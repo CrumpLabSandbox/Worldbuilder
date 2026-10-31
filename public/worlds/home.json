@@ -332,6 +332,19 @@
       "url": "https://samuelling.github.io/LargeLingModel/",
       "issue": "november",
       "name": "The Paper Machine"
+    },
+    {
+      "id": "night-window",
+      "type": "nightwindow",
+      "lat": -25.0642,
+      "lon": 16.1625,
+      "heading": 20,
+      "pad": 640,
+      "band": 160,
+      "raise": 0,
+      "url": "https://samuelling.github.io/Big-Apple-Sam/web/",
+      "issue": "november",
+      "name": "The Night Window"
     }
   ]
 }

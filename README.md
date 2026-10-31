@@ -153,6 +153,11 @@ Terrain features reshape the planet itself rather than sitting on it:
   an on-screen keyboard with chords, sliding and octave buttons. ThingSynth runs
   as its own page (a built copy in `public/thingsynth`) laid over the painting.
 
+- `nightwindow` — the Night Window, the way in to HomeBlocks: a block of towers
+  where it's always night (`pad`, `band`, `raise`, `url`, and `heading` is the way
+  the street runs). Click it, or use **🪟 Fly to the window**, to follow the beam
+  up through the open window, where the page at `url` opens in a frame.
+
 - `university` — the Walking University: a campus on six jointed legs (`pad`,
   `band`, `raise`, `url`, and `heading` is the way it walks). Click it, or use
   **🎓 Enter the University**, and it gets up and walks; the world gives way to
