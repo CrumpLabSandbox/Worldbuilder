@@ -179,8 +179,10 @@ Terrain features reshape the planet itself rather than sitting on it:
 - `drownedrange` — the Drowned Range, the way in to Ecphory: a ring of inked peaks
   round a sea of points of light like the game's mnemic substrate (`pad`, `band`,
   `level`, `url`, and `heading` is the way to the great peak). Inside the ring it has
-  its own sky, with the peaks reflected. **✨ Enter the substrate** breaks the view up
-  into points of light, then goes to `url`.
+  its own sky, with the peaks reflected. **✨ Enter Ecphory** runs a 17-second film
+  out of the bowl, down to a walker on the causeway and through their eyes to a
+  portal, as the scene comes apart, ending on a copy of the game's title before
+  going to `url`.
 
 - `nightwindow` — the Night Window, the way in to HomeBlocks: a block of towers
   where it's always night (`pad`, `band`, `raise`, `url`, and `heading` is the way

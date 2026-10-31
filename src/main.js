@@ -12,7 +12,6 @@ import { ORGAN_KEYS, KEY_NOTES } from './organHands.js';
 import { mountOrganKeys } from './organKeys.js';
 import { track, trackOnce, sendStats, startStats } from './stats.js';
 import { Gamepads } from './gamepad.js';
-import { dissolveToLight } from './drownedRange.js';
 import { OrbitTeleport } from './orbitaktTeleport.js';
 
 const $ = (id) => document.getElementById(id);
@@ -736,6 +735,7 @@ function nearestRange(maxDist = RANGE_REACH) {
   return ranges().find((m) => m.center.distanceTo(controls.position) < maxDist) || null;
 }
 function updateRange() {
+  if (mneme) return;
   const m = uni || night || bbs ? null : nearestRange();
   $('btn-mneme').classList.toggle('hidden', !m || !!mneme || !!ride || !!follow || m.center.distanceTo(controls.position) > 2300);
   if (m === rangeInside) return;
@@ -749,30 +749,44 @@ function mnemeGate(m) {
   track('enter', 'ecphory');
   $('mn-gate').classList.remove('hidden');
   controls.enabled = false;
-  $('mn-go').onclick = () => { mnemeGateClose(); dissolveRange(m); };
+  $('mn-go').onclick = () => { mnemeGateClose(); filmRange(m); };
   $('mn-go').focus();
 }
 function mnemeGateClose() {
   $('mn-gate').classList.add('hidden');
   controls.enabled = true;
 }
-function dissolveRange(m) {
+// The way in is a short film, ending on a copy of Ecphory's own title so that the
+// page itself takes over without a jump.
+function filmRange(m) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { leaveFor('ecphory', m.url); return; }
   if (ride) endRide();
   if (follow) endFollow();
   controls.cancelFlight();
   controls.enabled = false;
-  mneme = m;
-  document.body.classList.add('uni-on');
-  renderer.render(scene, camera); // so the canvas still holds this frame to break up
-  dissolveToLight(renderer.domElement, () => leaveFor('ecphory', m.url));
+  document.body.classList.add('uni-on', 'mn-film');
+  const font = document.createElement('link');
+  font.rel = 'stylesheet';
+  font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400&display=swap';
+  document.head.append(font);
+  mneme = { m, film: m.film(camera), t: 0, leaving: false };
+}
+function stepFilm(dt) {
+  if (mneme.leaving) return;
+  mneme.t += dt;
+  if (mneme.t > 14.9) $('mn-title').classList.add('on');
+  controls.position.copy(camera.position);
+  if (!mneme.film.step(mneme.t)) { mneme.leaving = true; leaveFor('ecphory', mneme.m.url); }
 }
 // back from Ecphory by the browser's back button: the page may come back as it was
 window.addEventListener('pageshow', (e) => {
   if (!e.persisted || !mneme) return;
-  $('mn-dissolve')?.remove();
-  document.body.classList.remove('uni-on');
+  mneme.film.stop();
   mneme = null;
+  $('mn-title').classList.remove('on');
+  document.body.classList.remove('uni-on', 'mn-film');
+  const v = nearestRange()?.view();
+  if (v) setPose(v.pos, v.look);
   controls.enabled = true;
 });
 
@@ -1303,7 +1317,7 @@ function readHash() {
   };
 }
 function writeHash() {
-  if (!controls || !store.current || uni || night) return; // not from inside a scene: a reload would start there
+  if (!controls || !store.current || uni || night || mneme) return; // not from inside a scene: a reload would start there
   const { lat, lon } = controls.latLon;
   const h = new URLSearchParams({ w: store.current.id, lat: lat.toFixed(4), lon: wrapLon(lon).toFixed(4), alt: controls.altitude.toFixed(0), h: controls.heading.toFixed(0), p: controls.pitch.toFixed(0) });
   history.replaceState(null, '', '#' + h.toString());
@@ -1410,6 +1424,7 @@ function wireUI() {
   $('hands-close').onclick = () => { $('hands-gate').classList.add('hidden'); document.activeElement?.blur(); };
   $('hands-gate').addEventListener('pointerdown', (e) => { if (e.target === $('hands-gate')) $('hands-close').click(); });
   $('mn-stay').onclick = mnemeGateClose;
+  $('mn-skip').onclick = () => { if (mneme && !mneme.leaving) { mneme.leaving = true; leaveFor('ecphory', mneme.m.url); } };
   $('night-leave').onclick = leaveNight;
   $('uni-window').onclick = () => {
     const on = document.body.classList.toggle('uni-gazing');
@@ -1780,7 +1795,9 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
   gamepads.update(dt);
-  if (night) {
+  if (mneme) {
+    stepFilm(dt);
+  } else if (night) {
     stepNight(dt);
   } else if (ash) {
     stepAshland(dt);

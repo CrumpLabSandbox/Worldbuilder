@@ -14,7 +14,7 @@ const STORE = 'worldbuilder.gamepad';
 // What A does, in order: whichever of these is showing.
 const ACTIONS = ['intro-start', 'mn-go', 'ash-go', 'orbit-go', 'about-start', 'btn-university', 'btn-night', 'btn-mneme', 'btn-organ', 'btn-ride', 'btn-dial', 'btn-ashland', 'btn-orbitakt', 'btn-paper', 'btn-skip', 'btn-comic'];
 // What B does, in order, before falling back on Escape.
-const CANCELS = ['hands-close', 'mn-stay', 'ash-stay', 'orbit-stay', 'ash-stop', 'orbit-stop', 'organ-stand', 'bbs-hangup', 'night-leave', 'uni-leave'];
+const CANCELS = ['hands-close', 'mn-skip', 'mn-stay', 'ash-stay', 'orbit-stay', 'ash-stop', 'orbit-stop', 'organ-stand', 'bbs-hangup', 'night-leave', 'uni-leave'];
 
 const shape = (v = 0) => (Math.abs(v) < DEAD ? 0 : (Math.sign(v) * (Math.min(1, Math.abs(v)) - DEAD)) / (1 - DEAD));
 const held = (pad, i) => { const b = pad.buttons[i]; return !!b && (b.pressed || b.value > 0.5); };
