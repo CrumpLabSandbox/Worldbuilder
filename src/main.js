@@ -10,6 +10,7 @@ import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './struct
 import { initChat } from './chat.js';
 import { ORGAN_KEYS, KEY_NOTES } from './organHands.js';
 import { mountOrganKeys } from './organKeys.js';
+import { OrbitTeleport } from './orbitaktTeleport.js';
 
 const $ = (id) => document.getElementById(id);
 const DEG = Math.PI / 180;
@@ -24,6 +25,7 @@ renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 app.appendChild(renderer.domElement);
+renderer.localClippingEnabled = true; // the traveller evaporates from the hat down
 gardenCtx.renderer = renderer;
 
 const labelRenderer = new CSS2DRenderer();
@@ -340,9 +342,29 @@ function flyToStructure(s) {
     const st = structureObjects.get(s.id)?.userData.organStage;
     if (st) { const v = st.view(0, 230, 520, 0, 200, 0); setPose(v.pos, v.look); return; }
   }
+  if (s.type === 'ashland') {
+    const a = structureObjects.get(s.id)?.userData.ashland;
+    if (a) { const v = a.view(); controls.teleport(v.lat, v.lon, v.alt, v.heading, v.pitch); return; }
+  }
+  if (s.type === 'orbitakt') {
+    const o = structureObjects.get(s.id)?.userData.orbitakt;
+    if (o) { const v = o.view(); setPose(v.pos, v.look); return; }
+  }
   if (s.type === 'university') {
     const u = structureObjects.get(s.id)?.userData.university;
     if (u) { const v = u.view(); setPose(v.pos, v.look); return; }
+  }
+  if (s.type === 'lastskip') {
+    const ls = structureObjects.get(s.id)?.userData.lastSkip;
+    if (ls) { const v = ls.view(); setPose(v.pos, v.look); return; }
+  }
+  if (s.type === 'comicstatue') {
+    const c = structureObjects.get(s.id)?.userData.comicStatue;
+    if (c) { const v = c.view(); setPose(v.pos, v.look); return; }
+  }
+  if (s.type === 'papermachine') {
+    const pm = structureObjects.get(s.id)?.userData.paperMachine;
+    if (pm) { const v = pm.view(); setPose(v.pos, v.look); return; }
   }
   if (s.type === 'catapult') {
     const h = (s.heading ?? 0) * DEG, back = 70 / (R * DEG);
@@ -472,6 +494,11 @@ function updateDialButton() {
   $('computer-actions').classList.toggle('hidden', !c);
   $('btn-organ').classList.toggle('hidden', !!bbs || !!ride || !!follow || !nearestStage());
   $('btn-university').classList.toggle('hidden', !!uni || !!bbs || !!ride || !!follow || !nearestUniversity());
+  $('btn-ashland').classList.toggle('hidden', !!ash || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestAshland());
+  $('btn-orbitakt').classList.toggle('hidden', !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestOrbitakt());
+  $('btn-paper').classList.toggle('hidden', !!paper || !!ash || !!skip || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestPaperMachine());
+  $('btn-skip').classList.toggle('hidden', !!skip || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestSkip());
+  $('btn-comic').classList.toggle('hidden', !!skip || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestComic());
 }
 function organStages() { return [...structureObjects.values()].map((g) => g.userData.organStage).filter(Boolean); }
 function nearestStage(maxDist = 800) {
@@ -558,6 +585,7 @@ function leaveOrgan() {
   controls.enabled = true;
   updateDialButton();
 }
+
 // ------------------------------------------------------------------ the Walking University
 // Going in: the campus gets up and starts to walk, the world gives way to the salt
 // flats, and the visitor flies round it and in through the lit tower window to the
@@ -662,6 +690,198 @@ async function leaveUniversity() {
   uni = null;
   updateDialButton();
   uniFade(false);
+}
+
+// ------------------------------------------------------------------ Ashland
+// Ashland is another website, so the gate welcomes the visitor and asks first; then
+// the camera comes down to the trail and through under the sign, and the page goes there.
+let ash = null, ashFrom = null; // { a, t, curve, left } on the way in, and the pose to come back to
+const ASH_WALK = 7;
+function nearestAshland(maxDist = 3200) {
+  return [...structureObjects.values()].map((g) => g.userData.ashland).find((a) => a && a.center.distanceTo(controls.position) < maxDist) || null;
+}
+function ashlandGate(a) {
+  if (ash || tele || uni || bbs || !a) return;
+  $('ash-gate').classList.remove('hidden');
+  controls.enabled = false;
+  $('ash-go').onclick = () => { ashlandGateClose(); walkIntoAshland(a); };
+  $('ash-go').focus();
+}
+function ashlandGateClose() {
+  $('ash-gate').classList.add('hidden');
+  controls.enabled = true;
+}
+function walkIntoAshland(a) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(a.url); return; }
+  if (ride) endRide();
+  if (follow) endFollow();
+  controls.cancelFlight();
+  controls.enabled = false;
+  ashFrom = { pos: controls.position.clone(), heading: controls.heading, pitch: controls.pitch };
+  document.body.classList.add('ash-on');
+  ash = { a, t: 0, curve: a.path(controls.position), left: false };
+}
+function stepAshland(dt) {
+  if (ash.left) return;
+  ash.t = Math.min(1, ash.t + dt / ASH_WALK);
+  const k = ash.t, e = k * k * (3 - 2 * k);
+  camera.up.copy(ash.a.up);
+  camera.position.copy(ash.curve.getPoint(e));
+  camera.lookAt(ash.curve.getPoint(Math.min(1, e + 0.05)));
+  controls.position.copy(camera.position);
+  $('ash-fade').style.opacity = THREE.MathUtils.smoothstep(k, 0.8, 0.97);
+  if (k >= 1) { ash.left = true; location.assign(ash.a.url); }
+}
+function stopAshland() {
+  if (!ash) return;
+  ash = null;
+  document.body.classList.remove('ash-on');
+  $('ash-fade').style.opacity = 0;
+  camera.up.set(0, 1, 0);
+  controls.position.copy(ashFrom.pos); controls.heading = ashFrom.heading; controls.pitch = ashFrom.pitch;
+  controls.updateCamera();
+  controls.enabled = true;
+  updateDialButton();
+}
+
+// ------------------------------------------------------------------ the Orbitakt launchpad
+// Orbitakt is another website, so the machine asks first; then the visitor leaves
+// by way of orbit (see orbitaktTeleport.js) and the page goes there.
+let tele = null, teleFrom = null, teleLeft = false; // the teleport under way, the pose to come back to, and whether the page has gone
+function nearestOrbitakt(maxDist = 1600) {
+  return [...structureObjects.values()].map((g) => g.userData.orbitakt).find((o) => o && o.center.distanceTo(controls.position) < maxDist) || null;
+}
+function orbitGate(o) {
+  if (tele || uni || bbs || !o) return;
+  $('orbit-gate').classList.remove('hidden');
+  controls.enabled = false;
+  $('orbit-go').onclick = () => { orbitGateClose(); launchOrbitakt(o); };
+  $('orbit-go').focus();
+}
+function orbitGateClose() {
+  $('orbit-gate').classList.add('hidden');
+  controls.enabled = true;
+}
+function launchOrbitakt(o) {
+  // no flight for those who'd rather not: straight there
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(o.url); return; }
+  if (ride) endRide();
+  if (follow) endFollow();
+  controls.cancelFlight();
+  controls.enabled = false;
+  teleFrom = { pos: controls.position.clone(), heading: controls.heading, pitch: controls.pitch };
+  document.body.classList.add('orbit-on');
+  tele = new OrbitTeleport({ scene, camera, o, caption: (text) => { $('orbit-caption').textContent = text; } });
+}
+function stepTeleport(dt) {
+  const done = tele.step(dt);
+  $('orbit-fade').style.opacity = tele.flash;
+  controls.position.copy(camera.position);
+  if (done) { teleLeft = true; location.assign(tele.o.url); }
+}
+function stopTeleport() {
+  if (!tele) return;
+  tele.dispose();
+  tele = null; teleLeft = false;
+  document.body.classList.remove('orbit-on');
+  $('orbit-fade').style.opacity = 0;
+  camera.up.set(0, 1, 0);
+  controls.position.copy(teleFrom.pos); controls.heading = teleFrom.heading; controls.pitch = teleFrom.pitch;
+  controls.updateCamera();
+  controls.enabled = true;
+  updateDialButton();
+}
+
+// ------------------------------------------------------------------ Comic Booklet
+// The statue opens megaZINE, where the booklet is in the issue, in its own tab,
+// leaving the visitor on the shore here.
+function nearestComic(maxDist = 1200) {
+  return [...structureObjects.values()].map((g) => g.userData.comicStatue).find((c) => c && c.center.distanceTo(controls.position) < maxDist) || null;
+}
+function openComic(c) { if (c) window.open(c.url, '_blank', 'noopener'); }
+
+// ------------------------------------------------------------------ Last Skip
+// A stone skips out across the sea with the camera after it, the view fades, and
+// the visitor goes on to the game itself.
+let skip = null; // { ls, play, leaving }
+function nearestSkip(maxDist = 1400) {
+  return [...structureObjects.values()].map((g) => g.userData.lastSkip).find((ls) => ls && ls.center.distanceTo(controls.position) < maxDist) || null;
+}
+function tryLastSkip(ls) {
+  if (skip || tele || uni || bbs || !ls) return;
+  // no flight for those who'd rather not: straight there
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(ls.url); return; }
+  if (ride) endRide();
+  if (follow) endFollow();
+  controls.cancelFlight();
+  controls.enabled = false;
+  document.body.classList.add('skip-on');
+  skip = { ls, play: ls.play(camera), leaving: false };
+  updateDialButton();
+}
+function stepSkip(dt) {
+  const done = skip.ls.step(skip.play, dt, camera);
+  controls.position.copy(camera.position);
+  if (done && !skip.leaving) {
+    skip.leaving = true;
+    uniFade(true);
+    uniWait(650).then(() => location.assign(skip.ls.url));
+  }
+}
+// back from the game: the browser may restore this page just as it was left
+function endSkip() {
+  if (!skip) return;
+  const v = skip.ls.view();
+  skip.ls.reset();
+  skip = null;
+  document.body.classList.remove('skip-on');
+  camera.up.set(0, 1, 0);
+  setPose(v.pos, v.look);
+  controls.enabled = true;
+  uniFade(false);
+  updateDialButton();
+}
+
+// ------------------------------------------------------------------ the Paper Machine
+// Ten seconds through the machine, from a falling tree to a printed page that fills
+// the screen, then the visitor is on Metamers. It shares the Orbitakt overlay.
+let paper = null; // { pm, from, left }
+function nearestPaperMachine(maxDist = 1300) {
+  return [...structureObjects.values()].map((g) => g.userData.paperMachine).find((pm) => pm && pm.center.distanceTo(controls.position) < maxDist) || null;
+}
+function runPaperMachine(pm) {
+  if (paper || ash || skip || tele || uni || bbs || !pm) return;
+  // no flight for those who'd rather not: straight there
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.assign(pm.url); return; }
+  if (ride) endRide();
+  if (follow) endFollow();
+  controls.cancelFlight();
+  controls.enabled = false;
+  paper = { pm, from: { pos: controls.position.clone(), heading: controls.heading, pitch: controls.pitch }, left: false };
+  document.body.classList.add('orbit-on');
+  $('orbit-stop').onclick = stopPaperMachine;
+  pm.start(camera, (text) => { $('orbit-caption').textContent = text; });
+  updateDialButton();
+}
+function stepPaperMachine(dt) {
+  const done = paper.pm.step(dt, camera);
+  $('orbit-fade').style.opacity = paper.pm.flash;
+  controls.position.copy(camera.position);
+  if (done) { paper.left = true; location.assign(paper.pm.url); }
+}
+function stopPaperMachine() {
+  if (!paper) return;
+  const { pm, from } = paper;
+  pm.stop();
+  paper = null;
+  document.body.classList.remove('orbit-on');
+  $('orbit-fade').style.opacity = 0;
+  $('orbit-stop').onclick = stopTeleport;
+  camera.up.set(0, 1, 0);
+  controls.position.copy(from.pos); controls.heading = from.heading; controls.pitch = from.pitch;
+  controls.updateCamera();
+  controls.enabled = true;
+  updateDialButton();
 }
 
 // glide the camera to a pose at the computer, then call `then`
@@ -989,6 +1209,22 @@ function wireUI() {
   $('btn-type').onclick = () => sitToType(nearestComputer());
   $('btn-organ').onclick = () => sitAtOrgan(nearestStage());
   $('btn-university').onclick = () => enterUniversity(nearestUniversity());
+  $('btn-ashland').onclick = () => ashlandGate(nearestAshland());
+  $('ash-stay').onclick = ashlandGateClose;
+  $('ash-stop').onclick = stopAshland;
+  $('ash-gate').addEventListener('pointerdown', (e) => { if (e.target === $('ash-gate')) ashlandGateClose(); });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) stopAshland(); });
+  $('btn-orbitakt').onclick = () => orbitGate(nearestOrbitakt());
+  $('orbit-stay').onclick = orbitGateClose;
+  $('orbit-gate').addEventListener('pointerdown', (e) => { if (e.target === $('orbit-gate')) orbitGateClose(); });
+  $('orbit-stop').onclick = stopTeleport;
+  // coming back with the Back button can restore the page just as it was left
+  window.addEventListener('pageshow', (e) => { if (e.persisted) stopTeleport(); });
+  $('btn-skip').onclick = () => tryLastSkip(nearestSkip());
+  $('btn-comic').onclick = () => openComic(nearestComic());
+  window.addEventListener('pageshow', (e) => { if (e.persisted) endSkip(); });
+  $('btn-paper').onclick = () => runPaperMachine(nearestPaperMachine());
+  window.addEventListener('pageshow', (e) => { if (e.persisted) stopPaperMachine(); });
   $('uni-leave').onclick = leaveUniversity;
   $('uni-window').onclick = () => {
     const on = document.body.classList.toggle('uni-gazing');
@@ -1048,6 +1284,12 @@ function wireUI() {
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) return;
     if (!$('about').classList.contains('hidden') || document.body.classList.contains('intro-open')) return;
+    if (!$('orbit-gate').classList.contains('hidden')) { if (e.code === 'Escape') orbitGateClose(); return; }
+    if (skip) return;
+    if (!$('ash-gate').classList.contains('hidden')) { if (e.code === 'Escape') ashlandGateClose(); return; }
+    if (ash) { if (e.code === 'Escape') stopAshland(); return; }
+    if (tele) { if (e.code === 'Escape') stopTeleport(); return; }
+    if (paper) { if (e.code === 'Escape') stopPaperMachine(); return; }
     if (uni) { if (e.code === 'Escape') leaveUniversity(); return; }
     if (bbs?.phase === 'organ') {
       if (e.code === 'Escape') { leaveOrgan(); return; }
@@ -1092,8 +1334,31 @@ function wireUI() {
       if (hit) { controls.flyTo(hit.lat, hit.lon); toast(`Flying to ${formatLat(hit.lat)}, ${formatLon(wrapLon(hit.lon))}`, 1800); }
       return;
     }
-    if (!buildMode && !bbs && !uni) {
+    if (!buildMode && !bbs && !uni && !tele && !skip && !ash) {
+      const park = nearestAshland();
+      if (park) {
+        raycaster.setFromCamera(ndc, camera);
+        const gateHit = raycaster.intersectObject(park.hit, false)[0];
+        const land = gateHit && pickGround(ndc.x, ndc.y);
+        if (gateHit && (!land || gateHit.distance < land.distance + 5)) { ashlandGate(park); return; }
+      }
+    }
+    if (!buildMode && !bbs && !uni && !tele && !skip && !paper) {
       raycaster.setFromCamera(ndc, camera);
+      const mainframe = nearestPaperMachine();
+      const hitFrame = mainframe && raycaster.intersectObject(mainframe.hit, false)[0];
+      const below = hitFrame && pickGround(ndc.x, ndc.y);
+      if (hitFrame && (!below || hitFrame.distance < below.distance + 5)) { runPaperMachine(mainframe); return; }
+      const stones = nearestSkip();
+      if (stones && raycaster.intersectObject(stones.hit, false)[0]) { tryLastSkip(stones); return; }
+      const comic = nearestComic();
+      const hitComic = comic && raycaster.intersectObject(comic.hit, false)[0];
+      const shore = hitComic && pickGround(ndc.x, ndc.y);
+      if (hitComic && (!shore || hitComic.distance < shore.distance + 5)) { openComic(comic); return; }
+      const pad = nearestOrbitakt();
+      const hitPad = pad && raycaster.intersectObject(pad.hit, false)[0];
+      const under = hitPad && pickGround(ndc.x, ndc.y);
+      if (hitPad && (!under || hitPad.distance < under.distance + 5)) { orbitGate(pad); return; }
       const campus = nearestUniversity();
       const hitCampus = campus && raycaster.intersectObject(campus.hit, false)[0];
       const land = hitCampus && pickGround(ndc.x, ndc.y);
@@ -1315,7 +1580,15 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!controls) return;
-  if (uni) {
+  if (ash) {
+    stepAshland(dt);
+  } else if (paper) {
+    if (!paper.left) stepPaperMachine(dt);
+  } else if (skip) {
+    stepSkip(dt);
+  } else if (tele) {
+    if (!teleLeft) stepTeleport(dt);
+  } else if (uni) {
     stepUniversity(dt);
   } else if (bbs) {
     if (bbs.phase === 'flying') stepDial(dt);
@@ -1345,7 +1618,7 @@ function animate() {
   for (const g of structureObjects.values()) {
     const lo = g.userData.label;
     if (!lo) continue;
-    let vis = showLabels && !uni;
+    let vis = showLabels && !paper && !uni && !tele && !skip;
     if (vis) {
       _tmp.copy(g.position).sub(camera.position);
       const dist = _tmp.length();
@@ -1357,7 +1630,7 @@ function animate() {
   const now = performance.now();
   if (now - hudT > 100) { hudT = now; updateHUD(); updateRideButton(); updateDialButton(); }
   if (now - catT > 400) { catT = now; updateCatapultPanel(); }
-  if (now - hashT > 1500) { hashT = now; writeHash(); }
+  if (now - hashT > 1500 && !paper && !tele && !skip && !ash) { hashT = now; writeHash(); }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
@@ -1384,5 +1657,5 @@ function animate() {
   gardenCtx.viewer = () => controls.position;
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
+  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, get tele() { return tele; }, get ash() { return ash; }, ashlandGate, walkIntoAshland, stopAshland, get skip() { return skip; }, tryLastSkip, endSkip, get paper() { return paper; }, runPaperMachine, stopPaperMachine, orbitGate, launchOrbitakt, stopTeleport, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
 })();

@@ -4,16 +4,16 @@
   "url": "https://megazine.org/?preview=02",
   "pieces": [
     { "id": "cognitive-hands", "title": "Cognitive Hands", "by": "Matt", "kind": "toy", "url": "https://crumplabsandbox.github.io/CognitiveHands/", "place": "megazine-bbs" },
-    { "id": "last-skip", "title": "Last Skip", "by": "Sam", "kind": "toy", "url": "https://samuelling.github.io/skipper/", "place": null },
+    { "id": "last-skip", "title": "Last Skip", "by": "Sam", "kind": "toy", "url": "https://samuelling.github.io/skipper/", "place": "last-skip", "site": { "lat": 66.9883, "lon": -129.6931, "alt": 123, "heading": 11 } },
     { "id": "ecphory", "title": "Ecphory", "by": "Matt", "kind": "game", "url": "https://ecphory.megazine.org/", "place": null },
-    { "id": "orbitakt", "title": "Orbitakt", "by": "Sam", "kind": "toy", "url": "https://samuelling.github.io/Orbitakt/play/", "place": null },
+    { "id": "orbitakt", "title": "Orbitakt", "by": "Sam", "kind": "toy", "url": "https://samuelling.github.io/Orbitakt/play/", "place": "orbitakt-launchpad", "site": { "lat": 74.3968, "lon": -146.5798, "alt": 28, "heading": 1 } },
     { "id": "chairquest", "title": "ChairQuest", "by": "Matt", "kind": "game", "url": "https://crumplab.github.io/ChairQuest/", "place": "walking-university", "site": { "lat": 14.8889, "lon": 147.834, "alt": 154, "heading": 352 } },
-    { "id": "comic-booklet", "title": "Comic Booklet", "by": "Jan", "kind": "art", "url": "https://megazine.org/media/little-comics.pdf", "place": null },
+    { "id": "comic-booklet", "title": "Comic Booklet", "by": "Jan", "kind": "art", "url": "https://megazine.org/media/little-comics.pdf", "place": "comic-statue", "site": { "lat": -20.0804, "lon": -111.317, "alt": 130, "heading": 9 } },
     { "id": "street-team-pack", "title": "Street Team Pack", "by": "Sam & Matt", "kind": "tool", "url": "https://megazine.org/print/flier.pdf", "place": null },
     { "id": "homeblocks", "title": "HomeBlocks", "by": "Sam", "kind": "toy", "url": "https://samuelling.github.io/Big-Apple-Sam/web/", "place": null },
     { "id": "thingsynth", "title": "thingsynth", "by": "Matt", "kind": "sound", "url": "https://www.crumplab.com/thingsynth/", "place": "thingsynth-stage" },
     { "id": "ashland", "title": "Ashland", "by": "Sam", "kind": "game", "url": "https://samuelling.github.io/Chopper/", "place": null },
     { "id": "worldbuilder", "title": "Worldbuilder", "by": "Matt", "kind": "game", "url": "https://worlds.megazine.org/", "place": null },
-    { "id": "metamers", "title": "Metamers", "by": "Sam", "kind": "toy", "url": "https://samuelling.github.io/LargeLingModel/", "place": null }
+    { "id": "metamers", "title": "Metamers", "by": "Sam", "kind": "toy", "url": "https://samuelling.github.io/LargeLingModel/", "place": "paper-machine", "site": { "lat": -1.4187, "lon": -117.0389, "alt": 189, "heading": 9 } }
   ]
 }

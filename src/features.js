@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { R, latLonToDir, tangentFrame } from './planet.js';
 import { CoasterFeature } from './coaster.js';
 import { CatapultFeature } from './catapult.js';
+import { AshlandFeature } from './ashland.js';
 
 const clamp = THREE.MathUtils.clamp;
 function smooth(a, b, x) { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -239,7 +240,7 @@ export class ClearingFeature {
   clearance(dir) { return Math.max(0, Math.acos(clamp(dir.dot(this.center), -1, 1)) * R - this.radius); }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree', 'computer', 'organstage', 'university']);
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree', 'computer', 'organstage', 'university', 'orbitakt', 'lastskip', 'papermachine', 'ashland', 'comicstatue']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -253,7 +254,7 @@ export function createFeatures(records, planet) {
     planet.setFeatures([...volcs, ...roads]);
   }
   // levelled sites: the catapult's hill, the graffiti plaza, the BBS computer's pad, the organ stage
-  const sites = records.filter((r) => ['catapult', 'graffiti', 'computer', 'organstage', 'university'].includes(r.type)).map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
+  const sites = records.filter((r) => ['catapult', 'graffiti', 'computer', 'organstage', 'university', 'orbitakt', 'lastskip', 'papermachine', 'comicstatue'].includes(r.type)).map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
   // the organ stage's long avenue: more of the same level ground out to the painting
   for (const st of sites.filter((f) => f.rec.type === 'organstage')) {
     const r = st.rec, h = (r.heading ?? 0) * Math.PI / 180, mPerDeg = (R * Math.PI) / 180;
@@ -265,6 +266,18 @@ export function createFeatures(records, planet) {
       }, planet));
     }
   }
+  // Last Skip: the sea is brought in to the foot of the steps, down a wide inlet
+  for (const st of sites.filter((f) => f.rec.type === 'lastskip')) {
+    const r = st.rec, h = (r.heading ?? 0) * Math.PI / 180, mPerDeg = (R * Math.PI) / 180;
+    for (const d of [340, 560]) {
+      sites.push(new CatapultFeature({
+        id: `${r.id}:${d}`, type: 'site', lane: 0, pad: 200, band: 60, level: -16, yieldToRoads: false,
+        lat: r.lat + (d * Math.cos(h)) / mPerDeg,
+        lon: r.lon + (d * Math.sin(h)) / (mPerDeg * Math.cos(r.lat * Math.PI / 180)),
+      }, planet));
+    }
+  }
+  sites.push(...records.filter((r) => r.type === 'ashland').map((r) => new AshlandFeature(r, planet)));
   planet.setFeatures([...volcs, ...roads, ...sites]);
   const coasters = [];
   for (const r of records.filter((x) => x.type === 'coaster' && Array.isArray(x.path) && x.path.length > 1)) {

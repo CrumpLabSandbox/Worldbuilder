@@ -12,6 +12,11 @@ import { buildMushroomTree } from './mushroomTree.js';
 import { buildComputer } from './computer.js';
 import { buildOrganStage } from './organStage.js';
 import { buildUniversity } from './university.js';
+import { buildLastSkip } from './lastSkip.js';
+import { buildComicStatue } from './comicStatue.js';
+import { buildOrbitakt } from './orbitakt.js';
+import { buildPaperMachine } from './paperMachine.js';
+import { buildAshland } from './ashland.js';
 import { buildBlueprint } from './blueprint.js';
 
 const geoCache = new Map();
@@ -355,6 +360,26 @@ export const STRUCTURES = {
   university: {
     label: 'Walking university', feature: true, menu: false,
     place: (rec, planet) => buildUniversity(rec, planet, planet.featureById(rec.id)),
+  },
+  ashland: {
+    label: 'Ashland', feature: true, menu: false,
+    place: (rec, planet) => buildAshland(rec, planet, planet.featureById(rec.id)),
+  },
+  orbitakt: {
+    label: 'Orbitakt launchpad', feature: true, menu: false,
+    place: (rec, planet) => buildOrbitakt(rec, planet, planet.featureById(rec.id)),
+  },
+  papermachine: {
+    label: 'Paper machine', feature: true, menu: false,
+    place: (rec, planet) => buildPaperMachine(rec, planet, planet.featureById(rec.id)),
+  },
+  lastskip: {
+    label: 'Skipping amphitheatre', feature: true, menu: false,
+    place: (rec, planet) => buildLastSkip(rec, planet, planet.featureById(rec.id)),
+  },
+  comicstatue: {
+    label: 'Comic statue', feature: true, menu: false,
+    place: (rec, planet) => buildComicStatue(rec, planet, planet.featureById(rec.id)),
   },
   computer: {
     label: 'BBS computer', feature: true, menu: false,

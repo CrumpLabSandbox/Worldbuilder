@@ -165,12 +165,37 @@ Records with `"issue": "november"` are listed first in **Visit place**.
 `public/issues/november.json` lists every piece in the November issue and the
 place it has here, if any.
 
+- `ashland` — Ashland: a reservoir in an autumn forest under its own dusk sky, after
+  the game of that name. The record's `lat`, `lon`, `alt` and `heading` are the view
+  **Visit place** opens on; the lake lies `ahead` metres along that heading. A timber
+  gate on the near shore welcomes visitors: **🍁 Enter Ashland**, or clicking the gate,
+  asks first, then walks them in under the sign and opens the game at `url`.
+- `lastskip` — Last Skip: a moonstone amphitheatre stepping down a carved inlet to
+  the sea; trying it skips a stone out across the water, then opens the game.
+- `comicstatue` — the Comic Booklet statue: a giant open comic on a plinth at the
+  shore, turning its own placeholder pages. The record's point is the lookout and
+  `heading` points at the statue. **📖 Read the Comic Booklet**, or clicking it, opens
+  `url` (the megaZINE issue, at the booklet) in a new tab.
+- `orbitakt` — the Orbitakt launchpad: a giant drum machine and kit in a Moebius
+  desert (`pad`, `band`, `raise`; the record's point is the ring in front of it and
+  `heading` points at the machine). **🛰️ Launch to Orbitakt**, or clicking the pads,
+  says it's another website and then the visitor evaporates into the stars, rises
+  to orbit among pulsing satellites, and the page goes to `url`. Esc stays.
+
+- `papermachine` — the Paper Machine, for Sam's Metamers: a mainframe in a Moebius
+  clearing (`pad`, `band`, `level`; the record's point is the middle of the clearing
+  and `heading` points at the mainframe) that fells its forest, sends logs through a
+  paper mill and reams up into its hopper, and prints papers on to giant stacks. It
+  all runs by itself. **📄 Run the Paper Machine**, or clicking the mainframe, is a ten
+  second ride through it that ends with a page filling the screen, and the page goes
+  to `url`. Esc stays. `viewBack` and `viewAlt` set where **Visit place** puts you.
+
 Press **U** for photo mode, which hides the interface.
 
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`, `mushroomtree`, `computer`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`, `mushroomtree`, `computer`, `papermachine`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight

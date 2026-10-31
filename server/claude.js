@@ -318,7 +318,7 @@ function validateStructure(input) {
 }
 
 // Published set pieces that chat builds keep clear of, in metres from their centre.
-const RESERVED = { computer: 260, organstage: 2500, university: 1300 }; // the stage's avenue runs a long way
+const RESERVED = { computer: 260, organstage: 2500, university: 1300, orbitakt: 520, lastskip: 1100, papermachine: 900, ashland: 3000, comicstatue: 700 }; // the stage's avenue runs a long way
 function keepClear(store, worldId, at) {
   for (const s of store.base(worldId)?.structures || []) {
     const clear = RESERVED[s.type];

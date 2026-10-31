@@ -267,6 +267,71 @@
       "url": "https://www.crumplab.com/ChairQuest/",
       "issue": "november",
       "name": "The Walking University"
+    },
+    {
+      "id": "ashland",
+      "type": "ashland",
+      "lat": 44.0082,
+      "lon": -106.1767,
+      "alt": 350,
+      "heading": 8,
+      "url": "https://samuelling.github.io/Chopper/",
+      "issue": "november",
+      "name": "Ashland"
+    },
+    {
+      "id": "orbitakt-launchpad",
+      "type": "orbitakt",
+      "lat": 74.3968,
+      "lon": -146.5798,
+      "heading": 1,
+      "pad": 360,
+      "band": 130,
+      "raise": 3,
+      "url": "https://samuelling.github.io/Orbitakt/play/",
+      "issue": "november",
+      "name": "Orbitakt Launchpad"
+    },
+    {
+      "id": "last-skip",
+      "type": "lastskip",
+      "lat": 66.9883,
+      "lon": -129.6931,
+      "heading": 80,
+      "pad": 450,
+      "band": 60,
+      "level": 3,
+      "url": "https://samuelling.github.io/skipper/",
+      "issue": "november",
+      "name": "Last Skip"
+    },
+    {
+      "id": "comic-statue",
+      "type": "comicstatue",
+      "lat": -20.0804,
+      "lon": -111.317,
+      "heading": 9,
+      "pad": 430,
+      "band": 160,
+      "level": 6,
+      "url": "https://megazine.org/?preview=02&w=little-comics",
+      "issue": "november",
+      "name": "Comic Booklet"
+    },
+    {
+      "id": "paper-machine",
+      "type": "papermachine",
+      "lat": 0.9583,
+      "lon": -116.6623,
+      "heading": 9,
+      "pad": 640,
+      "band": 200,
+      "level": 22,
+      "viewBack": 429,
+      "viewAlt": 180,
+      "url": "https://samuelling.github.io/LargeLingModel/",
+      "issue": "november",
+      "name": "The Paper Machine"
     }
   ]
 }
