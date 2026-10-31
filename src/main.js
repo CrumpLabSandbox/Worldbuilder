@@ -781,7 +781,7 @@ function wireUI() {
 
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) return;
-    if (!$('about').classList.contains('hidden')) return;
+    if (!$('about').classList.contains('hidden') || document.body.classList.contains('intro-open')) return;
     if (e.code === 'KeyH') setHelp($('help').classList.contains('hidden'));
     if (e.code === 'KeyU') { document.body.classList.toggle('photo'); toast(document.body.classList.contains('photo') ? 'Photo mode: UI hidden (U to show)' : 'UI shown', 1500); }
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
@@ -863,9 +863,15 @@ function wireUI() {
 }
 // ------------------------------------------------------------------ controls card + touch controls
 const HELP_KEY = 'worldbuilder.helpHidden';
-const ABOUT_KEY = 'worldbuilder.aboutSeen';
-// The about page opens on a first visit and from the About button. Flying pauses
-// while it's open, so reading keys don't move the camera.
+// The world opens behind a small see-through card, with the full about page a
+// click away (and on the About button). Flying pauses while either is open.
+function setIntro(show) {
+  $('intro').classList.toggle('hidden', !show);
+  document.body.classList.toggle('intro-open', show);
+  controls.enabled = !show;
+  if (show) $('intro-start').focus({ preventScroll: true });
+  else $('intro-start').blur();
+}
 let aboutPaused = false;
 function setAbout(show) {
   $('about').classList.toggle('hidden', !show);
@@ -877,7 +883,6 @@ function setAbout(show) {
   } else {
     if (aboutPaused) controls.enabled = true;
     aboutPaused = false;
-    try { localStorage.setItem(ABOUT_KEY, '1'); } catch { /* storage unavailable */ }
   }
 }
 function setHelp(show) {
@@ -910,9 +915,11 @@ function wireControlsUI() {
   $('about-start').onclick = () => setAbout(false);
   $('about').addEventListener('pointerdown', (e) => { if (e.target === $('about')) setAbout(false); });
   window.addEventListener('keydown', (e) => { if (e.code === 'Escape' && !$('about').classList.contains('hidden')) setAbout(false); });
-  let seen = false;
-  try { seen = localStorage.getItem(ABOUT_KEY) === '1'; } catch { /* storage unavailable */ }
-  if (!seen) setAbout(true);
+  $('intro-start').onclick = () => setIntro(false);
+  $('intro-more').onclick = () => { setIntro(false); setAbout(true); };
+  $('intro').addEventListener('pointerdown', (e) => { if (e.target === $('intro')) setIntro(false); });
+  window.addEventListener('keydown', (e) => { if (e.code === 'Escape' && document.body.classList.contains('intro-open')) setIntro(false); });
+  setIntro(true);
   $('hud-more').onclick = () => { const on = $('hud').classList.toggle('expanded'); $('hud-more').textContent = on ? 'less' : 'more'; };
 
   // speed and mouse look
