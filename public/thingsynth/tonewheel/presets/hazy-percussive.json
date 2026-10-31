@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Hazy Percussive",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "flute",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Perc Third Flute"
+  },
+  "params": {
+    "tg.click": 0.5677,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "perc.on": true,
+    "leslie.speed": "Stop",
+    "leslie.mic_angle": 142.7,
+    "out.level": 6.0
+  },
+  "features": {
+    "lufs": -18.02,
+    "peak": 0.5527,
+    "centroidHz": 993.1,
+    "attackMs": 35.08,
+    "releaseS": 0.08,
+    "f0Hz": 260.87
+  }
+}

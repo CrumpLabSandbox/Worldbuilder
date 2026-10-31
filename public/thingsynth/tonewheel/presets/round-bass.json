@@ -1,0 +1,38 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Round Bass",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "round"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "tg.click": 0.7,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db4": 8,
+    "lower.db1": 8,
+    "lower.db3": 6,
+    "lower.db4": 0,
+    "leslie.speed": "Stop",
+    "out.level": -0.1
+  },
+  "features": {
+    "lufs": -17.98,
+    "peak": 0.2939,
+    "centroidHz": 180.7,
+    "attackMs": 4.73,
+    "releaseS": 0.08,
+    "f0Hz": 65.4
+  }
+}

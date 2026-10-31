@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Slow Spin",
+  "category": "FX",
+  "tags": [
+    "fx",
+    "leslie",
+    "slow"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db4": 8,
+    "upper.db6": 8,
+    "vib.upper": true,
+    "leslie.horn_slow": 24,
+    "leslie.drum_slow": 20,
+    "leslie.horn_am": 1.0,
+    "out.level": -2.2
+  },
+  "features": {
+    "lufs": -18.06,
+    "peak": 0.4382,
+    "centroidHz": 564.3,
+    "attackMs": 42.15,
+    "releaseS": 0.02,
+    "f0Hz": 130.43
+  }
+}

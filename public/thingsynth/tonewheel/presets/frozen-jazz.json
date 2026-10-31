@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Frozen Jazz",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "percussion",
+    "classic",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Jazz Trio"
+  },
+  "params": {
+    "upper.db5": 1,
+    "upper.db6": 1,
+    "lower.db4": 5,
+    "perc.on": true,
+    "amp.drive": 0.1751,
+    "out.level": -6.1
+  },
+  "features": {
+    "lufs": -17.99,
+    "peak": 0.5118,
+    "centroidHz": 479.6,
+    "attackMs": 806.54,
+    "releaseS": 0.04,
+    "f0Hz": 130.79
+  }
+}

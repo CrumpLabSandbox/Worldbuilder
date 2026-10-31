@@ -1,0 +1,40 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Electric Rock",
+  "category": "Rock",
+  "tags": [
+    "morph",
+    "garage",
+    "vibrato"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Garage Combo",
+    "parent2": "Stab Organ",
+    "t": 0.393
+  },
+  "params": {
+    "upper.db1": 3,
+    "upper.db2": 3,
+    "upper.db4": 5,
+    "upper.db5": 5,
+    "upper.db6": 5,
+    "upper.db9": 3,
+    "vib.mode": "V3",
+    "vib.upper": true,
+    "amp.drive": 0.4786,
+    "leslie.on": false,
+    "out.level": -13.1
+  },
+  "features": {
+    "lufs": -17.96,
+    "peak": 0.4366,
+    "centroidHz": 979.9,
+    "attackMs": 8.44,
+    "releaseS": 0.04,
+    "f0Hz": 130.43
+  }
+}

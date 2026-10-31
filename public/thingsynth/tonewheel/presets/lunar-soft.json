@@ -1,0 +1,37 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Lunar Soft",
+  "category": "Soft",
+  "tags": [
+    "soft",
+    "flute",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Mellow Flutes"
+  },
+  "params": {
+    "tg.click": 0.15,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 4,
+    "upper.db4": 4,
+    "upper.db5": 1,
+    "vib.mode": "C2",
+    "vib.upper": true,
+    "amp.drive": 0.1469,
+    "out.level": 5.4
+  },
+  "features": {
+    "lufs": -18.0,
+    "peak": 0.5919,
+    "centroidHz": 687.5,
+    "attackMs": 1616.15,
+    "releaseS": 0.12,
+    "f0Hz": 260.87
+  }
+}

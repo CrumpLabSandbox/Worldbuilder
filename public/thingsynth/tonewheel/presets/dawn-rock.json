@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Dawn Rock",
+  "category": "Rock",
+  "tags": [
+    "blues",
+    "drive",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Blues Growl"
+  },
+  "params": {
+    "upper.db1": 7,
+    "upper.db4": 3,
+    "perc.on": true,
+    "perc.decay": "Slow",
+    "amp.drive": 0.55,
+    "out.level": -8.6
+  },
+  "features": {
+    "lufs": -17.95,
+    "peak": 0.5679,
+    "centroidHz": 650.2,
+    "attackMs": 829.27,
+    "releaseS": 0.06,
+    "f0Hz": 130.79
+  }
+}

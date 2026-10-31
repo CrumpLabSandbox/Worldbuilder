@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Full Swell",
+  "category": "Full",
+  "tags": [
+    "full",
+    "chorus"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db2": 6,
+    "upper.db4": 8,
+    "upper.db5": 6,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 6,
+    "upper.db9": 8,
+    "vib.upper": true,
+    "amp.drive": 0.2,
+    "out.level": -13.9
+  },
+  "features": {
+    "lufs": -17.92,
+    "peak": 0.5705,
+    "centroidHz": 1657.5,
+    "attackMs": 913.25,
+    "releaseS": 0.02,
+    "f0Hz": 130.43
+  }
+}

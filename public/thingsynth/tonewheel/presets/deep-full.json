@@ -1,0 +1,44 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Deep Full",
+  "category": "Full",
+  "tags": [
+    "full",
+    "church",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Big Chorale"
+  },
+  "params": {
+    "tg.click": 0.4894,
+    "upper.db2": 7,
+    "upper.db4": 8,
+    "upper.db5": 7,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 7,
+    "upper.db9": 8,
+    "lower.db1": 8,
+    "lower.db2": 6,
+    "lower.db4": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 6,
+    "vib.mode": "C1",
+    "vib.upper": true,
+    "amp.drive": 0.1739,
+    "out.level": -14.5
+  },
+  "features": {
+    "lufs": -17.87,
+    "peak": 0.6245,
+    "centroidHz": 1484.1,
+    "attackMs": 905.62,
+    "releaseS": 0.02,
+    "f0Hz": 130.43
+  }
+}

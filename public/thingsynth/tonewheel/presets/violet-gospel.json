@@ -1,0 +1,40 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Violet Gospel",
+  "category": "Gospel",
+  "tags": [
+    "morph",
+    "church",
+    "choir"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Choir Full Without 16",
+    "parent2": "Hymn Principal",
+    "t": 0.412
+  },
+  "params": {
+    "tg.crosstalk": -44.1,
+    "upper.db1": 4,
+    "upper.db2": 5,
+    "upper.db3": 7,
+    "upper.db4": 8,
+    "upper.db5": 4,
+    "upper.db6": 6,
+    "upper.db7": 5,
+    "upper.db8": 5,
+    "upper.db9": 5,
+    "vib.upper": true
+  },
+  "features": {
+    "lufs": -17.82,
+    "peak": 0.5828,
+    "centroidHz": 1525.5,
+    "attackMs": 1635.17,
+    "releaseS": 0.04,
+    "f0Hz": 130.43
+  }
+}

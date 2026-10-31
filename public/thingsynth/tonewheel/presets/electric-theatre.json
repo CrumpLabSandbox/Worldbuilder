@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Electric Theatre",
+  "category": "Theatre",
+  "tags": [
+    "morph",
+    "theatre",
+    "vibrato"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Theatre Tibia",
+    "parent2": "Theatre Full",
+    "t": 0.396
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db5": 4,
+    "upper.db9": 3,
+    "vib.mode": "V3",
+    "vib.upper": true
+  },
+  "features": {
+    "lufs": -18.27,
+    "peak": 0.5095,
+    "centroidHz": 777.2,
+    "attackMs": 898.27,
+    "releaseS": 0.04,
+    "f0Hz": 129.73
+  }
+}

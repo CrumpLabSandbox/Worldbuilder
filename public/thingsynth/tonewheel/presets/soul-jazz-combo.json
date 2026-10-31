@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Soul Jazz Combo",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "soul",
+    "fast"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db4": 8,
+    "perc.on": true,
+    "vib.upper": true,
+    "amp.drive": 0.25,
+    "leslie.speed": "Fast",
+    "out.level": -4.9
+  },
+  "features": {
+    "lufs": -18.06,
+    "peak": 0.6213,
+    "centroidHz": 536.4,
+    "attackMs": 40.79,
+    "releaseS": 0.06,
+    "f0Hz": 130.79
+  }
+}

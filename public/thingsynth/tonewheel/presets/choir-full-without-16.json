@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Choir Full Without 16",
+  "category": "Gospel",
+  "tags": [
+    "church",
+    "choir"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 6,
+    "upper.db4": 8,
+    "upper.db5": 6,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "vib.upper": true,
+    "out.level": -14.3
+  },
+  "features": {
+    "lufs": -17.88,
+    "peak": 0.5471,
+    "centroidHz": 1772.1,
+    "attackMs": 913.29,
+    "releaseS": 0.02,
+    "f0Hz": 130.43
+  }
+}

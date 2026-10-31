@@ -8,6 +8,7 @@ import { gardenCtx } from './graffiti.js';
 import { WorldStore, randomSeed, DEFAULT_SPAWN } from './world.js';
 import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './structures.js';
 import { initChat } from './chat.js';
+import { ORGAN_KEYS, KEY_NOTES } from './organHands.js';
 
 const $ = (id) => document.getElementById(id);
 const DEG = Math.PI / 180;
@@ -277,6 +278,23 @@ function updateWorldPanel() {
     sel.appendChild(o);
   }
   renderStructureList();
+  renderVisitMenu();
+}
+
+// The Visit place menu: every named place on this world, one click away.
+function renderVisitMenu() {
+  const sel = $('visit-select');
+  sel.replaceChildren(new Option('Visit place…', ''));
+  const name = (s) => s.name || STRUCTURES[s.type]?.label || s.type;
+  const list = store.current.structures.filter((s) => s.lat != null).sort((a, b) => name(a).localeCompare(name(b)));
+  const groups = [['Places', list.filter((s) => s.createdBy !== 'claude')], ['Built by visitors', list.filter((s) => s.createdBy === 'claude')]];
+  for (const [label, items] of groups) {
+    if (!items.length) continue;
+    const g = document.createElement('optgroup');
+    g.label = label;
+    for (const s of items) g.append(new Option(name(s), s.id));
+    sel.append(g);
+  }
 }
 
 function renderStructureList() {
@@ -317,6 +335,10 @@ function flyToStructure(s) {
     const c = structureObjects.get(s.id)?.userData.computer;
     if (c) { setPose(c.viewPoint(340), c.normal.clone().negate()); return; }
   }
+  if (s.type === 'organstage') {
+    const st = structureObjects.get(s.id)?.userData.organStage;
+    if (st) { const v = st.view(0, 230, 520, 0, 200, 0); setPose(v.pos, v.look); return; }
+  }
   if (s.type === 'catapult') {
     const h = (s.heading ?? 0) * DEG, back = 70 / (R * DEG);
     controls.teleport(s.lat - Math.cos(h) * back, s.lon - Math.sin(h) * back / Math.cos(s.lat * DEG), 30, s.heading ?? 0, -6);
@@ -351,6 +373,18 @@ function flyToStructure(s) {
     const ll = dirToLatLon(behind);
     controls.teleport(ll.lat, ll.lon, 22, heading, -8);
     return;
+  }
+  if (s.type === 'blueprint') {
+    // blueprints come in all sizes: stand back by their measured size
+    const g = structureObjects.get(s.id);
+    if (g) {
+      const size = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3()).length();
+      const back = Math.max(60, size * 1.1), look = g.position.clone().addScaledVector(g.position.clone().normalize(), size * 0.25);
+      const { north, up } = tangentFrame(g.position);
+      const pos = g.position.clone().addScaledVector(north, -back).addScaledVector(up, size * 0.45 + 12);
+      setPose(pos, look.sub(pos).normalize());
+      return;
+    }
   }
   const dist = 45 * (s.scale || 1) + 25;
   // stand to the south of it, looking north and down
@@ -431,6 +465,85 @@ function setPose(pos, look) {
 function updateDialButton() {
   const c = !bbs && !ride && !follow ? nearestComputer() : null;
   $('computer-actions').classList.toggle('hidden', !c);
+  $('btn-organ').classList.toggle('hidden', !!bbs || !!ride || !!follow || !nearestStage());
+}
+function organStages() { return [...structureObjects.values()].map((g) => g.userData.organStage).filter(Boolean); }
+function nearestStage(maxDist = 800) {
+  return organStages().find((st) => st.center.distanceTo(controls.position) < maxDist) || null;
+}
+// Sit at the organ: the seat sees the whole painting above both keyboards.
+function sitAtOrgan(st) {
+  if (bbs || !st) return;
+  loadThingSynth();
+  const v = st.seatView(camera.aspect);
+  glideTo(st, v.pos, v.look, () => {
+    bbs.phase = 'organ';
+    document.body.classList.add('organ-on');
+    showScene(st, true);
+    placeOrganFrame();
+  });
+}
+// ThingSynth runs as its own page in a frame laid over the painting. It makes the
+// sound and animates the painting; the game sends it the notes and moves the hands.
+let thingSynth = null, organOctave = 0;
+const organNotes = new Map(); // key -> sounding note
+function loadThingSynth() {
+  if ($('organ-frame').firstChild) return;
+  const frame = document.createElement('iframe');
+  frame.src = './thingsynth/index.html?embed';
+  frame.title = 'ThingSynth: Golden Pyramid With Tunnel Celebration';
+  frame.tabIndex = -1;
+  frame.allow = 'autoplay; midi';
+  $('organ-frame').append(frame);
+  const wait = setInterval(() => {
+    const api = frame.contentWindow?.thingsynthEmbed;
+    if (!api) return;
+    clearInterval(wait);
+    thingSynth = api;
+    document.body.classList.add('organ-live');
+    placeOrganFrame();
+    $('organ-status').textContent = '🎹 Play A S D F G H J K L ; and W E T Y U O P · Z / X change octave';
+  }, 150);
+}
+function placeOrganFrame() {
+  if (bbs?.phase !== 'organ') return;
+  const pts = bbs.c.corners().map((p) => p.project(camera));
+  const xs = pts.map((p) => (p.x + 1) / 2 * innerWidth), ys = pts.map((p) => (1 - p.y) / 2 * innerHeight);
+  const x = Math.min(...xs), y = Math.min(...ys);
+  Object.assign($('organ-frame').style, { left: `${x}px`, top: `${y}px`, width: `${Math.max(...xs) - x}px`, height: `${Math.max(...ys) - y}px` });
+}
+function organKeyDown(key) {
+  bbs.c.hands.hold(key);
+  if (!thingSynth) return;
+  const note = 60 + organOctave + KEY_NOTES[key];
+  organNotes.set(key, note);
+  const { host } = thingSynth;
+  if (host.audio.running()) { host.noteOn(note, 100); return; }
+  // the first key press starts the audio, then plays if the key is still down
+  thingSynth.start().then(() => { if (organNotes.get(key) === note) host.noteOn(note, 100); }).catch((err) => { console.warn('organ audio', err); toast("The organ's sound couldn't start. Press a key again.", 3000); });
+}
+function organKeyUp(key) {
+  bbs?.c.hands.release(key);
+  const note = organNotes.get(key);
+  organNotes.delete(key);
+  if (note != null && thingSynth) thingSynth.host.noteOff(note);
+}
+function showScene(st, on) {
+  st.setScene(on);
+  // the scene has its own ground and sky, and is the only thing in view
+  if (planetGroup) planetGroup.visible = !on;
+  if (gridGroup) gridGroup.visible = !on && $('opt-grid').checked;
+  for (const g of structureObjects.values()) if (!g.userData.organStage) g.visible = !on;
+}
+function leaveOrgan() {
+  if (!bbs || bbs.phase !== 'organ') return;
+  showScene(bbs.c, false);
+  for (const k of [...bbs.c.hands.held]) organKeyUp(k);
+  document.body.classList.remove('organ-on');
+  organOctave = 0;
+  bbs = null;
+  controls.enabled = true;
+  updateDialButton();
 }
 // glide the camera to a pose at the computer, then call `then`
 function glideTo(c, to, look, then) {
@@ -755,6 +868,10 @@ function wireUI() {
   $('btn-ride').onclick = () => { if (ride) endRide(); else startRide(nearestCoaster()); updateRideButton(); };
   $('btn-dial').onclick = () => dialIn(nearestComputer());
   $('btn-type').onclick = () => sitToType(nearestComputer());
+  $('btn-organ').onclick = () => sitAtOrgan(nearestStage());
+  $('organ-stand').onclick = leaveOrgan;
+  window.addEventListener('keyup', (e) => { if (bbs?.phase === 'organ' && ORGAN_KEYS[e.code]) organKeyUp(ORGAN_KEYS[e.code]); });
+  window.addEventListener('resize', placeOrganFrame);
   $('type-dial').onclick = () => dialIn(bbs?.c);
   $('type-stand').onclick = () => stopTyping();
   // typing goes through a hidden text field, which also brings up a phone's keyboard
@@ -773,6 +890,16 @@ function wireUI() {
   renderer.domElement.addEventListener('pointerdown', () => { if (bbs?.phase === 'typing') setTimeout(focusTypeInput, 0); });
   $('bbs-hangup').onclick = hangUp;
   window.addEventListener('resize', placeBBS);
+  $('visit-select').onchange = (e) => {
+    const s = store.current.structures.find((x) => x.id === e.target.value);
+    e.target.value = '';
+    e.target.blur(); // back to flying, so the next keys steer
+    if (!s || bbs) return;
+    if (ride) endRide();
+    if (follow) endFollow();
+    flyToStructure(s);
+    toast(s.name || STRUCTURES[s.type]?.label || s.type, 1800);
+  };
   $('btn-toggle-list').onclick = () => { const l = $('structure-list'); l.classList.toggle('hidden'); $('btn-toggle-list').textContent = l.classList.contains('hidden') ? 'show' : 'hide'; };
   $('opt-grid').onchange = (e) => { if (gridGroup) gridGroup.visible = e.target.checked; };
   $('opt-clouds').onchange = (e) => { if (cloudMesh) cloudMesh.visible = e.target.checked; };
@@ -782,11 +909,21 @@ function wireUI() {
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) return;
     if (!$('about').classList.contains('hidden') || document.body.classList.contains('intro-open')) return;
+    if (bbs?.phase === 'organ') {
+      if (e.code === 'Escape') { leaveOrgan(); return; }
+      const key = ORGAN_KEYS[e.code];
+      if (key) { e.preventDefault(); if (!e.repeat) organKeyDown(key); }
+      if ((e.code === 'KeyZ' || e.code === 'KeyX') && !e.repeat) {
+        organOctave = THREE.MathUtils.clamp(organOctave + (e.code === 'KeyZ' ? -12 : 12), -36, 36);
+        toast(organOctave ? `Octave ${organOctave > 0 ? '+' : ''}${organOctave / 12}` : 'Middle octave', 900);
+      }
+      return;
+    }
     if (e.code === 'KeyH') setHelp($('help').classList.contains('hidden'));
     if (e.code === 'KeyU') { document.body.classList.toggle('photo'); toast(document.body.classList.contains('photo') ? 'Photo mode: UI hidden (U to show)' : 'UI shown', 1500); }
     if (e.code === 'KeyG') { $('opt-grid').checked = !$('opt-grid').checked; $('opt-grid').onchange({ target: $('opt-grid') }); }
     if (e.code === 'KeyB') setBuildMode(!buildMode);
-    if (bbs && e.code === 'Escape') { if (bbs.phase === 'typing') stopTyping(); else hangUp(); return; }
+    if (bbs && e.code === 'Escape') { if (bbs.phase === 'organ') leaveOrgan(); else if (bbs.phase === 'typing') stopTyping(); else hangUp(); return; }
     if (bbs) return;
     if (ride && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endRide(); updateRideButton(); return; }
     if (follow && ['Escape', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) { endFollow(); return; }
@@ -1102,5 +1239,5 @@ function animate() {
   gardenCtx.viewer = () => controls.position;
   renderer.domElement.style.cursor = 'grab';
   animate();
-  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
+  window.worldbuilder = { store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
 })();

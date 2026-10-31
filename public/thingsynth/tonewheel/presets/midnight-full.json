@@ -1,0 +1,39 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Midnight Full",
+  "category": "Full",
+  "tags": [
+    "full",
+    "reed",
+    "fast",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Trumpet Reed"
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 6,
+    "upper.db4": 8,
+    "upper.db5": 7,
+    "upper.db6": 6,
+    "upper.db7": 5,
+    "upper.db8": 3,
+    "amp.drive": 0.3,
+    "leslie.speed": "Fast",
+    "out.level": -10.9
+  },
+  "features": {
+    "lufs": -18.02,
+    "peak": 0.5216,
+    "centroidHz": 1397.6,
+    "attackMs": 98.15,
+    "releaseS": 0.02,
+    "f0Hz": 260.87
+  }
+}

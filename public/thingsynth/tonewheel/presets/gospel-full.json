@@ -1,0 +1,42 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Gospel Full",
+  "category": "Gospel",
+  "tags": [
+    "gospel",
+    "full",
+    "fast"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 8,
+    "lower.db2": 3,
+    "lower.db4": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 6,
+    "vib.lower": true,
+    "amp.drive": 0.35,
+    "leslie.speed": "Fast",
+    "out.level": -18.7
+  },
+  "features": {
+    "lufs": -17.77,
+    "peak": 0.4563,
+    "centroidHz": 2033.0,
+    "attackMs": 40.65,
+    "releaseS": 0.04,
+    "f0Hz": 129.73
+  }
+}

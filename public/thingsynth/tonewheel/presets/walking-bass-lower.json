@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Walking Bass Lower",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "jazz"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "lower.db1": 8,
+    "lower.db4": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 0,
+    "out.level": -2.3
+  },
+  "features": {
+    "lufs": -18.06,
+    "peak": 0.294,
+    "centroidHz": 139.3,
+    "attackMs": 3.85,
+    "releaseS": 0.06,
+    "f0Hz": 65.48
+  }
+}

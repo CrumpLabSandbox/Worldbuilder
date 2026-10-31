@@ -1,0 +1,38 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Paper Texture",
+  "category": "FX",
+  "tags": [
+    "extreme",
+    "fx",
+    "leslie"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Slow Spin"
+  },
+  "params": {
+    "tg.click": 0.1,
+    "upper.db2": 0,
+    "upper.db4": 8,
+    "upper.db6": 8,
+    "vib.upper": true,
+    "amp.drive": 0.5931,
+    "leslie.horn_slow": 24,
+    "leslie.drum_slow": 20,
+    "leslie.mic_angle": 60.0,
+    "leslie.horn_am": 1.0,
+    "out.level": -5.5
+  },
+  "features": {
+    "lufs": -18.04,
+    "peak": 0.5242,
+    "centroidHz": 545.9,
+    "attackMs": 1050.6,
+    "releaseS": 0.06,
+    "f0Hz": 130.43
+  }
+}

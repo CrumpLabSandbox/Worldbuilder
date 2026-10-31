@@ -1,0 +1,40 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Dusk Sub",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "round",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Round Bass"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "tg.click": 0.7,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db4": 8,
+    "lower.db1": 8,
+    "lower.db3": 5,
+    "lower.db4": 0,
+    "leslie.speed": "Stop",
+    "leslie.mic_angle": 121.9,
+    "out.level": 0.6
+  },
+  "features": {
+    "lufs": -18.05,
+    "peak": 0.292,
+    "centroidHz": 187.7,
+    "attackMs": 19.71,
+    "releaseS": 0.08,
+    "f0Hz": 65.4
+  }
+}

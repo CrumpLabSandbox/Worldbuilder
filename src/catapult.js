@@ -18,7 +18,7 @@ export class CatapultFeature {
     this.center = latLonToDir(rec.lat, rec.lon);
     this.pad = rec.pad ?? 50;
     this.band = rec.band ?? 28;
-    this.target = planet.elevation(this.center) + (rec.raise ?? 5);
+    this.target = rec.level ?? planet.elevation(this.center) + (rec.raise ?? 5);
     this.heading = rec.heading ?? 0;
     this.lane = rec.lane ?? 450;            // length of the tree-free firing lane
     this.laneHalf = rec.laneWidth ?? 32;    // half-angle of the lane, degrees

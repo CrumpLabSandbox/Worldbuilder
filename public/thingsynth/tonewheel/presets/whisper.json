@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Whisper",
+  "category": "Soft",
+  "tags": [
+    "soft",
+    "quiet"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "tg.leakage": -50,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 4,
+    "vib.mode": "C1",
+    "vib.upper": true,
+    "out.level": 7.5
+  },
+  "features": {
+    "lufs": -18.03,
+    "peak": 0.4405,
+    "centroidHz": 751.6,
+    "attackMs": 151.79,
+    "releaseS": 0.18,
+    "f0Hz": 262.3
+  }
+}

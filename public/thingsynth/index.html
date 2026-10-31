@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>thingsynth</title>
+  <meta name="description" content="A painting by Matt Crump that plays Tonewheel, a tonewheel organ synth, in the browser." />
+  <script type="module" crossorigin src="./assets/main-Bsi7c3DR.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="stylesheet" crossorigin href="./assets/main-D0dSiUdf.css">
+</head>
+<body>
+  <main id="stage" aria-label="Painting"></main>
+  <div id="start" role="button" tabindex="0">
+    <div class="card">
+      <h1>thingsynth</h1>
+      <p id="start-title"></p>
+      <p class="hint">Click or press a key to start the organ.</p>
+      <svg class="keymap" viewBox="0 0 504 206" role="img" aria-label="A piano keyboard with a computer key printed on each piano key. The white keys are A S D F G H J K L ;. The black keys are W E T Y U O P. Z plays an octave lower and X an octave higher.">
+        <rect class="white" x="2" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="52" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="102" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="152" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="202" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="252" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="302" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="352" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="402" y="2" width="50" height="150" rx="4"/>
+        <rect class="white" x="452" y="2" width="50" height="150" rx="4"/>
+        <rect class="black" x="36" y="2" width="32" height="94" rx="3"/>
+        <rect class="black" x="86" y="2" width="32" height="94" rx="3"/>
+        <rect class="black" x="186" y="2" width="32" height="94" rx="3"/>
+        <rect class="black" x="236" y="2" width="32" height="94" rx="3"/>
+        <rect class="black" x="286" y="2" width="32" height="94" rx="3"/>
+        <rect class="black" x="386" y="2" width="32" height="94" rx="3"/>
+        <rect class="black" x="436" y="2" width="32" height="94" rx="3"/>
+        <rect class="cap" x="12" y="110" width="30" height="30" rx="6"/><text class="letter" x="27" y="131.5">A</text>
+        <rect class="cap" x="37" y="57" width="30" height="30" rx="6"/><text class="letter" x="52" y="78.5">W</text>
+        <rect class="cap" x="62" y="110" width="30" height="30" rx="6"/><text class="letter" x="77" y="131.5">S</text>
+        <rect class="cap" x="87" y="57" width="30" height="30" rx="6"/><text class="letter" x="102" y="78.5">E</text>
+        <rect class="cap" x="112" y="110" width="30" height="30" rx="6"/><text class="letter" x="127" y="131.5">D</text>
+        <rect class="cap" x="162" y="110" width="30" height="30" rx="6"/><text class="letter" x="177" y="131.5">F</text>
+        <rect class="cap" x="187" y="57" width="30" height="30" rx="6"/><text class="letter" x="202" y="78.5">T</text>
+        <rect class="cap" x="212" y="110" width="30" height="30" rx="6"/><text class="letter" x="227" y="131.5">G</text>
+        <rect class="cap" x="237" y="57" width="30" height="30" rx="6"/><text class="letter" x="252" y="78.5">Y</text>
+        <rect class="cap" x="262" y="110" width="30" height="30" rx="6"/><text class="letter" x="277" y="131.5">H</text>
+        <rect class="cap" x="287" y="57" width="30" height="30" rx="6"/><text class="letter" x="302" y="78.5">U</text>
+        <rect class="cap" x="312" y="110" width="30" height="30" rx="6"/><text class="letter" x="327" y="131.5">J</text>
+        <rect class="cap" x="362" y="110" width="30" height="30" rx="6"/><text class="letter" x="377" y="131.5">K</text>
+        <rect class="cap" x="387" y="57" width="30" height="30" rx="6"/><text class="letter" x="402" y="78.5">O</text>
+        <rect class="cap" x="412" y="110" width="30" height="30" rx="6"/><text class="letter" x="427" y="131.5">L</text>
+        <rect class="cap" x="437" y="57" width="30" height="30" rx="6"/><text class="letter" x="452" y="78.5">P</text>
+        <rect class="cap" x="462" y="110" width="30" height="30" rx="6"/><text class="letter" x="477" y="131.5">;</text>
+        <rect class="cap" x="2" y="173" width="30" height="30" rx="6"/><text class="letter" x="17" y="194.5">Z</text>
+        <path class="arrow" d="M58 188l14 -9v18z"/><text class="say" x="80" y="193" text-anchor="start">lower</text>
+        <text class="say mid" x="252" y="193">octave</text>
+        <text class="say" x="424" y="193" text-anchor="end">higher</text><path class="arrow" d="M446 188l-14 -9v18z"/>
+        <rect class="cap" x="472" y="173" width="30" height="30" rx="6"/><text class="letter" x="487" y="194.5">X</text>
+      </svg>
+      <p class="hint midi">A MIDI keyboard works too.</p>
+    </div>
+  </div>
+  <footer id="bar">
+    <label>Change how the organ sounds <select id="preset"></select></label>
+    <button id="wander" type="button" aria-pressed="false" title="Let every parameter of the preset wander around it">Wander through the organ sound settings</button>
+    <span id="shuffle-box"><button id="shuffle" type="button" title="Deal every parameter and note onto other animations of the painting">Remap the animations to the organ drawbars and keys</button><button id="unshuffle" type="button" title="Back to the curated mapping" hidden>&times;</button></span>
+    <span id="status">off</span>
+    <button id="keys-toggle" type="button" aria-pressed="false" title="Show or hide the on-screen piano">Piano keys</button>
+    <a id="about-link" href="about.html">What is this?</a>
+    <a id="debug-link" href="?debug">debug</a>
+  </footer>
+</body>
+</html>

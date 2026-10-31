@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Mellow Flutes",
+  "category": "Soft",
+  "tags": [
+    "soft",
+    "flute"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "tg.click": 0.15,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 4,
+    "upper.db4": 4,
+    "vib.mode": "C2",
+    "vib.upper": true,
+    "out.level": 5.9
+  },
+  "features": {
+    "lufs": -18.07,
+    "peak": 0.5747,
+    "centroidHz": 616.6,
+    "attackMs": 151.77,
+    "releaseS": 0.12,
+    "f0Hz": 260.87
+  }
+}

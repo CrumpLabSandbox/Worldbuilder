@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Solar Ballad",
+  "category": "Ballad",
+  "tags": [
+    "ballad",
+    "flute",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Ballad Flute"
+  },
+  "params": {
+    "tg.click": 0.1,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db4": 1,
+    "vib.upper": true,
+    "leslie.mic_angle": 113.2,
+    "out.level": -2.7
+  },
+  "features": {
+    "lufs": -18.07,
+    "peak": 0.5308,
+    "centroidHz": 463.8,
+    "attackMs": 159.46,
+    "releaseS": 0.06,
+    "f0Hz": 260.87
+  }
+}

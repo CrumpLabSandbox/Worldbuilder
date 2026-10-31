@@ -1,0 +1,37 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Mellow Theatre",
+  "category": "Theatre",
+  "tags": [
+    "theatre",
+    "reed",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Theatre Kinura"
+  },
+  "params": {
+    "tg.click": 0.4441,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db5": 8,
+    "upper.db7": 8,
+    "upper.db9": 6,
+    "vib.mode": "V2",
+    "vib.upper": true,
+    "amp.drive": 0.057,
+    "out.level": -11.0
+  },
+  "features": {
+    "lufs": -17.94,
+    "peak": 0.558,
+    "centroidHz": 1636.5,
+    "attackMs": 1603.06,
+    "releaseS": 0.02,
+    "f0Hz": 260.87
+  }
+}

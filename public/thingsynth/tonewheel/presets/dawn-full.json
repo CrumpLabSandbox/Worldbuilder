@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Dawn Full",
+  "category": "Full",
+  "tags": [
+    "full",
+    "classic",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Full Organ"
+  },
+  "params": {
+    "upper.db4": 7,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "amp.drive": 0.0721,
+    "out.level": -18.0
+  },
+  "features": {
+    "lufs": -17.83,
+    "peak": 0.4965,
+    "centroidHz": 1603.7,
+    "attackMs": 890.31,
+    "releaseS": 0.02,
+    "f0Hz": 130.43
+  }
+}

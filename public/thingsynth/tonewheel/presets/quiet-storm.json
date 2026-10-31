@@ -1,0 +1,37 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Quiet Storm",
+  "category": "FX",
+  "tags": [
+    "extreme",
+    "fx",
+    "drive"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Overdrive Scream"
+  },
+  "params": {
+    "upper.db4": 7,
+    "upper.db5": 7,
+    "upper.db6": 6,
+    "upper.db7": 7,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "amp.drive": 0.85,
+    "leslie.speed": "Fast",
+    "leslie.mic_angle": 160.0,
+    "out.level": -17.7
+  },
+  "features": {
+    "lufs": -17.75,
+    "peak": 0.5455,
+    "centroidHz": 1998.2,
+    "attackMs": 11.35,
+    "releaseS": 0.08,
+    "f0Hz": 1920
+  }
+}

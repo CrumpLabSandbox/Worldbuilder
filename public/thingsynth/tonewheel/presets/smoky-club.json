@@ -1,0 +1,31 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Smoky Club",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "warm"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db2": 3,
+    "perc.on": true,
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "amp.drive": 0.2
+  },
+  "features": {
+    "lufs": -17.96,
+    "peak": 0.4897,
+    "centroidHz": 387.5,
+    "attackMs": 12.15,
+    "releaseS": 0.02,
+    "f0Hz": 130.79
+  }
+}

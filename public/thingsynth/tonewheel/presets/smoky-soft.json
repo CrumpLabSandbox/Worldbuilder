@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Smoky Soft",
+  "category": "Soft",
+  "tags": [
+    "soft",
+    "quiet",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Whisper"
+  },
+  "params": {
+    "tg.leakage": -50,
+    "upper.db1": 1,
+    "upper.db2": 0,
+    "upper.db3": 3,
+    "vib.mode": "C1",
+    "vib.upper": true,
+    "amp.drive": 0.0089,
+    "out.level": 9.8
+  },
+  "features": {
+    "lufs": -17.99,
+    "peak": 0.4912,
+    "centroidHz": 671.8,
+    "attackMs": 65.69,
+    "releaseS": 0.18,
+    "f0Hz": 130.79
+  }
+}

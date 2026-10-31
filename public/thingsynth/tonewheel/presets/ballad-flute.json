@@ -1,0 +1,31 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Ballad Flute",
+  "category": "Ballad",
+  "tags": [
+    "ballad",
+    "flute"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "tg.click": 0.2,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "vib.upper": true,
+    "out.level": -2.6
+  },
+  "features": {
+    "lufs": -17.99,
+    "peak": 0.5292,
+    "centroidHz": 448.7,
+    "attackMs": 155.77,
+    "releaseS": 0.06,
+    "f0Hz": 260.87
+  }
+}

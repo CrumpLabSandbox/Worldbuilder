@@ -1,0 +1,32 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Quiet Theatre",
+  "category": "Theatre",
+  "tags": [
+    "theatre",
+    "vibrato",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Theatre Tibia"
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db5": 6,
+    "vib.mode": "V3",
+    "vib.upper": true,
+    "amp.drive": 0.1129
+  },
+  "features": {
+    "lufs": -18.23,
+    "peak": 0.5684,
+    "centroidHz": 519.2,
+    "attackMs": 1557.58,
+    "releaseS": 0.02,
+    "f0Hz": 130.08
+  }
+}

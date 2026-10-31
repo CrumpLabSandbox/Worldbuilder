@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Dusty Jazz",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "warm",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Smoky Club"
+  },
+  "params": {
+    "upper.db2": 2,
+    "perc.on": true,
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "amp.drive": 0.2,
+    "leslie.mic_angle": 94.3
+  },
+  "features": {
+    "lufs": -18.07,
+    "peak": 0.4831,
+    "centroidHz": 373.8,
+    "attackMs": 12.17,
+    "releaseS": 0.02,
+    "f0Hz": 130.79
+  }
+}

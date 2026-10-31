@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Round Jazz",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "percussion",
+    "dry",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Bebop Comping"
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "lower.db3": 6,
+    "lower.db4": 6,
+    "perc.on": true,
+    "amp.drive": 0.0,
+    "leslie.speed": "Stop",
+    "out.level": -0.2
+  },
+  "features": {
+    "lufs": -18.07,
+    "peak": 0.665,
+    "centroidHz": 360.8,
+    "attackMs": 4.48,
+    "releaseS": 0.06,
+    "f0Hz": 130.79
+  }
+}

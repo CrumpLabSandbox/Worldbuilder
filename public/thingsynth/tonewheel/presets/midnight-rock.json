@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Midnight Rock",
+  "category": "Rock",
+  "tags": [
+    "rock",
+    "stab",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Stab Organ"
+  },
+  "params": {
+    "upper.db9": 8,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "amp.drive": 0.6166,
+    "leslie.speed": "Stop",
+    "out.level": -9.2
+  },
+  "features": {
+    "lufs": -18.04,
+    "peak": 0.5697,
+    "centroidHz": 505.7,
+    "attackMs": 3.54,
+    "releaseS": 0.06,
+    "f0Hz": 130.79
+  }
+}

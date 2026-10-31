@@ -10,6 +10,9 @@ megaZINE. Both texts are in `index.html`.
 
 ## Exploring
 
+**Visit place** at the top of the screen lists every place on the world; choose
+one to go straight there.
+
 A **Controls** card at the bottom of the screen lists everything; hide it
 with `H` (or *hide*) and bring it back with the **? Controls** button.
 
@@ -139,6 +142,14 @@ Terrain features reshape the planet itself rather than sitting on it:
   (try `help`, `dir`, `ver`). On a phone the on-screen keyboard opens.
   Keystrokes typed into the BBS itself can't reach the game, as browsers keep
   another site's frame private, so the hands don't type there yet.
+
+- `organstage` — the ThingSynth stage: a giant organ on a round platform, with
+  *Golden Pyramid With Tunnel Celebration* on a stepped temple across a long
+  causeway (`pad`, `band`, `raise`, and `heading` is the way the organist
+  looks). Near it, **🎹 Play the organ** seats you in the Mirror Sea, a sunset
+  scene with the temple reflected in the water that shows only while seated.
+  The 17 keys are ThingSynth's playable computer keys (A S D F G H J K L ; and
+  W E T Y U O P), and the cognitive hands play and hold them.
 
 Press **U** for photo mode, which hides the interface.
 

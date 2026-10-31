@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Violet Percussive",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "xylo",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Perc Only Second"
+  },
+  "params": {
+    "tg.click": 0.4573,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "leslie.mic_angle": 98.1,
+    "out.level": 10.8
+  },
+  "features": {
+    "lufs": -18.1,
+    "peak": 0.5869,
+    "centroidHz": 1001.1,
+    "attackMs": 3.5,
+    "releaseS": 0.22,
+    "f0Hz": 521.74
+  }
+}

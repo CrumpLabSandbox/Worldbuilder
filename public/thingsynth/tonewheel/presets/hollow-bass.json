@@ -1,0 +1,42 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Hollow Bass",
+  "category": "Bass",
+  "tags": [
+    "morph",
+    "bass",
+    "split"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Growl Bass",
+    "parent2": "Round Bass",
+    "t": 0.468
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "tg.click": 0.5936,
+    "upper.db1": 4,
+    "upper.db2": 4,
+    "upper.db4": 4,
+    "lower.db1": 8,
+    "lower.db2": 2,
+    "lower.db3": 7,
+    "lower.db4": 0,
+    "amp.drive": 0.3362,
+    "leslie.on": false,
+    "out.level": -5.1
+  },
+  "features": {
+    "lufs": -17.97,
+    "peak": 0.2744,
+    "centroidHz": 176.9,
+    "attackMs": 2.27,
+    "releaseS": 0.06,
+    "f0Hz": 65.4
+  }
+}

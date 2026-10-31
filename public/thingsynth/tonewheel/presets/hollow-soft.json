@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Hollow Soft",
+  "category": "Soft",
+  "tags": [
+    "soft",
+    "flute",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Mellow Flutes"
+  },
+  "params": {
+    "tg.click": 0.15,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 4,
+    "upper.db4": 4,
+    "vib.mode": "C2",
+    "vib.upper": true,
+    "leslie.mic_angle": 99.4,
+    "out.level": 6.0
+  },
+  "features": {
+    "lufs": -18.0,
+    "peak": 0.5923,
+    "centroidHz": 586.2,
+    "attackMs": 178.44,
+    "releaseS": 0.12,
+    "f0Hz": 260.87
+  }
+}

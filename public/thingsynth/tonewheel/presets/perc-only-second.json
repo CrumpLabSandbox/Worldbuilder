@@ -1,0 +1,32 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Perc Only Second",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "xylo"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "out.level": 10.4
+  },
+  "features": {
+    "lufs": -18.01,
+    "peak": 0.5636,
+    "centroidHz": 1016.1,
+    "attackMs": 3.42,
+    "releaseS": 0.22,
+    "f0Hz": 521.74
+  }
+}

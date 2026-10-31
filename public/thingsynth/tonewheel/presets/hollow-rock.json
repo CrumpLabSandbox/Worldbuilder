@@ -1,0 +1,42 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Hollow Rock",
+  "category": "Rock",
+  "tags": [
+    "morph",
+    "rock",
+    "prog"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Prog Wall",
+    "parent2": "Blues Growl",
+    "t": 0.463
+  },
+  "params": {
+    "upper.db4": 6,
+    "upper.db5": 4,
+    "upper.db6": 4,
+    "upper.db7": 4,
+    "upper.db8": 4,
+    "upper.db9": 4,
+    "lower.db1": 4,
+    "lower.db2": 4,
+    "lower.db4": 4,
+    "pedal.db16": 7,
+    "pedal.db8": 6,
+    "amp.drive": 0.7112,
+    "out.level": -16.4
+  },
+  "features": {
+    "lufs": -17.83,
+    "peak": 0.6257,
+    "centroidHz": 1530.2,
+    "attackMs": 882.69,
+    "releaseS": 0.08,
+    "f0Hz": 130.79
+  }
+}

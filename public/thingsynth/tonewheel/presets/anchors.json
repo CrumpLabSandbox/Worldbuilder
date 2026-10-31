@@ -1,0 +1,3193 @@
+{
+ "anchors": [
+  {
+   "name": "Jazz Trio",
+   "category": "Jazz",
+   "tags": [
+    "jazz",
+    "percussion",
+    "classic"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 5,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Fast",
+    "perc.volume": "Normal",
+    "amp.drive": 0.15
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.0,
+     0.3
+    ]
+   }
+  },
+  {
+   "name": "Jazz Ballad Second",
+   "category": "Jazz",
+   "tags": [
+    "jazz",
+    "ballad",
+    "percussion"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "vib.upper": true,
+    "vib.mode": "C3"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Bebop Comping",
+   "category": "Jazz",
+   "tags": [
+    "jazz",
+    "percussion",
+    "dry"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 6,
+    "lower.db4": 6,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Fast",
+    "perc.volume": "Normal",
+    "leslie.speed": "Stop"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     0,
+     2
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Soul Jazz Combo",
+   "category": "Jazz",
+   "tags": [
+    "jazz",
+    "soul",
+    "fast"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Fast",
+    "perc.volume": "Normal",
+    "vib.upper": true,
+    "vib.mode": "C3",
+    "leslie.speed": "Fast",
+    "amp.drive": 0.25
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.1,
+     0.4
+    ]
+   }
+  },
+  {
+   "name": "Smoky Club",
+   "category": "Jazz",
+   "tags": [
+    "jazz",
+    "warm"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 3,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "amp.drive": 0.2
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     1,
+     5
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.05,
+     0.35
+    ]
+   }
+  },
+  {
+   "name": "Gospel Full",
+   "category": "Gospel",
+   "tags": [
+    "gospel",
+    "full",
+    "fast"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 8,
+    "lower.db2": 3,
+    "lower.db3": 8,
+    "lower.db4": 0,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 6,
+    "vib.lower": true,
+    "vib.mode": "C3",
+    "leslie.speed": "Fast",
+    "amp.drive": 0.35
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     6,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ],
+    "amp.drive": [
+     0.2,
+     0.5
+    ]
+   }
+  },
+  {
+   "name": "Gospel Shout",
+   "category": "Gospel",
+   "tags": [
+    "gospel",
+    "drive"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "leslie.speed": "Fast",
+    "amp.drive": 0.5
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     6,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ],
+    "amp.drive": [
+     0.35,
+     0.65
+    ]
+   }
+  },
+  {
+   "name": "Sunday Mellow",
+   "category": "Gospel",
+   "tags": [
+    "church",
+    "soft"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 4,
+    "lower.db4": 4,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C2"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Choir Full Without 16",
+   "category": "Gospel",
+   "tags": [
+    "church",
+    "choir"
+   ],
+   "params": {
+    "upper.db1": 6,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 6,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C3"
+   },
+   "vary": {
+    "upper.db1": [
+     4,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     4,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     6,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ]
+   }
+  },
+  {
+   "name": "Hymn Principal",
+   "category": "Gospel",
+   "tags": [
+    "church",
+    "direct"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 6,
+    "upper.db4": 8,
+    "upper.db5": 0,
+    "upper.db6": 4,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "leslie.on": false,
+    "tg.crosstalk": -50
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     4,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     2,
+     6
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Rock Overdrive",
+   "category": "Rock",
+   "tags": [
+    "rock",
+    "drive",
+    "percussion"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Fast",
+    "perc.volume": "Normal",
+    "amp.drive": 0.75,
+    "leslie.speed": "Fast",
+    "leslie.mic_angle": 150
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.6,
+     0.9
+    ]
+   }
+  },
+  {
+   "name": "Prog Wall",
+   "category": "Rock",
+   "tags": [
+    "rock",
+    "prog",
+    "full"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 8,
+    "lower.db2": 8,
+    "lower.db3": 8,
+    "lower.db4": 0,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 8,
+    "amp.drive": 0.85
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     6,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ],
+    "amp.drive": [
+     0.7,
+     0.95
+    ]
+   }
+  },
+  {
+   "name": "Stab Organ",
+   "category": "Rock",
+   "tags": [
+    "rock",
+    "stab"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "perc.decay": "Fast",
+    "amp.drive": 0.6,
+    "leslie.speed": "Stop"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     6,
+     8
+    ],
+    "amp.drive": [
+     0.45,
+     0.75
+    ]
+   }
+  },
+  {
+   "name": "Garage Combo",
+   "category": "Rock",
+   "tags": [
+    "garage",
+    "vibrato",
+    "direct"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "V3",
+    "leslie.on": false,
+    "amp.drive": 0.4
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.25,
+     0.55
+    ]
+   }
+  },
+  {
+   "name": "Blues Growl",
+   "category": "Rock",
+   "tags": [
+    "blues",
+    "drive"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 4,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Slow",
+    "amp.drive": 0.55
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     2,
+     6
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.4,
+     0.7
+    ]
+   }
+  },
+  {
+   "name": "Ballad Flute",
+   "category": "Ballad",
+   "tags": [
+    "ballad",
+    "flute"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C3",
+    "tg.click": 0.2
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Pop Ballad Pad",
+   "category": "Ballad",
+   "tags": [
+    "ballad",
+    "pad"
+   ],
+   "params": {
+    "upper.db1": 6,
+    "upper.db2": 7,
+    "upper.db3": 8,
+    "upper.db4": 6,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 6,
+    "lower.db4": 6,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C3"
+   },
+   "vary": {
+    "upper.db1": [
+     4,
+     8
+    ],
+    "upper.db2": [
+     5,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     4,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Bright Ballad",
+   "category": "Ballad",
+   "tags": [
+    "ballad",
+    "bright"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     6,
+     8
+    ]
+   }
+  },
+  {
+   "name": "Sixties Chord Organ",
+   "category": "Ballad",
+   "tags": [
+    "sixties",
+    "chorus"
+   ],
+   "params": {
+    "upper.db1": 6,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 6,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C3",
+    "amp.drive": 0.25
+   },
+   "vary": {
+    "upper.db1": [
+     4,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     4,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.1,
+     0.4
+    ]
+   }
+  },
+  {
+   "name": "Whisper",
+   "category": "Soft",
+   "tags": [
+    "soft",
+    "quiet"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 4,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C1",
+    "tg.leakage": -50
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     2,
+     6
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Clarinet",
+   "category": "Soft",
+   "tags": [
+    "soft",
+    "reed",
+    "odd"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 8,
+    "upper.db6": 0,
+    "upper.db7": 8,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "V2"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Strings",
+   "category": "Soft",
+   "tags": [
+    "soft",
+    "strings"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 7,
+    "upper.db4": 8,
+    "upper.db5": 7,
+    "upper.db6": 6,
+    "upper.db7": 5,
+    "upper.db8": 4,
+    "upper.db9": 3,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C3"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     5,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     5,
+     8
+    ],
+    "upper.db6": [
+     4,
+     8
+    ],
+    "upper.db7": [
+     3,
+     7
+    ],
+    "upper.db8": [
+     2,
+     6
+    ],
+    "upper.db9": [
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "name": "Mellow Flutes",
+   "category": "Soft",
+   "tags": [
+    "soft",
+    "flute"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 4,
+    "upper.db4": 4,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C2",
+    "tg.click": 0.15
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     2,
+     6
+    ],
+    "upper.db4": [
+     2,
+     6
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Perc Third Flute",
+   "category": "Percussive",
+   "tags": [
+    "percussion",
+    "flute"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Fast",
+    "perc.volume": "Normal",
+    "leslie.speed": "Stop"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Perc Only Second",
+   "category": "Percussive",
+   "tags": [
+    "percussion",
+    "xylo"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "perc.decay": "Fast",
+    "perc.volume": "Normal"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     0,
+     2
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Perc Chime",
+   "category": "Percussive",
+   "tags": [
+    "percussion",
+    "chime"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "perc.decay": "Slow",
+    "perc.volume": "Soft"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Click Comp",
+   "category": "Percussive",
+   "tags": [
+    "percussion",
+    "click"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "perc.on": true,
+    "perc.harmonic": "Third",
+    "perc.decay": "Fast",
+    "perc.volume": "Normal",
+    "tg.click": 0.9,
+    "leslie.speed": "Stop"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     0,
+     2
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Full Organ",
+   "category": "Full",
+   "tags": [
+    "full",
+    "classic"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     6,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ]
+   }
+  },
+  {
+   "name": "Trumpet Reed",
+   "category": "Full",
+   "tags": [
+    "full",
+    "reed",
+    "fast"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 6,
+    "upper.db4": 8,
+    "upper.db5": 7,
+    "upper.db6": 6,
+    "upper.db7": 5,
+    "upper.db8": 4,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "amp.drive": 0.3,
+    "leslie.speed": "Fast"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     4,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     5,
+     8
+    ],
+    "upper.db6": [
+     4,
+     8
+    ],
+    "upper.db7": [
+     3,
+     7
+    ],
+    "upper.db8": [
+     2,
+     6
+    ],
+    "upper.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.15,
+     0.45
+    ]
+   }
+  },
+  {
+   "name": "Full Swell",
+   "category": "Full",
+   "tags": [
+    "full",
+    "chorus"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 6,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 6,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 6,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "C3",
+    "amp.drive": 0.2
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     4,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     4,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     4,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ],
+    "amp.drive": [
+     0.05,
+     0.35
+    ]
+   }
+  },
+  {
+   "name": "Big Chorale",
+   "category": "Full",
+   "tags": [
+    "full",
+    "church"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 7,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 7,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 7,
+    "upper.db9": 8,
+    "lower.db1": 8,
+    "lower.db2": 6,
+    "lower.db3": 8,
+    "lower.db4": 0,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 6,
+    "vib.upper": true,
+    "vib.mode": "C1"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     5,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     5,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     5,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ]
+   }
+  },
+  {
+   "name": "Theatre Tibia",
+   "category": "Theatre",
+   "tags": [
+    "theatre",
+    "vibrato"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 6,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "V3",
+    "leslie.speed": "Slow"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     4,
+     8
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Theatre Full",
+   "category": "Theatre",
+   "tags": [
+    "theatre",
+    "bright"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "V3",
+    "leslie.speed": "Slow"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     6,
+     8
+    ]
+   }
+  },
+  {
+   "name": "Theatre Sixteen One",
+   "category": "Theatre",
+   "tags": [
+    "theatre",
+    "hollow"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "V2",
+    "leslie.on": false
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     0,
+     2
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     6,
+     8
+    ]
+   }
+  },
+  {
+   "name": "Theatre Kinura",
+   "category": "Theatre",
+   "tags": [
+    "theatre",
+    "reed"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 8,
+    "upper.db6": 0,
+    "upper.db7": 8,
+    "upper.db8": 0,
+    "upper.db9": 6,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "vib.upper": true,
+    "vib.mode": "V2",
+    "leslie.speed": "Slow"
+   },
+   "vary": {
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     4,
+     8
+    ]
+   }
+  },
+  {
+   "name": "Walking Bass Lower",
+   "category": "Bass",
+   "tags": [
+    "bass",
+    "split",
+    "jazz"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 8,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 0,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 0,
+    "voice.manuals": "Split",
+    "voice.split": 55
+   },
+   "vary": {
+    "lower.db1": [
+     6,
+     8
+    ],
+    "lower.db2": [
+     0,
+     2
+    ],
+    "lower.db3": [
+     6,
+     8
+    ],
+    "lower.db4": [
+     0,
+     2
+    ],
+    "lower.db5": [
+     0,
+     2
+    ],
+    "lower.db6": [
+     0,
+     2
+    ],
+    "lower.db7": [
+     0,
+     2
+    ],
+    "lower.db8": [
+     0,
+     2
+    ],
+    "lower.db9": [
+     0,
+     2
+    ],
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Round Bass",
+   "category": "Bass",
+   "tags": [
+    "bass",
+    "split",
+    "round"
+   ],
+   "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 8,
+    "lower.db2": 0,
+    "lower.db3": 6,
+    "lower.db4": 0,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "leslie.speed": "Stop",
+    "tg.click": 0.7
+   },
+   "vary": {
+    "lower.db1": [
+     6,
+     8
+    ],
+    "lower.db2": [
+     0,
+     2
+    ],
+    "lower.db3": [
+     4,
+     8
+    ],
+    "lower.db4": [
+     0,
+     2
+    ],
+    "lower.db5": [
+     0,
+     2
+    ],
+    "lower.db6": [
+     0,
+     2
+    ],
+    "lower.db7": [
+     0,
+     2
+    ],
+    "lower.db8": [
+     0,
+     2
+    ],
+    "lower.db9": [
+     0,
+     2
+    ],
+    "upper.db1": [
+     0,
+     2
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Growl Bass",
+   "category": "Bass",
+   "tags": [
+    "bass",
+    "split",
+    "drive"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 8,
+    "lower.db2": 4,
+    "lower.db3": 8,
+    "lower.db4": 0,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "amp.drive": 0.5,
+    "leslie.on": false
+   },
+   "vary": {
+    "lower.db1": [
+     6,
+     8
+    ],
+    "lower.db2": [
+     2,
+     6
+    ],
+    "lower.db3": [
+     6,
+     8
+    ],
+    "lower.db4": [
+     0,
+     2
+    ],
+    "lower.db5": [
+     0,
+     2
+    ],
+    "lower.db6": [
+     0,
+     2
+    ],
+    "lower.db7": [
+     0,
+     2
+    ],
+    "lower.db8": [
+     0,
+     2
+    ],
+    "lower.db9": [
+     0,
+     2
+    ],
+    "amp.drive": [
+     0.35,
+     0.65
+    ],
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Brake Effect",
+   "category": "FX",
+   "tags": [
+    "fx",
+    "leslie",
+    "brake"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 0,
+    "upper.db5": 0,
+    "upper.db6": 0,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "leslie.speed": "Stop",
+    "leslie.horn_decel": 0.6,
+    "leslie.drum_decel": 2.0
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     0,
+     2
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     0,
+     2
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  },
+  {
+   "name": "Leaky Drone",
+   "category": "FX",
+   "tags": [
+    "fx",
+    "leakage",
+    "lofi"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "tg.leakage": -35,
+    "tg.crosstalk": -22,
+    "tg.age": 1.0,
+    "leslie.speed": "Slow",
+    "amp.drive": 0.3
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     6,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ],
+    "amp.drive": [
+     0.15,
+     0.45
+    ]
+   }
+  },
+  {
+   "name": "Overdrive Scream",
+   "category": "FX",
+   "tags": [
+    "fx",
+    "drive",
+    "fast"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 8,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "amp.drive": 0.95,
+    "leslie.speed": "Fast",
+    "leslie.mic_angle": 180
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     6,
+     8
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     6,
+     8
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     6,
+     8
+    ],
+    "upper.db8": [
+     6,
+     8
+    ],
+    "upper.db9": [
+     6,
+     8
+    ],
+    "amp.drive": [
+     0.8,
+     0.95
+    ]
+   }
+  },
+  {
+   "name": "Slow Spin",
+   "category": "FX",
+   "tags": [
+    "fx",
+    "leslie",
+    "slow"
+   ],
+   "params": {
+    "upper.db1": 8,
+    "upper.db2": 0,
+    "upper.db3": 8,
+    "upper.db4": 8,
+    "upper.db5": 0,
+    "upper.db6": 8,
+    "upper.db7": 0,
+    "upper.db8": 0,
+    "upper.db9": 0,
+    "lower.db1": 0,
+    "lower.db2": 0,
+    "lower.db3": 8,
+    "lower.db4": 8,
+    "lower.db5": 0,
+    "lower.db6": 0,
+    "lower.db7": 0,
+    "lower.db8": 0,
+    "lower.db9": 0,
+    "pedal.db16": 6,
+    "pedal.db8": 3,
+    "leslie.horn_slow": 24,
+    "leslie.drum_slow": 20,
+    "leslie.horn_am": 1.0,
+    "vib.upper": true,
+    "vib.mode": "C3"
+   },
+   "vary": {
+    "upper.db1": [
+     6,
+     8
+    ],
+    "upper.db2": [
+     0,
+     2
+    ],
+    "upper.db3": [
+     6,
+     8
+    ],
+    "upper.db4": [
+     6,
+     8
+    ],
+    "upper.db5": [
+     0,
+     2
+    ],
+    "upper.db6": [
+     6,
+     8
+    ],
+    "upper.db7": [
+     0,
+     2
+    ],
+    "upper.db8": [
+     0,
+     2
+    ],
+    "upper.db9": [
+     0,
+     2
+    ]
+   }
+  }
+ ]
+}

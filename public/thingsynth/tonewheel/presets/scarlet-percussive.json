@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Scarlet Percussive",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "click",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Click Comp"
+  },
+  "params": {
+    "tg.click": 0.9,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "perc.on": true,
+    "leslie.speed": "Stop",
+    "leslie.mic_angle": 150.9,
+    "out.level": 5.8
+  },
+  "features": {
+    "lufs": -18.02,
+    "peak": 0.5986,
+    "centroidHz": 1024.6,
+    "attackMs": 3.38,
+    "releaseS": 0.08,
+    "f0Hz": 130.79
+  }
+}

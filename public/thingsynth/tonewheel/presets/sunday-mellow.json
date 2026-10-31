@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Sunday Mellow",
+  "category": "Gospel",
+  "tags": [
+    "church",
+    "soft"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db4": 8,
+    "lower.db3": 4,
+    "lower.db4": 4,
+    "vib.mode": "C2",
+    "vib.upper": true,
+    "out.level": -6.0
+  },
+  "features": {
+    "lufs": -18.01,
+    "peak": 0.5775,
+    "centroidHz": 561.2,
+    "attackMs": 166.94,
+    "releaseS": 0.06,
+    "f0Hz": 260.87
+  }
+}

@@ -141,6 +141,12 @@
     <button id="btn-type" class="panel" title="Sit at the giant keyboard: the hands type what you type">⌨️ Type</button>
     <button id="btn-dial" class="panel" title="Connect to the MEGAzine BBS on this computer">📞 Dial in to MEGAzine BBS</button>
   </div>
+  <button id="btn-organ" class="panel hidden" title="Sit down at the organ">🎹 Play the organ</button>
+  <div id="organ-frame"></div>
+  <div id="organ-bar" class="panel">
+    <span id="organ-status" class="bbs-status">🎹 Warming up the organ…</span>
+    <button id="organ-stand" title="Get up (Esc)">Stand up</button>
+  </div>
   <div id="type-bar" class="panel">
     <span class="bbs-status">⌨️ Typing on the MEGA 486</span>
     <button id="type-dial" title="Call the board">📞 Dial in</button>
@@ -168,6 +174,9 @@
     </div>
   </div>
   <button id="btn-about" class="panel" title="What is this?">About</button>
+  <div id="visit" class="panel">
+    <select id="visit-select" aria-label="Visit place" title="Go straight to a place on this world"></select>
+  </div>
   <div id="about" class="hidden" role="dialog" aria-modal="true" aria-labelledby="about-title">
     <div id="about-card" class="panel" tabindex="-1">
       <button id="about-close" class="link" title="Close (Esc)">close</button>

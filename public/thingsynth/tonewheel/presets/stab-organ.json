@@ -1,0 +1,32 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Stab Organ",
+  "category": "Rock",
+  "tags": [
+    "rock",
+    "stab"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db9": 8,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "amp.drive": 0.6,
+    "leslie.speed": "Stop",
+    "out.level": -8.9
+  },
+  "features": {
+    "lufs": -17.97,
+    "peak": 0.5671,
+    "centroidHz": 499.2,
+    "attackMs": 3.54,
+    "releaseS": 0.06,
+    "f0Hz": 130.79
+  }
+}

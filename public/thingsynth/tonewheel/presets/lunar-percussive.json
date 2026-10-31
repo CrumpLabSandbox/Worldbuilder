@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Lunar Percussive",
+  "category": "Percussive",
+  "tags": [
+    "morph",
+    "percussion",
+    "flute"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Perc Only Second",
+    "parent2": "Perc Third Flute",
+    "t": 0.617
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 5,
+    "perc.on": true,
+    "leslie.speed": "Stop",
+    "out.level": 7.8
+  },
+  "features": {
+    "lufs": -18.04,
+    "peak": 0.6574,
+    "centroidHz": 1166.2,
+    "attackMs": 8.33,
+    "releaseS": 0.12,
+    "f0Hz": 260.87
+  }
+}

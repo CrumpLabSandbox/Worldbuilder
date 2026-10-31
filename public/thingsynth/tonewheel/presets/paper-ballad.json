@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Paper Ballad",
+  "category": "Ballad",
+  "tags": [
+    "morph",
+    "sixties",
+    "chorus"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Sixties Chord Organ",
+    "parent2": "Bright Ballad",
+    "t": 0.419
+  },
+  "params": {
+    "upper.db1": 3,
+    "upper.db2": 5,
+    "upper.db4": 7,
+    "upper.db9": 3,
+    "vib.upper": true,
+    "amp.drive": 0.2081,
+    "out.level": -5.3
+  },
+  "features": {
+    "lufs": -17.97,
+    "peak": 0.5931,
+    "centroidHz": 985.7,
+    "attackMs": 40.71,
+    "releaseS": 0.06,
+    "f0Hz": 130.43
+  }
+}

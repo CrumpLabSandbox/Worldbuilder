@@ -1,0 +1,30 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Theatre Tibia",
+  "category": "Theatre",
+  "tags": [
+    "theatre",
+    "vibrato"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db5": 6,
+    "vib.mode": "V3",
+    "vib.upper": true
+  },
+  "features": {
+    "lufs": -18.12,
+    "peak": 0.5762,
+    "centroidHz": 519.4,
+    "attackMs": 1557.58,
+    "releaseS": 0.02,
+    "f0Hz": 130.08
+  }
+}

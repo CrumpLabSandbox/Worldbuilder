@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Electric Percussive",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "chime",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Perc Chime"
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db8": 1,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "leslie.mic_angle": 153.1,
+    "out.level": 4.2
+  },
+  "features": {
+    "lufs": -18.01,
+    "peak": 0.4957,
+    "centroidHz": 804.4,
+    "attackMs": 6.02,
+    "releaseS": 0.06,
+    "f0Hz": 262.3
+  }
+}

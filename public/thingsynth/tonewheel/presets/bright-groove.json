@@ -1,0 +1,41 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Bright Groove",
+  "category": "Bass",
+  "tags": [
+    "morph",
+    "bass",
+    "split"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Round Bass",
+    "parent2": "Walking Bass Lower",
+    "t": 0.646
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "tg.click": 0.5708,
+    "upper.db1": 5,
+    "upper.db2": 5,
+    "upper.db4": 3,
+    "lower.db1": 8,
+    "lower.db3": 7,
+    "lower.db4": 0,
+    "pedal.db16": 7,
+    "pedal.db8": 1,
+    "out.level": -1.1
+  },
+  "features": {
+    "lufs": -18.0,
+    "peak": 0.289,
+    "centroidHz": 146.5,
+    "attackMs": 19.38,
+    "releaseS": 0.08,
+    "f0Hz": 65.48
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Vivid Soft",
+  "category": "Soft",
+  "tags": [
+    "morph",
+    "soft",
+    "quiet"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Whisper",
+    "parent2": "Strings",
+    "t": 0.488
+  },
+  "params": {
+    "tg.leakage": -54.9,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 5,
+    "upper.db4": 4,
+    "upper.db5": 3,
+    "upper.db6": 3,
+    "upper.db7": 2,
+    "upper.db8": 2,
+    "upper.db9": 1,
+    "vib.mode": "C1",
+    "vib.upper": true,
+    "out.level": 0.1
+  },
+  "features": {
+    "lufs": -18.07,
+    "peak": 0.6306,
+    "centroidHz": 1371.9,
+    "attackMs": 1619.9,
+    "releaseS": 0.1,
+    "f0Hz": 260.87
+  }
+}

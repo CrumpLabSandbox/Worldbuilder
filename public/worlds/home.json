@@ -241,6 +241,17 @@
       "raise": 62,
       "url": "https://samuelling.github.io/BBS/",
       "name": "MEGAzine BBS"
+    },
+    {
+      "id": "thingsynth-stage",
+      "type": "organstage",
+      "lat": 38.295,
+      "lon": 29.7972,
+      "heading": 325,
+      "pad": 245,
+      "band": 90,
+      "raise": 6,
+      "name": "ThingSynth Stage"
     }
   ]
 }

@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Paper Jazz",
+  "category": "Jazz",
+  "tags": [
+    "morph",
+    "jazz",
+    "warm"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Smoky Club",
+    "parent2": "Jazz Trio",
+    "t": 0.333
+  },
+  "params": {
+    "upper.db2": 5,
+    "lower.db4": 7,
+    "perc.on": true,
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "amp.drive": 0.1834,
+    "out.level": -8.4
+  },
+  "features": {
+    "lufs": -18.02,
+    "peak": 0.4891,
+    "centroidHz": 396.1,
+    "attackMs": 157.31,
+    "releaseS": 0.02,
+    "f0Hz": 130.79
+  }
+}

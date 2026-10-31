@@ -1,0 +1,38 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Leaky Drone",
+  "category": "FX",
+  "tags": [
+    "fx",
+    "leakage",
+    "lofi"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "tg.leakage": -35,
+    "tg.crosstalk": -22,
+    "tg.age": 1.0,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "amp.drive": 0.3,
+    "out.level": -9.4
+  },
+  "features": {
+    "lufs": -17.94,
+    "peak": 0.5306,
+    "centroidHz": 1189.6,
+    "attackMs": 829.02,
+    "releaseS": 0.1,
+    "f0Hz": 130.43
+  }
+}

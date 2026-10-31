@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Crystal Ballad",
+  "category": "Ballad",
+  "tags": [
+    "morph",
+    "ballad",
+    "bright"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Sixties Chord Organ",
+    "parent2": "Bright Ballad",
+    "t": 0.746
+  },
+  "params": {
+    "upper.db1": 2,
+    "upper.db2": 2,
+    "upper.db4": 7,
+    "upper.db9": 6,
+    "amp.drive": 0.1754,
+    "out.level": -9.7
+  },
+  "features": {
+    "lufs": -17.95,
+    "peak": 0.5359,
+    "centroidHz": 1469.2,
+    "attackMs": 79.02,
+    "releaseS": 0.02,
+    "f0Hz": 260.87
+  }
+}

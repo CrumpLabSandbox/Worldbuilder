@@ -1,0 +1,31 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Perc Third Flute",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "flute"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "perc.on": true,
+    "leslie.speed": "Stop",
+    "out.level": 6.0
+  },
+  "features": {
+    "lufs": -18.09,
+    "peak": 0.6057,
+    "centroidHz": 978.3,
+    "attackMs": 6.5,
+    "releaseS": 0.06,
+    "f0Hz": 260.87
+  }
+}

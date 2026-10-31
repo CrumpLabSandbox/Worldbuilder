@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Velvet Percussive",
+  "category": "Percussive",
+  "tags": [
+    "morph",
+    "percussion",
+    "click"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Click Comp",
+    "parent2": "Perc Chime",
+    "t": 0.281
+  },
+  "params": {
+    "tg.click": 0.7878,
+    "upper.db1": 6,
+    "upper.db2": 0,
+    "upper.db3": 2,
+    "perc.on": true,
+    "leslie.speed": "Stop",
+    "out.level": 7.4
+  },
+  "features": {
+    "lufs": -18.1,
+    "peak": 0.7028,
+    "centroidHz": 1020.9,
+    "attackMs": 4.52,
+    "releaseS": 0.12,
+    "f0Hz": 130.79
+  }
+}

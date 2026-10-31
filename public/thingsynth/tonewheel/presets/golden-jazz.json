@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Golden Jazz",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "warm",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Smoky Club"
+  },
+  "params": {
+    "tg.click": 0.5199,
+    "upper.db2": 3,
+    "perc.on": true,
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "amp.drive": 0.2,
+    "leslie.mic_angle": 148.9
+  },
+  "features": {
+    "lufs": -17.95,
+    "peak": 0.4832,
+    "centroidHz": 391.1,
+    "attackMs": 73.27,
+    "releaseS": 0.04,
+    "f0Hz": 130.79
+  }
+}

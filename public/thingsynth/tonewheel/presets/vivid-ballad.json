@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Vivid Ballad",
+  "category": "Ballad",
+  "tags": [
+    "morph",
+    "ballad",
+    "bright"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Bright Ballad",
+    "parent2": "Ballad Flute",
+    "t": 0.392
+  },
+  "params": {
+    "tg.click": 0.3824,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db4": 5,
+    "upper.db9": 5,
+    "out.level": -7.5
+  },
+  "features": {
+    "lufs": -18.04,
+    "peak": 0.5062,
+    "centroidHz": 1446.0,
+    "attackMs": 71.35,
+    "releaseS": 0.04,
+    "f0Hz": 260.87
+  }
+}

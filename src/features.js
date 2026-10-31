@@ -239,7 +239,7 @@ export class ClearingFeature {
   clearance(dir) { return Math.max(0, Math.acos(clamp(dir.dot(this.center), -1, 1)) * R - this.radius); }
 }
 
-export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree', 'computer']);
+export const FEATURE_TYPES = new Set(['volcano', 'road', 'woodland', 'coaster', 'catapult', 'graffiti', 'mushroomtree', 'computer', 'organstage']);
 
 // Build features from structure records. Volcanoes first, then roads (which
 // tunnel through them), then woodland tints.
@@ -252,8 +252,19 @@ export function createFeatures(records, planet) {
     roads.push(new RoadFeature(r, planet));
     planet.setFeatures([...volcs, ...roads]);
   }
-  // levelled sites: the catapult's hill, the graffiti plaza, the BBS computer's pad
-  const sites = records.filter((r) => r.type === 'catapult' || r.type === 'graffiti' || r.type === 'computer').map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
+  // levelled sites: the catapult's hill, the graffiti plaza, the BBS computer's pad, the organ stage
+  const sites = records.filter((r) => ['catapult', 'graffiti', 'computer', 'organstage'].includes(r.type)).map((r) => new CatapultFeature({ lane: 0, ...r }, planet));
+  // the organ stage's long avenue: more of the same level ground out to the painting
+  for (const st of sites.filter((f) => f.rec.type === 'organstage')) {
+    const r = st.rec, h = (r.heading ?? 0) * Math.PI / 180, mPerDeg = (R * Math.PI) / 180;
+    for (const d of [320, 640, 960, 1280, 1600, 1900]) {
+      sites.push(new CatapultFeature({
+        id: `${r.id}:${d}`, type: 'site', lane: 0, pad: 300, band: 120, level: st.target, yieldToRoads: false,
+        lat: r.lat + (d * Math.cos(h)) / mPerDeg,
+        lon: r.lon + (d * Math.sin(h)) / (mPerDeg * Math.cos(r.lat * Math.PI / 180)),
+      }, planet));
+    }
+  }
   planet.setFeatures([...volcs, ...roads, ...sites]);
   const coasters = [];
   for (const r of records.filter((x) => x.type === 'coaster' && Array.isArray(x.path) && x.path.length > 1)) {

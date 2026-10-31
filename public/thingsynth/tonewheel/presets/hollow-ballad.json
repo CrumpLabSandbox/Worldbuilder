@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Hollow Ballad",
+  "category": "Ballad",
+  "tags": [
+    "morph",
+    "ballad",
+    "bright"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Sixties Chord Organ",
+    "parent2": "Bright Ballad",
+    "t": 0.585
+  },
+  "params": {
+    "upper.db1": 2,
+    "upper.db2": 3,
+    "upper.db4": 7,
+    "upper.db9": 5,
+    "amp.drive": 0.1915,
+    "out.level": -8.6
+  },
+  "features": {
+    "lufs": -17.96,
+    "peak": 0.5483,
+    "centroidHz": 1265.3,
+    "attackMs": 79,
+    "releaseS": 0.04,
+    "f0Hz": 130.79
+  }
+}

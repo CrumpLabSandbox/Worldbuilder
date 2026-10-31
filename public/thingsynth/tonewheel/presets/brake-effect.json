@@ -1,0 +1,31 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Brake Effect",
+  "category": "FX",
+  "tags": [
+    "fx",
+    "leslie",
+    "brake"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "leslie.speed": "Stop",
+    "leslie.horn_decel": 0.6,
+    "leslie.drum_decel": 2.0,
+    "out.level": -2.9
+  },
+  "features": {
+    "lufs": -18.04,
+    "peak": 0.344,
+    "centroidHz": 329.6,
+    "attackMs": 1181.44,
+    "releaseS": 0.02,
+    "f0Hz": 130.79
+  }
+}

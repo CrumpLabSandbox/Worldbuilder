@@ -1,0 +1,46 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Plastic Gospel",
+  "category": "Gospel",
+  "tags": [
+    "morph",
+    "church",
+    "soft"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Sunday Mellow",
+    "parent2": "Gospel Full",
+    "t": 0.429
+  },
+  "params": {
+    "upper.db1": 3,
+    "upper.db2": 3,
+    "upper.db4": 8,
+    "upper.db5": 3,
+    "upper.db6": 3,
+    "upper.db7": 3,
+    "upper.db8": 3,
+    "upper.db9": 3,
+    "lower.db1": 3,
+    "lower.db2": 1,
+    "lower.db3": 6,
+    "lower.db4": 2,
+    "pedal.db16": 7,
+    "pedal.db8": 4,
+    "vib.mode": "C2",
+    "vib.upper": true,
+    "amp.drive": 0.2359
+  },
+  "features": {
+    "lufs": -18.25,
+    "peak": 0.5532,
+    "centroidHz": 1113.8,
+    "attackMs": 913.27,
+    "releaseS": 0.04,
+    "f0Hz": 130.43
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Growl Bass",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "drive"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "lower.db1": 8,
+    "lower.db2": 4,
+    "lower.db4": 0,
+    "amp.drive": 0.5,
+    "leslie.on": false,
+    "out.level": -7.7
+  },
+  "features": {
+    "lufs": -18.01,
+    "peak": 0.3017,
+    "centroidHz": 168.0,
+    "attackMs": 1.83,
+    "releaseS": 0.04,
+    "f0Hz": 65.4
+  }
+}

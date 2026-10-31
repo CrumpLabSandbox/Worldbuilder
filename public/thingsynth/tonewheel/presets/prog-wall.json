@@ -1,0 +1,40 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Prog Wall",
+  "category": "Rock",
+  "tags": [
+    "rock",
+    "prog",
+    "full"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "lower.db1": 8,
+    "lower.db2": 8,
+    "lower.db4": 0,
+    "pedal.db16": 8,
+    "pedal.db8": 8,
+    "amp.drive": 0.85,
+    "out.level": -25.7
+  },
+  "features": {
+    "lufs": -18.01,
+    "peak": 0.4403,
+    "centroidHz": 2681.5,
+    "attackMs": 882.71,
+    "releaseS": 0.08,
+    "f0Hz": 130.79
+  }
+}

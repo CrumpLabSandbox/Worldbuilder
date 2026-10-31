@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Theatre Sixteen One",
+  "category": "Theatre",
+  "tags": [
+    "theatre",
+    "hollow"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "upper.db9": 8,
+    "vib.mode": "V2",
+    "vib.upper": true,
+    "leslie.on": false,
+    "out.level": -12.0
+  },
+  "features": {
+    "lufs": -17.99,
+    "peak": 0.4228,
+    "centroidHz": 1624.7,
+    "attackMs": 5.38,
+    "releaseS": 0.02,
+    "f0Hz": 0
+  }
+}

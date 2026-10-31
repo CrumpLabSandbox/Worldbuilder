@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Silver Riser",
+  "category": "FX",
+  "tags": [
+    "extreme",
+    "fx",
+    "leslie"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Brake Effect"
+  },
+  "params": {
+    "upper.db4": 1,
+    "upper.db7": 2,
+    "leslie.speed": "Stop",
+    "leslie.horn_decel": 0.6,
+    "leslie.drum_decel": 2.0,
+    "leslie.mic_angle": 60.4,
+    "out.level": -3.2
+  },
+  "features": {
+    "lufs": -18.06,
+    "peak": 0.3336,
+    "centroidHz": 346.2,
+    "attackMs": 50.06,
+    "releaseS": 0.02,
+    "f0Hz": 130.79
+  }
+}

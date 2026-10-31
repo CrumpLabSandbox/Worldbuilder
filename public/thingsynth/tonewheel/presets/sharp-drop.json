@@ -1,0 +1,32 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Sharp Drop",
+  "category": "FX",
+  "tags": [
+    "extreme",
+    "fx",
+    "leslie"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Brake Effect"
+  },
+  "params": {
+    "leslie.speed": "Stop",
+    "leslie.horn_decel": 0.6,
+    "leslie.drum_decel": 2.0,
+    "leslie.mic_angle": 83.1,
+    "out.level": -3.0
+  },
+  "features": {
+    "lufs": -17.99,
+    "peak": 0.3354,
+    "centroidHz": 316.9,
+    "attackMs": 149.58,
+    "releaseS": 0.02,
+    "f0Hz": 130.79
+  }
+}

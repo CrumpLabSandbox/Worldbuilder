@@ -1,0 +1,31 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Sixties Chord Organ",
+  "category": "Ballad",
+  "tags": [
+    "sixties",
+    "chorus"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 6,
+    "upper.db4": 6,
+    "vib.upper": true,
+    "amp.drive": 0.25,
+    "out.level": -7.2
+  },
+  "features": {
+    "lufs": -18.0,
+    "peak": 0.6144,
+    "centroidHz": 474.0,
+    "attackMs": 775.88,
+    "releaseS": 0.06,
+    "f0Hz": 130.43
+  }
+}

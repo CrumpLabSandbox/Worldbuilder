@@ -1,0 +1,35 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Deep Bass",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "drive",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Growl Bass"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "lower.db1": 8,
+    "lower.db2": 4,
+    "lower.db4": 0,
+    "amp.drive": 0.5441,
+    "leslie.on": false
+  },
+  "features": {
+    "lufs": -17.87,
+    "peak": 0.3138,
+    "centroidHz": 170.6,
+    "attackMs": 1.81,
+    "releaseS": 0.04,
+    "f0Hz": 65.4
+  }
+}

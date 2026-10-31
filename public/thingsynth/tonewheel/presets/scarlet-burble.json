@@ -1,0 +1,39 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Scarlet Burble",
+  "category": "FX",
+  "tags": [
+    "morph",
+    "fx",
+    "leslie"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Brake Effect",
+    "parent2": "Slow Spin",
+    "t": 0.44
+  },
+  "params": {
+    "upper.db2": 4,
+    "upper.db4": 4,
+    "upper.db6": 4,
+    "leslie.speed": "Stop",
+    "leslie.horn_slow": 37.4,
+    "leslie.drum_slow": 31.2,
+    "leslie.horn_decel": 0.4551,
+    "leslie.drum_decel": 1.7097,
+    "leslie.horn_am": 0.7759,
+    "out.level": -1.2
+  },
+  "features": {
+    "lufs": -17.99,
+    "peak": 0.3179,
+    "centroidHz": 382.7,
+    "attackMs": 3.9,
+    "releaseS": 0.02,
+    "f0Hz": 130.79
+  }
+}

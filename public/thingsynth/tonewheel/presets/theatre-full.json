@@ -1,0 +1,31 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Theatre Full",
+  "category": "Theatre",
+  "tags": [
+    "theatre",
+    "bright"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db9": 8,
+    "vib.mode": "V3",
+    "vib.upper": true,
+    "out.level": -11.6
+  },
+  "features": {
+    "lufs": -18.01,
+    "peak": 0.514,
+    "centroidHz": 1674.0,
+    "attackMs": 898.71,
+    "releaseS": 0.02,
+    "f0Hz": 128.69
+  }
+}

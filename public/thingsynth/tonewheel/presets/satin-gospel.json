@@ -1,0 +1,42 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Satin Gospel",
+  "category": "Gospel",
+  "tags": [
+    "morph",
+    "gospel",
+    "drive"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Sunday Mellow",
+    "parent2": "Gospel Shout",
+    "t": 0.595
+  },
+  "params": {
+    "upper.db1": 5,
+    "upper.db2": 5,
+    "upper.db4": 8,
+    "upper.db5": 5,
+    "upper.db6": 5,
+    "upper.db7": 5,
+    "upper.db8": 5,
+    "upper.db9": 5,
+    "lower.db3": 6,
+    "lower.db4": 6,
+    "amp.drive": 0.3581,
+    "leslie.speed": "Fast",
+    "out.level": -12.8
+  },
+  "features": {
+    "lufs": -17.99,
+    "peak": 0.507,
+    "centroidHz": 1698.9,
+    "attackMs": 40.62,
+    "releaseS": 0.04,
+    "f0Hz": 130.08
+  }
+}

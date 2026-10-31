@@ -1,0 +1,34 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Jazz Ballad Second",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "ballad",
+    "percussion"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db2": 0,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "vib.upper": true,
+    "out.level": -6.1
+  },
+  "features": {
+    "lufs": -18.01,
+    "peak": 0.558,
+    "centroidHz": 342.2,
+    "attackMs": 890.69,
+    "releaseS": 0.04,
+    "f0Hz": 130.43
+  }
+}

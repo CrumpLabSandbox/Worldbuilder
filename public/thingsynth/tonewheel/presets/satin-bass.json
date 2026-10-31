@@ -1,0 +1,37 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Satin Bass",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "drive",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Growl Bass"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "lower.db1": 8,
+    "lower.db2": 4,
+    "lower.db3": 7,
+    "lower.db4": 0,
+    "amp.drive": 0.5,
+    "leslie.on": false,
+    "out.level": -6.6
+  },
+  "features": {
+    "lufs": -18.0,
+    "peak": 0.3042,
+    "centroidHz": 172.6,
+    "attackMs": 1.9,
+    "releaseS": 0.06,
+    "f0Hz": 65.4
+  }
+}

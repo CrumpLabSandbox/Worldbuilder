@@ -1,0 +1,32 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Click Comp",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "click"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "tg.click": 0.9,
+    "upper.db2": 0,
+    "upper.db3": 0,
+    "perc.on": true,
+    "leslie.speed": "Stop",
+    "out.level": 6.0
+  },
+  "features": {
+    "lufs": -18.03,
+    "peak": 0.7143,
+    "centroidHz": 1005.2,
+    "attackMs": 4.46,
+    "releaseS": 0.06,
+    "f0Hz": 130.79
+  }
+}

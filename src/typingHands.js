@@ -28,21 +28,21 @@ const unitCylinder = new THREE.CylinderGeometry(1, 1, 1, 14, 1);
 const unitSphere = new THREE.SphereGeometry(1, 16, 12);
 
 export class TypingHands {
-  constructor() {
+  constructor({ scale = SCALE, speed = 1.3 } = {}) {
     this.rng = makeRng(20261025);
     this.keyboard = new Keyboard();
     this.hands = { left: new Hand('left'), right: new Hand('right') };
     this.arms = { left: new Arm('left'), right: new Arm('right') };
     this.placeHands();
     // a bit faster and steadier than the research default, for a smooth show
-    this.controller = new MotorController({ hands: this.hands, keyboard: this.keyboard, rng: this.rng, params: { speed: 1.3, noise: 0.35 } });
+    this.controller = new MotorController({ hands: this.hands, keyboard: this.keyboard, rng: this.rng, params: { speed, noise: 0.35 } });
     this.queue = [];       // requested { key, char, done }, in typing order
     this.onType = null;    // (char) => void, when a keystroke lands
     this.acc = 0;
     this.quiet = IDLE_AFTER; // run a little at start so the fingers settle onto the home row
 
     this.group = new THREE.Group();
-    this.group.scale.setScalar(SCALE);
+    this.group.scale.setScalar(scale);
     this.meshes = new Map();
     this.keyMeshes = new Map();
     this.mats = {
@@ -201,7 +201,8 @@ export class TypingHands {
     }
     for (const key of this.keyboard.keys) {
       const e = this.keyMeshes.get(key.id);
-      e.mesh.position.y = -KEY_HEIGHT / 2 - key.depth;
+      if (!e) continue;
+      e.mesh.position.y = (e.base ?? -KEY_HEIGHT / 2) - key.depth;
       e.top.emissive.setHex(key.pressed ? 0xff7a30 : 0x000000);
     }
   }

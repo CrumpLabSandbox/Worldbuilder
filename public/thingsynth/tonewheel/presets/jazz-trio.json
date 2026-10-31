@@ -1,0 +1,30 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Jazz Trio",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "percussion",
+    "classic"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "lower.db4": 5,
+    "perc.on": true,
+    "out.level": -6.0
+  },
+  "features": {
+    "lufs": -18.04,
+    "peak": 0.516,
+    "centroidHz": 423.6,
+    "attackMs": 791.25,
+    "releaseS": 0.04,
+    "f0Hz": 130.79
+  }
+}

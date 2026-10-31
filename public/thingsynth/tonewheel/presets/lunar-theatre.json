@@ -1,0 +1,38 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Lunar Theatre",
+  "category": "Theatre",
+  "tags": [
+    "morph",
+    "theatre",
+    "reed"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Theatre Kinura",
+    "parent2": "Theatre Sixteen One",
+    "t": 0.483
+  },
+  "params": {
+    "upper.db1": 4,
+    "upper.db2": 0,
+    "upper.db3": 4,
+    "upper.db5": 4,
+    "upper.db7": 4,
+    "upper.db9": 7,
+    "vib.mode": "V2",
+    "vib.upper": true,
+    "out.level": -7.4
+  },
+  "features": {
+    "lufs": -17.96,
+    "peak": 0.5081,
+    "centroidHz": 2122.6,
+    "attackMs": 715.73,
+    "releaseS": 0.02,
+    "f0Hz": 0
+  }
+}

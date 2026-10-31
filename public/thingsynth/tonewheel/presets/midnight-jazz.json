@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Midnight Jazz",
+  "category": "Jazz",
+  "tags": [
+    "jazz",
+    "warm",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Smoky Club"
+  },
+  "params": {
+    "tg.click": 0.437,
+    "upper.db2": 3,
+    "perc.on": true,
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "amp.drive": 0.1381
+  },
+  "features": {
+    "lufs": -18.2,
+    "peak": 0.4757,
+    "centroidHz": 386.5,
+    "attackMs": 4.21,
+    "releaseS": 0.04,
+    "f0Hz": 130.79
+  }
+}

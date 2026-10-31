@@ -1,0 +1,37 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Overdrive Scream",
+  "category": "FX",
+  "tags": [
+    "fx",
+    "drive",
+    "fast"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "upper.db7": 8,
+    "upper.db8": 8,
+    "upper.db9": 8,
+    "amp.drive": 0.95,
+    "leslie.speed": "Fast",
+    "leslie.mic_angle": 180,
+    "out.level": -22.9
+  },
+  "features": {
+    "lufs": -17.98,
+    "peak": 0.5356,
+    "centroidHz": 2144.6,
+    "attackMs": 1013.12,
+    "releaseS": 0.08,
+    "f0Hz": 132.96
+  }
+}

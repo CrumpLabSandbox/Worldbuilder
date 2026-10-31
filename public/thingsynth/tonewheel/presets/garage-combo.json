@@ -1,0 +1,37 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Garage Combo",
+  "category": "Rock",
+  "tags": [
+    "garage",
+    "vibrato",
+    "direct"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db4": 8,
+    "upper.db5": 8,
+    "upper.db6": 8,
+    "vib.mode": "V3",
+    "vib.upper": true,
+    "amp.drive": 0.4,
+    "leslie.on": false,
+    "out.level": -16.5
+  },
+  "features": {
+    "lufs": -17.85,
+    "peak": 0.4078,
+    "centroidHz": 1084.9,
+    "attackMs": 4.56,
+    "releaseS": 0.02,
+    "f0Hz": 260.87
+  }
+}

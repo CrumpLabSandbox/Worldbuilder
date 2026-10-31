@@ -1,0 +1,41 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Velvet Storm",
+  "category": "FX",
+  "tags": [
+    "morph",
+    "fx",
+    "drive"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Overdrive Scream",
+    "parent2": "Brake Effect",
+    "t": 0.373
+  },
+  "params": {
+    "upper.db4": 5,
+    "upper.db5": 5,
+    "upper.db6": 5,
+    "upper.db7": 5,
+    "upper.db8": 5,
+    "upper.db9": 5,
+    "amp.drive": 0.6517,
+    "leslie.speed": "Fast",
+    "leslie.horn_decel": 0.4045,
+    "leslie.drum_decel": 1.5991,
+    "leslie.mic_angle": 157.6,
+    "out.level": -8.9
+  },
+  "features": {
+    "lufs": -18.02,
+    "peak": 0.5758,
+    "centroidHz": 1148.6,
+    "attackMs": 11.27,
+    "releaseS": 0.08,
+    "f0Hz": 131.51
+  }
+}

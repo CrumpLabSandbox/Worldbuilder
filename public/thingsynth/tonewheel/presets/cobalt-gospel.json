@@ -1,0 +1,48 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Cobalt Gospel",
+  "category": "Gospel",
+  "tags": [
+    "morph",
+    "gospel",
+    "full"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Hymn Principal",
+    "parent2": "Gospel Full",
+    "t": 0.621
+  },
+  "params": {
+    "tg.crosstalk": -43.8,
+    "upper.db1": 5,
+    "upper.db2": 5,
+    "upper.db3": 7,
+    "upper.db4": 8,
+    "upper.db5": 5,
+    "upper.db6": 6,
+    "upper.db7": 5,
+    "upper.db8": 5,
+    "upper.db9": 5,
+    "lower.db1": 5,
+    "lower.db2": 2,
+    "lower.db4": 3,
+    "pedal.db16": 7,
+    "pedal.db8": 5,
+    "vib.lower": true,
+    "amp.drive": 0.2742,
+    "leslie.speed": "Fast",
+    "out.level": -12.3
+  },
+  "features": {
+    "lufs": -17.98,
+    "peak": 0.4869,
+    "centroidHz": 1696.4,
+    "attackMs": 40.62,
+    "releaseS": 0.02,
+    "f0Hz": 130.08
+  }
+}

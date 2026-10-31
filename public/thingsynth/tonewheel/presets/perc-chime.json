@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Perc Chime",
+  "category": "Percussive",
+  "tags": [
+    "percussion",
+    "chime"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "perc.on": true,
+    "perc.harmonic": "Second",
+    "perc.decay": "Slow",
+    "perc.volume": "Soft",
+    "out.level": 4.6
+  },
+  "features": {
+    "lufs": -18.08,
+    "peak": 0.4444,
+    "centroidHz": 627.7,
+    "attackMs": 6.23,
+    "releaseS": 0.06,
+    "f0Hz": 262.3
+  }
+}

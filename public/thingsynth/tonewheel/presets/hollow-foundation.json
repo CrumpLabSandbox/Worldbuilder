@@ -1,0 +1,37 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Hollow Foundation",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "drive",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Growl Bass"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "lower.db1": 8,
+    "lower.db2": 3,
+    "lower.db4": 0,
+    "amp.drive": 0.5,
+    "leslie.on": false,
+    "leslie.mic_angle": 89.9,
+    "out.level": -7.6
+  },
+  "features": {
+    "lufs": -17.96,
+    "peak": 0.2943,
+    "centroidHz": 168.3,
+    "attackMs": 1.75,
+    "releaseS": 0.04,
+    "f0Hz": 65.4
+  }
+}

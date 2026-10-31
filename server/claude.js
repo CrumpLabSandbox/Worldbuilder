@@ -263,6 +263,7 @@ export class BuilderChat {
     if (name === 'place_structure') {
       if (turn.places >= MAX_PLACES) throw new Error(`Limit of ${MAX_PLACES} structures per request reached.`);
       const rec = validateStructure(input);
+      keepClear(store, worldId, rec);
       turn.places += 1;
       await store.add(worldId, rec);
       turn.changes.push({ op: 'add', structure: rec });
@@ -271,6 +272,7 @@ export class BuilderChat {
     if (name === 'build_blueprint') {
       if (turn.places >= MAX_PLACES) throw new Error(`Limit of ${MAX_PLACES} structures per request reached.`);
       const rec = validateBlueprint(input);
+      keepClear(store, worldId, rec);
       turn.places += 1;
       await store.add(worldId, rec);
       turn.changes.push({ op: 'add', structure: rec });
@@ -313,6 +315,15 @@ function validateStructure(input) {
     if (finite(input[opt])) rec[opt] = Math.round(clamp(input[opt], opt === 'height' ? 40 : 50, opt === 'height' ? 600 : 1500));
   }
   return rec;
+}
+
+// Published set pieces that chat builds keep clear of, in metres from their centre.
+const RESERVED = { computer: 260, organstage: 2500 }; // the stage's avenue runs a long way
+function keepClear(store, worldId, at) {
+  for (const s of store.base(worldId)?.structures || []) {
+    const clear = RESERVED[s.type];
+    if (clear && distanceM(at, s) < clear) throw new Error(`That spot is on ${s.name}, which needs to stay clear. Build at least ${clear} m from its centre.`);
+  }
 }
 
 const COLOR = /^#[0-9a-f]{6}$/i;

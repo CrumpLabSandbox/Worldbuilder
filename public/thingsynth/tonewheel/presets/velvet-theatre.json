@@ -1,0 +1,36 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Velvet Theatre",
+  "category": "Theatre",
+  "tags": [
+    "morph",
+    "theatre",
+    "vibrato"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Theatre Sixteen One",
+    "parent2": "Theatre Tibia",
+    "t": 0.65
+  },
+  "params": {
+    "upper.db2": 0,
+    "upper.db3": 5,
+    "upper.db5": 4,
+    "upper.db9": 3,
+    "vib.mode": "V3",
+    "vib.upper": true,
+    "out.level": -5.3
+  },
+  "features": {
+    "lufs": -17.97,
+    "peak": 0.5372,
+    "centroidHz": 871.1,
+    "attackMs": 898.23,
+    "releaseS": 0.04,
+    "f0Hz": 129.38
+  }
+}

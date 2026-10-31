@@ -1,0 +1,33 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Pop Ballad Pad",
+  "category": "Ballad",
+  "tags": [
+    "ballad",
+    "pad"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "upper.db1": 6,
+    "upper.db2": 7,
+    "upper.db4": 6,
+    "lower.db3": 6,
+    "lower.db4": 6,
+    "vib.upper": true,
+    "out.level": -6.0
+  },
+  "features": {
+    "lufs": -18.0,
+    "peak": 0.6107,
+    "centroidHz": 464.8,
+    "attackMs": 775.75,
+    "releaseS": 0.04,
+    "f0Hz": 130.43
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Rock Overdrive",
+  "category": "Rock",
+  "tags": [
+    "rock",
+    "drive",
+    "percussion"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "anchor",
+    "brief": "docs/research/additive.md"
+  },
+  "params": {
+    "perc.on": true,
+    "amp.drive": 0.75,
+    "leslie.speed": "Fast",
+    "leslie.mic_angle": 150,
+    "out.level": -11.9
+  },
+  "features": {
+    "lufs": -17.95,
+    "peak": 0.6435,
+    "centroidHz": 631.0,
+    "attackMs": 11.62,
+    "releaseS": 0.08,
+    "f0Hz": 130.79
+  }
+}

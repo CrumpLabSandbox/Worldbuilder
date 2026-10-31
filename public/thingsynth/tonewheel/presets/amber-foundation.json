@@ -1,0 +1,39 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Amber Foundation",
+  "category": "Bass",
+  "tags": [
+    "bass",
+    "split",
+    "round",
+    "variation"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "variation",
+    "parent": "Round Bass"
+  },
+  "params": {
+    "voice.manuals": "Split",
+    "voice.split": 55,
+    "tg.click": 0.7,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db4": 8,
+    "lower.db1": 8,
+    "lower.db3": 7,
+    "lower.db4": 0,
+    "leslie.speed": "Stop",
+    "out.level": -1.1
+  },
+  "features": {
+    "lufs": -18.03,
+    "peak": 0.292,
+    "centroidHz": 173.9,
+    "attackMs": 4.67,
+    "releaseS": 0.08,
+    "f0Hz": 65.4
+  }
+}

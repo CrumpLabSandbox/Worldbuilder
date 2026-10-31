@@ -1,0 +1,38 @@
+{
+  "schema": "synthland.preset/1",
+  "plugin": "tonewheel",
+  "engineVersion": "0.1.0",
+  "name": "Marble Soft",
+  "category": "Soft",
+  "tags": [
+    "morph",
+    "soft",
+    "quiet"
+  ],
+  "author": "SynthLand",
+  "origin": {
+    "kind": "morph",
+    "parent": "Clarinet",
+    "parent2": "Whisper",
+    "t": 0.74
+  },
+  "params": {
+    "tg.leakage": -52.6,
+    "upper.db1": 0,
+    "upper.db2": 0,
+    "upper.db3": 5,
+    "upper.db5": 2,
+    "upper.db7": 2,
+    "vib.mode": "C1",
+    "vib.upper": true,
+    "out.level": 3.7
+  },
+  "features": {
+    "lufs": -18.05,
+    "peak": 0.5551,
+    "centroidHz": 938.8,
+    "attackMs": 1616.12,
+    "releaseS": 0.14,
+    "f0Hz": 262.3
+  }
+}
