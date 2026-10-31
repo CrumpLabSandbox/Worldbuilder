@@ -1236,7 +1236,7 @@ function readHash() {
   };
 }
 function writeHash() {
-  if (!controls || !store.current) return;
+  if (!controls || !store.current || uni || night) return; // not from inside a scene: a reload would start there
   const { lat, lon } = controls.latLon;
   const h = new URLSearchParams({ w: store.current.id, lat: lat.toFixed(4), lon: wrapLon(lon).toFixed(4), alt: controls.altitude.toFixed(0), h: controls.heading.toFixed(0), p: controls.pitch.toFixed(0) });
   history.replaceState(null, '', '#' + h.toString());
@@ -1777,6 +1777,10 @@ function animate() {
     await store.load(worlds[0].id);
   }
   await buildWorld(store.current, hash && hash.world === store.current.id ? hash.view : null);
+  // a link saved from inside one of these scenes lands outside it instead
+  for (const [places, reach] of [[nightWindows(), 750], [universities(), 1000]]) {
+    for (const p of places) if (p.center.distanceTo(controls.position) < reach) { const v = p.view(); setPose(v.pos, v.look); }
+  }
   wireControlsUI();
   wireChat();
   gardenCtx.viewer = () => controls.position;
