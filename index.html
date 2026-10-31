@@ -156,6 +156,32 @@
     <div id="bbs-slot"></div>
   </div>
 
+  <button id="btn-about" class="panel" title="What is this?">About</button>
+  <div id="about" class="hidden" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <div id="about-card" class="panel" tabindex="-1">
+      <button id="about-close" class="link" title="Close (Esc)">close</button>
+      <div class="about-kicker">megaZINE · November issue</div>
+      <h1 id="about-title">Worldbuilder</h1>
+      <div class="about-byline">by Matt Crump</div>
+
+      <h2>How it started</h2>
+      <p>I've been exploring using Claude Code to make all sorts of applications, including games and many other things. Worldbuilder came about when I was thinking about games like Minecraft, and the ability to simply use these tools in a chat to declare that you want to make stuff. I thought, well, what if I wanted to make an entire world, and then go into that world, fly around it, go to particular coordinates like latitudes and longitudes, and just say, "build something here"? It could be a fast way of doing Minecraft.</p>
+      <p>So I made this app: a little 3D world with a full coordinate system. Before it was fully developed, I would be on the other side of it, chatting with a Claude chatbot hooked up to all the code I had built. I would say, let's make a volcano, or a roller coaster, or a catapult, and put it here, put it there. What you're looking at is an example of some of that testing.</p>
+      <p>I've also used this as a little tool to explore how to build a web server, how to put an app on it so that other people can get to it, and how to integrate other tools into a game like this.</p>
+
+      <h2>Building from inside the world</h2>
+      <p>The version you're looking at has a little chat feature. While you explore, you can use it to send a message about building something somewhere on this world. Press <kbd>T</kbd> or the 💬 button, click the ground to pick a spot, and ask.</p>
+      <p>The capacity of this is interesting. It's not quite the same as what I can do on the other side of the app, where the entire code can be rewritten and all sorts of things put in different places. Within the game, what has been built is essentially a library of basic 3D elements. I would call these geon objects, because that relates to a theory of object recognition in cognitive psychology, but you could think of them as little 3D pixels or 3D blocks. There are different basic shape types, and a way to receive structured JSON instructions that arrange these building blocks into whatever you're asking for, somewhere on the world.</p>
+      <p>For example, if you say in the chat that you want to build a dinosaur statue, that message goes to Claude along with instructions about the local capacities for building: what kinds of shapes there are and how they can be arranged. In the background, Claude figures out a kind of recipe and hands it back to this app. On the server, algorithms take those instructions, build the object, and put it at that location in the world.</p>
+
+      <h2>megaZINE in the world</h2>
+      <p>You'll also see things on this world that have to do with other parts of megaZINE. There's a BBS for megaZINE, so we wondered: could we just make a big computer and put it on a mountain? What would happen if you got close to it? Could you log into our BBS through this world, in this world? It turns out you can. You can find it under Structures in the World panel.</p>
+      <p>Cognitive Hands is another publication in megaZINE this month, and here we put those hands in front of the computer's keyboard. The idea is for them to log into the BBS. That part isn't complete yet, but you can definitely use the hands: fly up to the computer and press Type.</p>
+      <p>The plan is to add more of the articles published in megaZINE to this world, so you might see more here too.</p>
+
+      <button id="about-start" class="primary">Start exploring</button>
+    </div>
+  </div>
   <button id="btn-menu" class="panel" title="World &amp; build panel">☰</button>
 
   <button id="btn-chat" class="panel hidden" title="Ask Claude to build something (T)">💬 <span class="chat-label">Ask Claude to build</span></button>

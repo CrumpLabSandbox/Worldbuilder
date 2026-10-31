@@ -214,3 +214,19 @@ body.bbs-on #bbs { display: block; }
 body.bbs-on .panel:not(#bbs-bar), body.bbs-on #touch-ui, body.bbs-on #crosshair,
 body.bbs-calling .panel:not(#hud), body.bbs-calling #touch-ui, body.bbs-calling #crosshair { display: none !important; }
 @media (max-width: 520px) { #bbs-bar .bbs-status, #type-bar .bbs-status { display: none; } }
+
+/* ---- about page ---- */
+#btn-about { left: 12px; bottom: 12px; padding: 8px 14px; font-weight: 600; z-index: 12; }
+body.touch #btn-about { left: calc(12px + var(--safe-l)); bottom: auto; top: calc(142px + var(--safe-t)); padding: 6px 12px; }
+#about { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(3,5,10,.55); padding: calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l)); box-sizing: border-box; }
+#about.hidden { display: none; }
+#about-card { position: relative; width: min(640px, 100%); max-height: 100%; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 28px 32px; font-size: 15px; line-height: 1.6; user-select: text; -webkit-user-select: text; background: rgba(10,14,22,.94); outline: none; }
+#about-close { position: absolute; top: 14px; right: 16px; font-size: 13px; }
+.about-kicker { color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+#about-card h1 { margin: 6px 0 2px; font-size: 32px; line-height: 1.15; }
+.about-byline { color: var(--muted); margin-bottom: 18px; }
+#about-card h2 { margin: 22px 0 6px; font-size: 17px; }
+#about-card p { margin: 0 0 12px; }
+#about-start { width: 100%; margin-top: 10px; }
+body.riding #btn-about, body.following #btn-about { display: none; }
+@media (max-width: 520px) { #about-card { padding: 22px 20px; } }

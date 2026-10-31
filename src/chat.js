@@ -92,6 +92,7 @@ export function initChat({ store, controls, applyEdits, onSpot }) {
   window.addEventListener('keydown', (e) => {
     const t = e.target;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA')) return;
+    if (!$('about').classList.contains('hidden')) return;
     if (e.code === 'KeyT' && !e.metaKey && !e.ctrlKey) { e.preventDefault(); open(); }
   });
 

@@ -4,6 +4,9 @@ A procedurally generated globe you can fly around, explore, and build on.
 Built with [Three.js](https://threejs.org/) and Vite, and self-hosted on
 Coolify from a Docker image.
 
+An **About** page, written for the November issue of megaZINE, opens on a
+visitor's first load and from the About button. Its text is in `index.html`.
+
 ## Exploring
 
 A **Controls** card at the bottom of the screen lists everything; hide it
