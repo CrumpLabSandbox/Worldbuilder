@@ -263,3 +263,15 @@ body.organ-on .panel:not(#organ-bar), body.organ-on #touch-ui, body.organ-on #cr
 #organ-frame { display: none; position: fixed; z-index: 5; pointer-events: none; }
 #organ-frame iframe { width: 100%; height: 100%; border: 0; display: block; background: transparent; }
 body.organ-on.organ-live #organ-frame { display: block; }
+
+/* ---- on-screen organ keys (touch screens) ---- */
+#organ-keys { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 42; padding: 4px calc(6px + var(--safe-r)) calc(6px + var(--safe-b)) calc(6px + var(--safe-l)); background: rgba(10,14,22,.72); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+body.touch.organ-on #organ-keys { display: block; }
+.okeys-oct { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.okeys-oct button { padding: 5px 12px; touch-action: manipulation; }
+.okeys { position: relative; display: flex; gap: 2px; height: clamp(120px, 24vh, 190px); touch-action: none; }
+.okey { flex: 1; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; background: #f3ecda; color: #4a463d; font-weight: 700; font-size: 13px; border-radius: 0 0 5px 5px; }
+.okey.on { background: #ffb347; }
+.okey.black { position: absolute; top: 0; width: 7%; height: 60%; margin-left: -3.5%; background: #15130f; color: #f3ecda; z-index: 1; border-radius: 0 0 4px 4px; font-size: 11px; }
+.okey.black.on { background: #d9702a; }
+@media (max-height: 460px) { .okeys { height: 42vh; } .okeys-oct { position: absolute; top: -32px; left: 8px; right: 8px; } }

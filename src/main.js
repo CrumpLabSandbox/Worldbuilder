@@ -9,6 +9,7 @@ import { WorldStore, randomSeed, DEFAULT_SPAWN } from './world.js';
 import { STRUCTURES, STRUCTURE_TYPES, buildStructure, buildSpan } from './structures.js';
 import { initChat } from './chat.js';
 import { ORGAN_KEYS, KEY_NOTES } from './organHands.js';
+import { mountOrganKeys } from './organKeys.js';
 
 const $ = (id) => document.getElementById(id);
 const DEG = Math.PI / 180;
@@ -475,7 +476,9 @@ function nearestStage(maxDist = 800) {
 function sitAtOrgan(st) {
   if (bbs || !st) return;
   loadThingSynth();
+  const touch = document.body.classList.contains('touch');
   const v = st.seatView(camera.aspect);
+  if (touch) $('organ-status').textContent = '🎹 Warming up…';
   glideTo(st, v.pos, v.look, () => {
     bbs.phase = 'organ';
     document.body.classList.add('organ-on');
@@ -485,7 +488,7 @@ function sitAtOrgan(st) {
 }
 // ThingSynth runs as its own page in a frame laid over the painting. It makes the
 // sound and animates the painting; the game sends it the notes and moves the hands.
-let thingSynth = null, organOctave = 0;
+let thingSynth = null, organOctave = 0, organTouch = null;
 const organNotes = new Map(); // key -> sounding note
 function loadThingSynth() {
   if ($('organ-frame').firstChild) return;
@@ -502,7 +505,7 @@ function loadThingSynth() {
     thingSynth = api;
     document.body.classList.add('organ-live');
     placeOrganFrame();
-    $('organ-status').textContent = '🎹 Play A S D F G H J K L ; and W E T Y U O P · Z / X change octave';
+    $('organ-status').textContent = document.body.classList.contains('touch') ? '🎹 Tap the keys, then play' : '🎹 Play A S D F G H J K L ; and W E T Y U O P · Z / X change octave';
   }, 150);
 }
 function placeOrganFrame() {
@@ -522,6 +525,10 @@ function organKeyDown(key) {
   // the first key press starts the audio, then plays if the key is still down
   thingSynth.start().then(() => { if (organNotes.get(key) === note) host.noteOn(note, 100); }).catch((err) => { console.warn('organ audio', err); toast("The organ's sound couldn't start. Press a key again.", 3000); });
 }
+function organOctaveShift(step) {
+  organOctave = THREE.MathUtils.clamp(organOctave + step, -36, 36);
+  toast(organOctave ? `Octave ${organOctave > 0 ? '+' : ''}${organOctave / 12}` : 'Middle octave', 900);
+}
 function organKeyUp(key) {
   bbs?.c.hands.release(key);
   const note = organNotes.get(key);
@@ -538,6 +545,7 @@ function showScene(st, on) {
 function leaveOrgan() {
   if (!bbs || bbs.phase !== 'organ') return;
   showScene(bbs.c, false);
+  organTouch?.release();
   for (const k of [...bbs.c.hands.held]) organKeyUp(k);
   document.body.classList.remove('organ-on');
   organOctave = 0;
@@ -872,6 +880,18 @@ function wireUI() {
   $('organ-stand').onclick = leaveOrgan;
   window.addEventListener('keyup', (e) => { if (bbs?.phase === 'organ' && ORGAN_KEYS[e.code]) organKeyUp(ORGAN_KEYS[e.code]); });
   window.addEventListener('resize', placeOrganFrame);
+  organTouch = mountOrganKeys($('organ-keys'), {
+    down: (key) => { if (bbs?.phase === 'organ') organKeyDown(key); },
+    up: (key) => { if (bbs?.phase === 'organ') organKeyUp(key); },
+    octave: organOctaveShift,
+  });
+  // iPhones only let audio start on a finger lift or a click, not a finger down
+  for (const type of ['touchend', 'click']) window.addEventListener(type, () => {
+    if (thingSynth && bbs?.phase === 'organ' && !thingSynth.host.audio.running()) {
+      thingSynth.start().catch(() => {});
+      thingSynth.output.context.resume().catch(() => {});
+    }
+  }, { capture: true, passive: true });
   $('type-dial').onclick = () => dialIn(bbs?.c);
   $('type-stand').onclick = () => stopTyping();
   // typing goes through a hidden text field, which also brings up a phone's keyboard
@@ -914,8 +934,7 @@ function wireUI() {
       const key = ORGAN_KEYS[e.code];
       if (key) { e.preventDefault(); if (!e.repeat) organKeyDown(key); }
       if ((e.code === 'KeyZ' || e.code === 'KeyX') && !e.repeat) {
-        organOctave = THREE.MathUtils.clamp(organOctave + (e.code === 'KeyZ' ? -12 : 12), -36, 36);
-        toast(organOctave ? `Octave ${organOctave > 0 ? '+' : ''}${organOctave / 12}` : 'Middle octave', 900);
+        organOctaveShift(e.code === 'KeyZ' ? -12 : 12);
       }
       return;
     }

@@ -149,7 +149,9 @@ Terrain features reshape the planet itself rather than sitting on it:
   looks). Near it, **🎹 Play the organ** seats you in the Mirror Sea, a sunset
   scene with the temple reflected in the water that shows only while seated.
   The 17 keys are ThingSynth's playable computer keys (A S D F G H J K L ; and
-  W E T Y U O P), and the cognitive hands play and hold them.
+  W E T Y U O P), and the cognitive hands play and hold them. Touch screens get
+  an on-screen keyboard with chords, sliding and octave buttons. ThingSynth runs
+  as its own page (a built copy in `public/thingsynth`) laid over the painting.
 
 Press **U** for photo mode, which hides the interface.
 
