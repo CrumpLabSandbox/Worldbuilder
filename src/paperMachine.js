@@ -259,10 +259,12 @@ function buildMainframe(model) {
   // the name on top, and a green screen in the middle of it all
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(290, 56), new THREE.MeshBasicMaterial({
     map: canvasTexture(1400, 270, (c, w, h) => {
+      c.fillStyle = '#f8efd8'; c.fillRect(0, 0, w, h);
+      c.strokeStyle = '#e0705a'; c.lineWidth = 16; c.strokeRect(12, 12, w - 24, h - 24);
       c.fillStyle = '#16110e'; c.textAlign = 'center';
       c.font = '900 italic 170px Georgia, serif'; c.fillText('METAMERS', w / 2, 160);
       c.font = '700 54px Georgia, serif'; c.fillText('LLM · the Large Ling Model', w / 2, 240);
-    }), transparent: true, toneMapped: false, side: THREE.DoubleSide,
+    }), toneMapped: false, side: THREE.DoubleSide,
   }));
   sign.rotation.y = Math.PI;
   sign.position.set(-70, Y0 + H + 44, Z + 30);
@@ -498,8 +500,8 @@ export function buildPaperMachine(rec, planet, f) {
   // The camera, in model space, as the show goes on.
   const shot = (t, hero, pos, look) => {
     curve.getPointAt(Math.min(1, hero / belt), v);
-    const near = 84 * smooth(0, 60, v.z) * (1 - smooth(230, 300, v.z)); // up over the mill's roof
-    pos.set(v.x - 30, v.y + 34 + near, v.z - 62);
+    const out = smooth(0, 60, v.z) * (1 - smooth(230, 300, v.z)); // out alongside the mill while the hero's inside
+    pos.set(v.x - 30 - 130 * out, v.y + 34 + 90 * out, v.z - 62);
     look.copy(v).setZ(v.z + 26);
     const wait = smooth(2.1, 2.9, t);
     pos.lerp(w.set(248, 30, -262), 1 - wait);
