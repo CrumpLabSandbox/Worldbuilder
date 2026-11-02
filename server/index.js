@@ -8,6 +8,8 @@
 //   CHAT_LIMIT_PER_HOUR   messages per visitor per hour (default 30)
 //   CHAT_LIMIT_PER_DAY    messages for the whole site per day (default 500)
 //   STATS_KEY             password for the /stats page (no key, no page)
+//   SHRED_ORIGINS         sites allowed to post debris drops (default: the Shred Hole on GitHub Pages)
+//   SHRED_LIMIT_PER_HOUR  drops per visitor per hour (default 40)
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,6 +19,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { WorldStore } from './worldStore.js';
 import { BuilderChat } from './claude.js';
 import { Stats, statsPage } from './stats.js';
+import { ShredDrops } from './shredDrops.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -27,6 +30,11 @@ const PER_DAY = +(process.env.CHAT_LIMIT_PER_DAY || 500);
 
 const store = new WorldStore({ dataDir: DATA_DIR, worldsDirs: [path.join(DIST, 'worlds'), path.join(ROOT, 'public', 'worlds')] });
 await store.init();
+
+const shred = new ShredDrops({ dir: DATA_DIR });
+shred.init();
+const SHRED_ORIGINS = (process.env.SHRED_ORIGINS || 'https://samuelling.github.io').split(',').map((s) => s.trim()).filter(Boolean);
+const SHRED_PER_HOUR = +(process.env.SHRED_LIMIT_PER_HOUR || 40);
 
 const logFile = path.join(DATA_DIR, 'chat-log.jsonl');
 const stats = new Stats({ dir: path.join(DATA_DIR, 'stats'), places: () => new Set((store.base('home')?.structures || []).map((s) => s.id)) });
@@ -61,6 +69,34 @@ function allow(who) {
 
 const app = express();
 app.disable('x-powered-by');
+
+// ---- the Shred Pile's mailbox (registered before the small JSON limit below; drops are bigger)
+const shredHits = new Map();
+function shredCors(req, res) {
+  const origin = req.get('origin') || '';
+  const ok = SHRED_ORIGINS.includes(origin) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+  if (ok) res.set({ 'Access-Control-Allow-Origin': origin, Vary: 'Origin' });
+  res.set({ 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'content-type', 'Access-Control-Allow-Private-Network': 'true' });
+  return ok || !origin;
+}
+app.options('/api/shred/drops', (req, res) => { shredCors(req, res); res.status(204).end(); });
+app.get('/api/shred/drops', (req, res) => {
+  shredCors(req, res);
+  res.set('Cache-Control', 'no-store');
+  res.json({ now: Date.now(), drops: shred.since(req.query.since) });
+});
+app.post('/api/shred/drops', express.json({ limit: '300kb' }), (req, res) => {
+  if (!shredCors(req, res)) return res.status(403).json({ error: 'Not allowed from this site.' });
+  const who = visitor(req), now = Date.now();
+  const list = (shredHits.get(who) || []).filter((t) => now - t < 3600e3);
+  if (list.length >= SHRED_PER_HOUR) return res.status(429).json({ error: 'The portal needs a breather.' });
+  list.push(now); shredHits.set(who, list);
+  const d = shred.add(req.body);
+  if (!d) return res.status(400).json({ error: 'That drop has no usable pieces.' });
+  stats.add('shred', 'drops'); stats.add('shred', 'pieces', d.pieces.length);
+  res.status(201).json({ id: d.id, at: d.at });
+});
+
 app.use(express.json({ limit: '16kb' }));
 
 app.get('/api/config', (req, res) => res.json({ chat: chat.enabled }));

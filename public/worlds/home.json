@@ -358,6 +358,20 @@
       "url": "https://ecphory.megazine.org/",
       "issue": "november",
       "name": "Ecphory"
+    },
+    {
+      "id": "shred-pile",
+      "type": "shredpile",
+      "lat": 7.5,
+      "lon": 30.0,
+      "heading": 0,
+      "pad": 120,
+      "band": 50,
+      "raise": 2,
+      "debrisScale": 60,
+      "relay": "",
+      "url": "https://samuelling.github.io/tunnel/",
+      "name": "The Shred Pile"
     }
   ]
 }

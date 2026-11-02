@@ -384,6 +384,10 @@ function flyToStructure(s) {
     const c = structureObjects.get(s.id)?.userData.comicStatue;
     if (c) { const v = c.view(); setPose(v.pos, v.look); return; }
   }
+  if (s.type === 'shredpile') {
+    const sp = structureObjects.get(s.id)?.userData.shredPile;
+    if (sp) { const v = sp.view(); setPose(v.pos, v.look); return; }
+  }
   if (s.type === 'papermachine') {
     const pm = structureObjects.get(s.id)?.userData.paperMachine;
     if (pm) { const v = pm.view(); setPose(v.pos, v.look); return; }

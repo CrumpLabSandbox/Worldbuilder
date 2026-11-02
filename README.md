@@ -226,6 +226,25 @@ place it has here, if any.
   second ride through it that ends with a page filling the screen, and the page goes
   to `url`. Esc stays. `viewBack` and `viewAlt` set where **Visit place** puts you.
 
+- `shredpile` — the Shred Pile: the far end of the vortex portal under Sam's
+  [Shred Hole](https://samuelling.github.io/tunnel/), a vertical wind tunnel with a fan that
+  shreds whatever is dropped in. Everything that falls through the portal there comes out of a
+  matching portal hanging over this pile (`lat`/`lon`, a levelled `pad`/`band`), supersized by
+  `debrisScale` (default 60: the pieces are real-size convex hulls, so a duck chunk is a few
+  centimetres). Each piece falls, bounces once and settles on a heap that slumps to an angle of
+  repose, and the sign board lists the latest arrivals. Old drops are rebuilt into the same heap
+  on load (seeded by drop id, so everyone sees the same pile). The game polls the server's
+  mailbox every few seconds; `relay` (or `?shredRelay=URL`) adds a second mailbox, such as the
+  Shred Hole's Cloudflare Worker, for when the server isn't reachable from the internet.
+
+  **Mailbox API** (in `server/shredDrops.js`): `POST /api/shred/drops` with a debris drop,
+  `GET /api/shred/drops?since=<ms>` returns `{ now, drops }`. A drop is
+  `{ v: 1, object: { name, icon, verdict, quip, mass }, spray, colors, pieces: [{ c, i, m, p, q, o, v }] }`
+  where each piece has outer/inner colours, mass (kg), hull points `p` (flat x,y,z list in metres),
+  orientation `q`, offset `o` and velocity `v` (y up). Posting is allowed from
+  `SHRED_ORIGINS` (default `https://samuelling.github.io`, plus localhost) and rate-limited by
+  `SHRED_LIMIT_PER_HOUR` (default 40). The last 400 drops are kept in `DATA_DIR/shred-drops.jsonl`.
+
 Near the BBS computer and the thingsynth stage, **✋ About Cognitive Hands** says
 where the hands come from and links to that piece.
 
@@ -234,7 +253,7 @@ Press **U** for photo mode, which hides the interface.
 Available types: `house`, `hut`, `village`, `town`, `city`, `tower`, `castle`,
 `lighthouse`, `windmill`, `temple`, `pyramid`, `obelisk`, `dome`, `tree`,
 `forest`, `farm`, `beacon`, `flag`, `wall`, `bridge`, `ship`, `monolith`,
-`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`, `mushroomtree`, `computer`, `papermachine`. New types are added in `src/structures.js`.
+`arch`, `statue`, `dinosaur`, `volcano`, `woodland`, `road`, `coaster`, `catapult`, `graffiti`, `mushroomtree`, `computer`, `papermachine`, `shredpile`. New types are added in `src/structures.js`.
 
 To request a build, give the coordinates and what to build, e.g.
 "build a lighthouse at 41.2S, 138.0W facing east". Coordinates come straight
