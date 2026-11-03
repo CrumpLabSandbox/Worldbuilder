@@ -241,6 +241,12 @@ place it has here, if any.
   mailbox every few seconds; `relay` (or `?shredRelay=URL`) adds a second mailbox, such as the
   Shred Hole's Cloudflare Worker, for when the server isn't reachable from the internet.
 
+  Drops may arrive as **Debris Drop v2** (hull points packed as base64 bytes, `b` + `s`, about a
+  quarter of the size); `src/dropCodec.js` unpacks them back into `p` arrays, in the browser
+  and in the server's mailbox. The pile checks its mailbox every 8 s while drops are arriving and
+  backs off to every 2 minutes when nothing comes. The server's `POST /api/shred/drops` also
+  accepts `text/plain` bodies (sent that way to skip CORS preflights).
+
   **Mailbox API** (in `server/shredDrops.js`): `POST /api/shred/drops` with a debris drop,
   `GET /api/shred/drops?since=<ms>` returns `{ now, drops }`. A drop is
   `{ v: 1, object: { name, icon, verdict, quip, mass }, spray, colors, pieces: [{ c, i, m, p, q, o, v }] }`

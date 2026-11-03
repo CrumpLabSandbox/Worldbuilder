@@ -7,6 +7,7 @@
 // The heap is a height field that accepts each piece's volume and slumps to an angle of repose,
 // so pieces stack instead of interpenetrating. Old drops are rebuilt into the same heap on load
 // (seeded by drop id, so everyone sees the same pile), new ones fall out of the sky as they arrive.
+import { inflateDrop } from './dropCodec.js';
 import * as THREE from 'three';
 import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -19,7 +20,7 @@ const CELLS = 64, CELL = (PILE_R * 2) / CELLS;
 const REPOSE = Math.tan(38 * DEG); // steepest slope the heap holds
 const PORTAL_ALT = 150, PORTAL_R = 28;
 const GRAV = 9.81 * 2.2;           // a bit brisker than real so the long fall stays watchable
-const POLL = 6, POLL_MAX = 60;     // seconds between mailbox checks; the pile naps when nothing arrives
+const POLL = 8, POLL_MAX = 120;    // seconds between mailbox checks; the pile naps when nothing arrives
 const COMPACT_AT = 32;             // heap height (m) that brings the compactor
 const BALE_SQUASH = 0.22;          // a bale keeps ~22% of the heap's loose volume
 
@@ -479,7 +480,7 @@ export function buildShredPile(rec, planet, f) {
         const r = await fetch(`${url}?since=${first ? 0 : lastAt}`, { cache: 'no-store' });
         if (!r.ok) return;
         const j = await r.json();
-        if (Array.isArray(j.drops)) got.push(...j.drops);
+        if (Array.isArray(j.drops)) got.push(...j.drops.map(inflateDrop));   // v2 drops carry packed points
       } catch { /* that mailbox isn't reachable from here */ }
     }));
     got.sort((a, b) => a.at - b.at);

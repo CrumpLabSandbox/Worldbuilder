@@ -8,6 +8,7 @@
 //   spray, colors: [...],
 //   pieces: [{ c, i, m, p: [x,y,z,…] hull points, q: [x,y,z,w], o: [x,y,z], v: [vx,vy,vz] }],
 //   particles: { count, colors } }
+import { inflateDrop } from '../src/dropCodec.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -22,6 +23,7 @@ const str = (s, n) => (typeof s === 'string' ? s.replace(/[\u0000-\u001f]/g, '')
 
 // Validate and normalise an incoming drop. Returns null if it is unusable.
 export function cleanDrop(d) {
+  inflateDrop(d);   // Debris Drop v2 packs hull points as base64 bytes; unpack them
   if (!d || typeof d !== 'object' || !Array.isArray(d.pieces)) return null;
   const pieces = [];
   for (const p of d.pieces.slice(0, d.payload ? MAX_PAYLOAD_PIECES : MAX_PIECES)) {

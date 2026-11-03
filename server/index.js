@@ -85,7 +85,7 @@ app.get('/api/shred/drops', (req, res) => {
   res.set('Cache-Control', 'no-store');
   res.json({ now: Date.now(), drops: shred.since(req.query.since) });
 });
-app.post('/api/shred/drops', express.json({ limit: '600kb' }), (req, res) => {
+app.post('/api/shred/drops', express.json({ limit: '600kb', type: ['application/json', 'text/plain'] }), (req, res) => {
   if (!shredCors(req, res)) return res.status(403).json({ error: 'Not allowed from this site.' });
   const who = visitor(req), now = Date.now();
   const list = (shredHits.get(who) || []).filter((t) => now - t < 3600e3);
