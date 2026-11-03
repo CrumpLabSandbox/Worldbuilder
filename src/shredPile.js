@@ -20,6 +20,8 @@ const REPOSE = Math.tan(38 * DEG); // steepest slope the heap holds
 const PORTAL_ALT = 150, PORTAL_R = 28;
 const GRAV = 9.81 * 2.2;           // a bit brisker than real so the long fall stays watchable
 const POLL = 6, POLL_MAX = 60;     // seconds between mailbox checks; the pile naps when nothing arrives
+const COMPACT_AT = 32;             // heap height (m) that brings the compactor
+const BALE_SQUASH = 0.22;          // a bale keeps ~22% of the heap's loose volume
 
 function hashString(s) {
   let h = 2166136261;
@@ -96,7 +98,7 @@ export function buildShredPile(rec, planet, f) {
   const g = new THREE.Group();
   g.rotation.y = -(rec.heading ?? 0) * DEG;
   site.add(g);
-  const SCALE = rec.debrisScale ?? 60;   // Shred Hole pieces are real-size; here they arrive kaiju-size
+  const SCALE = rec.debrisScale ?? 18;   // Shred Hole pieces are real-size; here they arrive big, but not instant-mountain big
 
   // ---- the yard: a scorched landing zone, a ring of hazard posts, the sign board
   const yard = new THREE.Mesh(new THREE.CircleGeometry(PILE_R + 14, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({
@@ -140,7 +142,9 @@ export function buildShredPile(rec, planet, f) {
     });
     c.textAlign = 'right'; c.font = '700 26px "Arial Black", sans-serif';
     c.fillText(`${total.pieces.toLocaleString()} PIECES · ${total.kg.toFixed(1)} KG OF REAL-WORLD MASS`, w - 50, h - 40);
-    if (pollEvery >= 30) { c.textAlign = 'left'; c.fillText('💤 NAPPING', 50, h - 40); }
+    c.textAlign = 'left';
+    const tags = [bales.length ? `${bales.length} BALE${bales.length === 1 ? '' : 'S'} COMPACTED` : '', pollEvery >= 30 ? '💤 NAPPING' : ''].filter(Boolean);
+    if (tags.length) c.fillText(tags.join(' · '), 50, h - 40);
     board.needsUpdate = true;
   }
 
@@ -222,6 +226,8 @@ export function buildShredPile(rec, planet, f) {
     }
     addMerged(geos);
     note(d);
+    logHeap(d);
+    maybeCompact(false);
   }
   function addMerged(geos) {
     if (!geos.length) return;
@@ -237,12 +243,126 @@ export function buildShredPile(rec, planet, f) {
     log.unshift(d); if (log.length > 20) log.pop();
   }
 
+  // ---- the compactor: when the heap gets tall, a giant press squashes it into a bale and the
+  // bale is stacked in the brick yard beside the pile. Replayed in drop order on load, so everyone
+  // sees the same bales (for the drops the mailbox still remembers).
+  const bales = [];
+  const baleGroup = new THREE.Group(); g.add(baleGroup);
+  const colTop = [0, 0, 0, 0];
+  const BALE_COLS = [[PILE_R + 34, -22], [PILE_R + 34, 22], [PILE_R + 78, -22], [PILE_R + 78, 22]];
+  let heapLog = { pieces: 0, kg: 0, colors: [], drops: 0 };
+  function heapMax() { let m = 0; for (let i = 0; i < H.length; i++) if (H[i] > m) m = H[i]; return m; }
+  function heapVolume() { let v = 0; for (let i = 0; i < H.length; i++) v += H[i]; return v * CELL * CELL; }
+  function baleTexture(colors, n) {
+    return canvasTexture(256, 256, (c, w, h) => {
+      c.fillStyle = '#2a2622'; c.fillRect(0, 0, w, h);
+      const cols = colors.length ? colors : ['#888888', '#aa8866', '#666666'];
+      const rnd = mulberry32(n * 7919 + 13);
+      for (let i = 0; i < 420; i++) {
+        c.fillStyle = cols[Math.floor(rnd() * cols.length)];
+        c.globalAlpha = 0.55 + rnd() * 0.45;
+        const x = rnd() * w, y = rnd() * h, bw = 6 + rnd() * 30, bh = 3 + rnd() * 10;
+        c.save(); c.translate(x, y); c.rotate((rnd() - 0.5) * 0.7); c.fillRect(-bw / 2, -bh / 2, bw, bh); c.restore();
+      }
+      c.globalAlpha = 1; c.fillStyle = '#15171a';
+      for (const y of [0.3, 0.7]) c.fillRect(0, h * y - 4, w, 8);          // steel straps
+      c.fillStyle = '#f2b311'; c.fillRect(w - 92, h - 40, 84, 30);
+      c.fillStyle = '#111'; c.font = '900 20px Impact, sans-serif'; c.fillText(`BALE ${n}`, w - 86, h - 18);
+    });
+  }
+  function addBale(info, from) {
+    const n = bales.length + 1;
+    const side = THREE.MathUtils.clamp(Math.cbrt(info.volume * BALE_SQUASH), 6, 40);
+    const col = (n - 1) % 4;
+    const [bx, bz] = BALE_COLS[col];
+    const y = colTop[col] + side / 2;
+    colTop[col] += side;
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(side, side, side), new THREE.MeshStandardMaterial({ map: baleTexture(info.colors, n), roughness: 0.85, metalness: 0.15 }));
+    mesh.castShadow = mesh.receiveShadow = true;
+    mesh.rotation.y = (mulberry32(n)() - 0.5) * 0.25;
+    baleGroup.add(mesh);
+    const target = new THREE.Vector3(bx, y, bz);
+    if (from) { mesh.position.copy(from); baleMoves.push({ mesh, from: from.clone(), to: target, t: 0 }); }
+    else mesh.position.copy(target);
+    bales.push({ n, side, ...info });
+    return mesh;
+  }
+  function clearHeap() {
+    H.fill(0);
+    for (const m of [...pileGroup.children]) { if (falling.some((p) => p.mesh === m)) continue; pileGroup.remove(m); m.geometry.dispose(); }
+    pileGroup.scale.y = 1;
+  }
+  function takeHeap() {
+    const info = { volume: heapVolume(), pieces: heapLog.pieces, kg: heapLog.kg, colors: heapLog.colors.slice(0, 8), drops: heapLog.drops };
+    heapLog = { pieces: 0, kg: 0, colors: [], drops: 0 };
+    return info;
+  }
+  function logHeap(d) {
+    heapLog.pieces += d.pieces.length; heapLog.kg += d.object?.mass || 0; heapLog.drops++;
+    for (const c of d.colors || []) if (!heapLog.colors.includes(c)) heapLog.colors.push(c);
+  }
+  // the press, built once, shown while it works
+  const press = new THREE.Group(); press.visible = false; g.add(press);
+  const pressMat = new THREE.MeshStandardMaterial({ map: canvasTexture(256, 256, (c, w, h) => {
+    c.fillStyle = '#f2b311'; c.fillRect(0, 0, w, h); c.fillStyle = '#16161a';
+    for (let i = -h; i < w; i += 48) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i + 24, 0); c.lineTo(i + 24 + h, h); c.lineTo(i + h, h); c.fill(); }
+  }), roughness: 0.5, metalness: 0.4 });
+  const plate = new THREE.Mesh(new THREE.BoxGeometry(PILE_R * 1.9, 5, PILE_R * 1.9), pressMat);
+  plate.castShadow = true; press.add(plate);
+  const rodMat = new THREE.MeshStandardMaterial({ color: 0xd6dbe0, metalness: 0.9, roughness: 0.25 });
+  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 300, 16), rodMat);
+    rod.position.set(x * PILE_R * 0.7, 152.5, z * PILE_R * 0.7); press.add(rod);
+  }
+  const baleMoves = [];
+  let compacting = null;   // { t, top }
+  function maybeCompact(animate) {
+    if (compacting || heapMax() < COMPACT_AT) return;
+    if (!animate) { const info = takeHeap(); clearHeap(); addBale(info); return; }
+    compacting = { t: 0, top: heapMax() };
+    press.visible = true; press.position.y = compacting.top + 90;
+  }
+  function stepCompactor(dt) {
+    for (let i = baleMoves.length - 1; i >= 0; i--) {
+      const m = baleMoves[i]; m.t = Math.min(1, m.t + dt / 2.5);
+      const e = m.t * m.t * (3 - 2 * m.t);
+      m.mesh.position.lerpVectors(m.from, m.to, e); m.mesh.position.y += Math.sin(e * Math.PI) * 25;
+      if (m.t >= 1) baleMoves.splice(i, 1);
+    }
+    if (!compacting) return;
+    const C = compacting; C.t += dt;
+    const top = C.top;
+    if (C.t < 2.6) {                                   // down it comes
+      const k = C.t / 2.6, y = (top + 90) * (1 - k * k) + 2.5 * k * k;
+      press.position.y = y;
+      pileGroup.scale.y = THREE.MathUtils.clamp((y - 2.5) / top, 0.08, 1);
+    } else if (!C.done) {                              // CRUNCH: the heap becomes a bale
+      C.done = true;
+      const info = takeHeap(); clearHeap();
+      C.bale = addBale(info, new THREE.Vector3(0, 0, 0));
+      C.bale.position.y = C.bale.geometry.parameters.height / 2;
+      baleMoves.pop();                                 // it waits under the press first
+      C.baleFrom = C.bale.position.clone();
+      for (let k = 0; k < 140; k++) { const a = Math.random() * 6.283, r = Math.random() * PILE_R * 0.8; emitP(Math.cos(a) * r, 2, Math.sin(a) * r, Math.cos(a) * 14, 6 + Math.random() * 10, Math.sin(a) * 14, '#8a7a68', 2 + Math.random() * 2); }
+      drawBoard();
+    } else if (C.t < 5) {                              // and up it goes
+      const k = (C.t - 3) / 2;
+      if (k > 0) press.position.y = 2.5 + k * k * (top + 120);
+    } else {
+      press.visible = false;
+      const b = bales[bales.length - 1], col = (b.n - 1) % 4, [bx, bz] = BALE_COLS[col];
+      baleMoves.push({ mesh: C.bale, from: C.baleFrom, to: new THREE.Vector3(bx, colTop[col] - b.side / 2, bz), t: 0 });
+      compacting = null;
+    }
+  }
+
   // ---- arrivals: pieces fall out of the portal
   const falling = [];     // { mesh, vel, spin, axis, half, radius, volume, drop }
   const arriving = [];    // queued pieces still to emerge, spaced out a little
   const pending = new Map(); // drop id -> { geos, left }
   function arrive(d) {
     note(d);
+    logHeap(d);
     drawBoard();
     uniforms.uPulse.value = 1.5;
     const rng = mulberry32(hashString(d.id));
@@ -295,7 +415,7 @@ export function buildShredPile(rec, planet, f) {
         m.updateMatrix();
         pend.geos.push(m.geometry.clone().applyMatrix4(m.matrix));
         pileGroup.remove(m); m.geometry.dispose();
-        if (--pend.left <= 0 && !arriving.some((a) => a.d.id === p.drop)) { addMerged(pend.geos); pending.delete(p.drop); }
+        if (--pend.left <= 0 && !arriving.some((a) => a.d.id === p.drop)) { addMerged(pend.geos); pending.delete(p.drop); maybeCompact(true); }
       }
     }
   }
@@ -399,6 +519,7 @@ export function buildShredPile(rec, planet, f) {
     if (pollClock >= pollEvery && !document.hidden) { pollClock = 0; poll(); }
     if (arriving.length) emerge(dt);
     if (falling.length) fall(dt);
+    stepCompactor(dt);
     stepParticles(dt);
   };
 
@@ -408,9 +529,11 @@ export function buildShredPile(rec, planet, f) {
   site.userData.shredPile = {
     site, center: site.position.clone(),
     stats: total,
+    bales,
+    compactNow: () => { if (heapMax() > 1) { compacting = { t: 0, top: Math.max(heapMax(), 8) }; press.visible = true; press.position.y = compacting.top + 90; } },
     view() {
-      const pos = toWorld(new THREE.Vector3(0, 62, -165));
-      return { pos, look: toWorld(new THREE.Vector3(0, 55, 0)).sub(pos).normalize() };
+      const pos = toWorld(new THREE.Vector3(-40, 70, -175));          // the heap and the brick yard
+      return { pos, look: toWorld(new THREE.Vector3(40, 14, 0)).sub(pos).normalize() };
     },
     // for testing from the console: worldbuilder.structure('shred-pile').userData.shredPile.arrive(drop)
     arrive,

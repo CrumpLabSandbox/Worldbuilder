@@ -230,9 +230,13 @@ place it has here, if any.
   [Shred Hole](https://samuelling.github.io/Tunnel/), a vertical wind tunnel with a fan that
   shreds whatever is dropped in. Everything that falls through the portal there comes out of a
   matching portal hanging over this pile (`lat`/`lon`, a levelled `pad`/`band`), supersized by
-  `debrisScale` (default 60: the pieces are real-size convex hulls, so a duck chunk is a few
-  centimetres). Each piece falls, bounces once and settles on a heap that slumps to an angle of
-  repose, and the sign board lists the latest arrivals. Old drops are rebuilt into the same heap
+  `debrisScale` (default 18: the pieces are real-size convex hulls, so a duck chunk is a few
+  centimetres; at 18× it takes a good few hundred objects to build a real heap). Each piece falls, bounces once and settles on a heap that slumps to an angle of
+  repose, and the sign board lists the latest arrivals. When the heap reaches 32 m the **compactor**
+  comes down, squashes it into a cube bale (about a fifth of its loose volume, textured with what
+  went in) and stacks the bale in the brick yard beside the pile; replayed in drop order on load, so
+  everyone sees the same bales. Several objects can arrive as one **payload** (from the Shred
+  Hole's Portal Chute). The pile checks its mailboxes less often when nothing is arriving (💤). Old drops are rebuilt into the same heap
   on load (seeded by drop id, so everyone sees the same pile). The game polls the server's
   mailbox every few seconds; `relay` (or `?shredRelay=URL`) adds a second mailbox, such as the
   Shred Hole's Cloudflare Worker, for when the server isn't reachable from the internet.
