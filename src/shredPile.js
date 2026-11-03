@@ -533,8 +533,8 @@ export function buildShredPile(rec, planet, f) {
     bales,
     compactNow: () => { if (heapMax() > 1) { compacting = { t: 0, top: Math.max(heapMax(), 8) }; press.visible = true; press.position.y = compacting.top + 90; } },
     view() {
-      const pos = toWorld(new THREE.Vector3(0, 66, -190));            // straight on: the heap in the middle
-      return { pos, look: toWorld(new THREE.Vector3(0, 10, 0)).sub(pos).normalize() };
+      const pos = toWorld(new THREE.Vector3(0, 34, -250));            // straight on, looking up: heap and portal
+      return { pos, look: toWorld(new THREE.Vector3(0, 70, 0)).sub(pos).normalize() };
     },
     // for testing from the console: worldbuilder.structure('shred-pile').userData.shredPile.arrive(drop)
     arrive,
