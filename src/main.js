@@ -1889,5 +1889,11 @@ function animate() {
   });
   renderer.domElement.style.cursor = 'grab';
   animate();
+  // ?visit=<place id> opens straight at a place (the Shred Hole's split view uses ?visit=shred-pile)
+  const visitId = new URLSearchParams(location.search).get('visit');
+  if (visitId) {
+    const s = store.current.structures.find((x) => x.id === visitId);
+    if (s) setTimeout(() => flyToStructure(s), 400);
+  }
   window.worldbuilder = { gamepads, get mneme() { return mneme; }, mnemeGate, get night() { return night; }, enterNight, leaveNight, store, scene, camera, get planet() { return planet; }, get controls() { return controls; }, get terrain() { return terrain; }, get ride() { return ride; }, startRide, endRide, nearestCoaster, structureObjects, get thingSynth() { return thingSynth; }, get uni() { return uni; }, get tele() { return tele; }, get ash() { return ash; }, ashlandGate, walkIntoAshland, stopAshland, get skip() { return skip; }, tryLastSkip, endSkip, get paper() { return paper; }, runPaperMachine, stopPaperMachine, orbitGate, launchOrbitakt, stopTeleport, enterUniversity, leaveUniversity, sitAtOrgan, leaveOrgan, setPose, showScene, get catapult() { return catapult; }, fireCatapult, sun, pickGround, placeStructure };
 })();
