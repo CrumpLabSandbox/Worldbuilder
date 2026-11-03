@@ -19,7 +19,7 @@ const CELLS = 64, CELL = (PILE_R * 2) / CELLS;
 const REPOSE = Math.tan(38 * DEG); // steepest slope the heap holds
 const PORTAL_ALT = 150, PORTAL_R = 28;
 const GRAV = 9.81 * 2.2;           // a bit brisker than real so the long fall stays watchable
-const POLL = 6;                    // seconds between mailbox checks
+const POLL = 6, POLL_MAX = 60;     // seconds between mailbox checks; the pile naps when nothing arrives
 
 function hashString(s) {
   let h = 2166136261;
@@ -140,6 +140,7 @@ export function buildShredPile(rec, planet, f) {
     });
     c.textAlign = 'right'; c.font = '700 26px "Arial Black", sans-serif';
     c.fillText(`${total.pieces.toLocaleString()} PIECES · ${total.kg.toFixed(1)} KG OF REAL-WORLD MASS`, w - 50, h - 40);
+    if (pollEvery >= 30) { c.textAlign = 'left'; c.fillText('💤 NAPPING', 50, h - 40); }
     board.needsUpdate = true;
   }
 
@@ -348,7 +349,7 @@ export function buildShredPile(rec, planet, f) {
     if (relay) list.push(relay.replace(/\/$/, ''));
     return list;
   };
-  let pollClock = POLL, first = true, busy = false;
+  let pollClock = POLL, pollEvery = POLL, first = true, busy = false;
   async function poll() {
     if (busy) return;
     busy = true;
@@ -362,12 +363,19 @@ export function buildShredPile(rec, planet, f) {
       } catch { /* that mailbox isn't reachable from here */ }
     }));
     got.sort((a, b) => a.at - b.at);
+    let fresh = 0;
     for (const d of got) {
       const key = d.id || `${d.at}:${d.object?.name}`;
       if (seen.has(key) || !Array.isArray(d.pieces)) continue;
       seen.add(key);
       lastAt = Math.max(lastAt, d.at || 0);
+      fresh++;
       if (first) settleDrop(d); else arrive(d);
+    }
+    if (!first) {
+      const was = pollEvery;
+      pollEvery = fresh ? POLL : Math.min(POLL_MAX, pollEvery * 1.5);
+      if ((was >= 30) !== (pollEvery >= 30)) drawBoard();
     }
     if (first) drawBoard();
     first = false;
@@ -388,7 +396,7 @@ export function buildShredPile(rec, planet, f) {
     beam.material.opacity = 0.04 + 0.05 * uniforms.uPulse.value;
     // only check the mailbox when someone is within sight of the pile (or it has never been read)
     pollClock += dt;
-    if (pollClock >= POLL) { pollClock = 0; poll(); }
+    if (pollClock >= pollEvery && !document.hidden) { pollClock = 0; poll(); }
     if (arriving.length) emerge(dt);
     if (falling.length) fall(dt);
     stepParticles(dt);

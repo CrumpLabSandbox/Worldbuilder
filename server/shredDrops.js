@@ -13,7 +13,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const KEEP = 400;           // drops remembered (the pile is rebuilt from these)
-const MAX_PIECES = 120;
+const MAX_PIECES = 120, MAX_PAYLOAD_PIECES = 400;   // a payload = several objects sent in one go
 const MAX_POINTS = 48;
 
 const hex = (s, d) => (typeof s === 'string' && /^#[0-9a-f]{6}$/i.test(s) ? s : d);
@@ -24,7 +24,7 @@ const str = (s, n) => (typeof s === 'string' ? s.replace(/[\u0000-\u001f]/g, '')
 export function cleanDrop(d) {
   if (!d || typeof d !== 'object' || !Array.isArray(d.pieces)) return null;
   const pieces = [];
-  for (const p of d.pieces.slice(0, MAX_PIECES)) {
+  for (const p of d.pieces.slice(0, d.payload ? MAX_PAYLOAD_PIECES : MAX_PIECES)) {
     if (!p || !Array.isArray(p.p)) continue;
     const pts = p.p.slice(0, MAX_POINTS * 3).map((v) => num(v, 0, -5, 5));
     if (pts.length < 12) continue;
@@ -44,7 +44,8 @@ export function cleanDrop(d) {
     id: crypto.randomUUID(),
     at: Date.now(),
     source: str(d.source, 40) || 'shred-hole',
-    object: { name: str(o.name, 40) || 'Something', icon: str(o.icon, 8) || '✨', verdict: str(o.verdict, 40), quip: str(o.quip, 120), mass: num(o.mass, 1, 0, 1e5) },
+    object: { name: str(o.name, 40) || 'Something', icon: str(o.icon, 8) || '✨', verdict: str(o.verdict, 40), quip: str(o.quip, 200), mass: num(o.mass, 1, 0, 1e5) },
+    ...(d.payload ? { payload: true, objects: (Array.isArray(d.objects) ? d.objects : []).slice(0, 60).map((x) => ({ name: str(x?.name, 40), icon: str(x?.icon, 8), verdict: str(x?.verdict, 40), mass: num(x?.mass, 0, 0, 1e5), pieces: num(x?.pieces, 0, 0, 1000) })) } : {}),
     spray: str(d.spray, 16),
     colors: (Array.isArray(d.colors) ? d.colors : []).slice(0, 8).map((c) => hex(c, '#cccccc')),
     pieces,
