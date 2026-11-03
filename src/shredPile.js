@@ -1,5 +1,5 @@
 // The Shred Pile: the far end of the Shred Hole's vortex portal
-// (https://samuelling.github.io/tunnel/). Whatever falls through the portal under the Shred Hole
+// (https://samuelling.github.io/Tunnel/). Whatever falls through the portal under the Shred Hole
 // comes out of a matching portal hanging in the sky here and lands on a growing heap.
 //
 // The server keeps the drops (server/shredDrops.js); this polls for them, supersizes the pieces

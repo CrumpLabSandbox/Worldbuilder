@@ -1,4 +1,4 @@
-// The Shred Pile's mailbox. The Shred Hole (https://samuelling.github.io/tunnel/) posts a
+// The Shred Pile's mailbox. The Shred Hole (https://samuelling.github.io/Tunnel/) posts a
 // "debris drop" whenever something falls through its portal; the game polls for new drops and
 // drops the pieces out of the sky portal onto the pile. Drops are kept in DATA_DIR as JSON lines.
 //

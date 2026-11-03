@@ -227,7 +227,7 @@ place it has here, if any.
   to `url`. Esc stays. `viewBack` and `viewAlt` set where **Visit place** puts you.
 
 - `shredpile` — the Shred Pile: the far end of the vortex portal under Sam's
-  [Shred Hole](https://samuelling.github.io/tunnel/), a vertical wind tunnel with a fan that
+  [Shred Hole](https://samuelling.github.io/Tunnel/), a vertical wind tunnel with a fan that
   shreds whatever is dropped in. Everything that falls through the portal there comes out of a
   matching portal hanging over this pile (`lat`/`lon`, a levelled `pad`/`band`), supersized by
   `debrisScale` (default 60: the pieces are real-size convex hulls, so a duck chunk is a few
