@@ -230,8 +230,8 @@ place it has here, if any.
   [Shred Hole](https://samuelling.github.io/Tunnel/), a vertical wind tunnel with a fan that
   shreds whatever is dropped in. Everything that falls through the portal there comes out of a
   matching portal hanging over this pile (`lat`/`lon`, a levelled `pad`/`band`), supersized by
-  `debrisScale` (default 18: the pieces are real-size convex hulls, so a duck chunk is a few
-  centimetres; at 18× it takes a good few hundred objects to build a real heap). Each piece falls, bounces once and settles on a heap that slumps to an angle of
+  `debrisScale` (default 10: the pieces are real-size convex hulls, so a duck chunk is a few
+  centimetres; at 10× the heap builds slowly, over many hundreds of objects). Each piece falls, bounces once and settles on a heap that slumps to an angle of
   repose, and the sign board lists the latest arrivals. When the heap reaches 32 m the **compactor**
   comes down, squashes it into a cube bale (about a fifth of its loose volume, textured with what
   went in) and stacks the bale in the brick yard beside the pile; replayed in drop order on load, so

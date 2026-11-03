@@ -98,7 +98,7 @@ export function buildShredPile(rec, planet, f) {
   const g = new THREE.Group();
   g.rotation.y = -(rec.heading ?? 0) * DEG;
   site.add(g);
-  const SCALE = rec.debrisScale ?? 18;   // Shred Hole pieces are real-size; here they arrive big, but not instant-mountain big
+  const SCALE = rec.debrisScale ?? 10;   // Shred Hole pieces are real-size; here they arrive big, but not instant-mountain big
 
   // ---- the yard: a scorched landing zone, a ring of hazard posts, the sign board
   const yard = new THREE.Mesh(new THREE.CircleGeometry(PILE_R + 14, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({
