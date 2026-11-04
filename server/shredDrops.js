@@ -100,6 +100,31 @@ export class ShredDrops {
     return true;
   }
 
+  // bring in drops from elsewhere (the Shred Hole's old relay), keeping their ids and times so
+  // the heap settles exactly as it does in the Shred Hole's Pile Cam. Returns how many were new.
+  importDrops(list) {
+    const have = new Set(this.drops.map((d) => d.id));
+    let added = 0;
+    for (const raw of Array.isArray(list) ? list : []) {
+      const id = typeof raw?.id === 'string' ? raw.id.slice(0, 64) : '', at = +raw?.at;
+      if (!id || have.has(id) || !Number.isFinite(at)) continue;
+      const clean = cleanDrop(raw);
+      if (!clean) continue;
+      have.add(id);
+      this.drops.push(slimDrop({ ...clean, id, at: Math.min(at, Date.now()) }));
+      added++;
+    }
+    if (!added) return 0;
+    this.drops.sort((a, b) => a.at - b.at);
+    for (let i = 1; i < this.drops.length; i++) if (this.drops[i].at <= this.drops[i - 1].at) this.drops[i].at = this.drops[i - 1].at + 1;
+    this.drops = this.drops.slice(-KEEP);
+    // older drops slot in behind newer ones, so everyone rebuilds the pile from scratch
+    this.epoch = crypto.randomUUID().slice(0, 8);
+    fs.writeFileSync(this.file, this.drops.map((x) => JSON.stringify(x)).join('\n') + '\n');
+    fs.writeFileSync(`${this.file}.epoch`, this.epoch);
+    return added;
+  }
+
   // empty the pile, for everyone
   clear() {
     this.drops = [];

@@ -11,6 +11,7 @@
 //   SHRED_ORIGINS         sites allowed to post debris drops (default: the Shred Hole on GitHub Pages)
 //   SHRED_LIMIT_PER_HOUR  drops per visitor per hour (default 40)
 //   SHRED_LIMIT_PER_DAY   drops for the whole site per day (default 300)
+//   SHRED_RELAY           the Shred Hole's old relay, for the stats page's one-off import
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -37,6 +38,7 @@ shred.init();
 const SHRED_ORIGINS = (process.env.SHRED_ORIGINS || 'https://samuelling.github.io').split(',').map((s) => s.trim()).filter(Boolean);
 const SHRED_PER_HOUR = +(process.env.SHRED_LIMIT_PER_HOUR || 40);
 const SHRED_PER_DAY = +(process.env.SHRED_LIMIT_PER_DAY || 300);
+const SHRED_RELAY = process.env.SHRED_RELAY || 'https://tunnel-claude.samuelling.workers.dev/drops';
 
 const logFile = path.join(DATA_DIR, 'chat-log.jsonl');
 const stats = new Stats({ dir: path.join(DATA_DIR, 'stats'), places: () => new Set((store.base('home')?.structures || []).map((s) => s.id)) });
@@ -154,7 +156,7 @@ app.get('/stats', (req, res) => {
     try { issue = JSON.parse(fs.readFileSync(path.join(dir, 'issues', 'november.json'), 'utf8')); break; } catch { /* try the next */ }
   }
   res.set({ 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
-  res.type('html').send(statsPage(stats.summary(days), { days, key, world: store.base('home'), issue, shred: { kept: shred.drops.length, today: shred.today.date === new Date().toISOString().slice(0, 10) ? shred.today.count : 0, perDay: SHRED_PER_DAY } }));
+  res.type('html').send(statsPage(stats.summary(days), { days, key, world: store.base('home'), issue, shred: { kept: shred.drops.length, today: shred.today.date === new Date().toISOString().slice(0, 10) ? shred.today.count : 0, perDay: SHRED_PER_DAY, note: String(req.query.note || '').slice(0, 120) } }));
 });
 
 // empty the Shred Pile for everyone (a button on the stats page)
@@ -163,6 +165,20 @@ app.post('/api/shred/clear', express.urlencoded({ extended: false, limit: '2kb' 
   if (!key || !sameKey(req.body?.key ?? '', key)) return res.status(404).type('text').send('Not found');
   shred.clear();
   res.redirect(303, `/stats?key=${encodeURIComponent(key)}`);
+});
+
+// copy the Shred Hole relay's drops onto the pile, once (a button on the stats page)
+app.post('/api/shred/import', express.urlencoded({ extended: false, limit: '2kb' }), async (req, res) => {
+  const key = process.env.STATS_KEY;
+  if (!key || !sameKey(req.body?.key ?? '', key)) return res.status(404).type('text').send('Not found');
+  let msg;
+  try {
+    const r = await fetch(`${SHRED_RELAY}?since=0`, { signal: AbortSignal.timeout(20000) });
+    if (!r.ok) throw new Error(`relay said ${r.status}`);
+    const n = shred.importDrops((await r.json()).drops);
+    msg = `Brought in ${n} drop${n === 1 ? '' : 's'} from the relay.`;
+  } catch (e) { msg = `Couldn't reach the relay: ${e.message}`; }
+  res.redirect(303, `/stats?key=${encodeURIComponent(key)}&note=${encodeURIComponent(msg)}`);
 });
 
 // ---- the built game

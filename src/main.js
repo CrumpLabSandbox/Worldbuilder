@@ -339,6 +339,13 @@ function renderStructureList() {
 }
 
 // Going off to a piece's own site: count it first, as the page is about to go.
+// near the Shred Pile, its button takes the place of the Starfall Coaster's (the station is close by).
+// Not when the pile is showing inside the Shred Hole's own split view.
+const SHRED_HOLE_URL = 'https://samuelling.github.io/Tunnel/';
+const framed = window.top !== window;
+function nearestShredPile(maxDist = 400) {
+  return [...structureObjects.values()].map((g) => g.userData.shredPile).find((sp) => sp && sp.center.distanceTo(controls.position) < maxDist) || null;
+}
 function leaveFor(place, url) { track('out', place); sendStats(); location.assign(url); }
 
 function flyToStructure(s) {
@@ -490,7 +497,7 @@ function endRide(arrived = false) {
 function updateRideButton() {
   const btn = $('btn-ride');
   if (ride) { btn.textContent = '✋ Get off'; btn.classList.remove('hidden'); return; }
-  const c = follow ? null : nearestCoaster();
+  const c = follow || nearestShredPile() ? null : nearestCoaster();
   if (c) { btn.textContent = `🎢 Ride ${c.feature.rec.name || 'the coaster'}`; btn.classList.remove('hidden'); }
   else btn.classList.add('hidden');
 }
@@ -529,6 +536,7 @@ function updateDialButton() {
   $('btn-ashland').classList.toggle('hidden', !!ash || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestAshland());
   $('btn-orbitakt').classList.toggle('hidden', !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestOrbitakt());
   $('btn-paper').classList.toggle('hidden', !!paper || !!ash || !!skip || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestPaperMachine());
+  $('btn-shred').classList.toggle('hidden', framed || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestShredPile());
   $('btn-skip').classList.toggle('hidden', !!skip || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestSkip());
   $('btn-comic').classList.toggle('hidden', !!skip || !!tele || !!uni || !!bbs || !!ride || !!follow || !nearestComic());
 }
@@ -1417,6 +1425,7 @@ function wireUI() {
   $('orbit-stop').onclick = stopTeleport;
   // coming back with the Back button can restore the page just as it was left
   window.addEventListener('pageshow', (e) => { if (e.persisted) stopTeleport(); });
+  $('btn-shred').onclick = () => leaveFor('shred-pile', SHRED_HOLE_URL);
   $('btn-skip').onclick = () => tryLastSkip(nearestSkip());
   $('btn-comic').onclick = () => openComic(nearestComic());
   window.addEventListener('pageshow', (e) => { if (e.persisted) endSkip(); });

@@ -519,8 +519,10 @@ export function buildShredPile(rec, planet, f) {
     bales,
     compactNow: () => { if (heapMax() > 1) { compacting = { t: 0, top: Math.max(heapMax(), 8) }; press.visible = true; press.position.y = compacting.top + 90; } },
     view() {
-      const pos = toWorld(new THREE.Vector3(0, 34, -250));            // straight on, looking up: heap and portal
-      return { pos, look: toWorld(new THREE.Vector3(0, 70, 0)).sub(pos).normalize() };
+      // straight on, looking up: heap and portal. Closer than the Shred Hole's Pile Cam, whose
+      // narrower lens and pane make the heap fill more of the picture
+      const pos = toWorld(new THREE.Vector3(0, 26, -175));
+      return { pos, look: toWorld(new THREE.Vector3(0, 62, 0)).sub(pos).normalize() };
     },
     // the mailbox's latest stamp, from the game's regular check
     notice(s) { if (s != null) stamp = String(s); },
