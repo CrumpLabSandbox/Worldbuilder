@@ -38,7 +38,7 @@ export class WorldStore {
     try {
       const q = known != null ? `?known=${known}` : '';
       const res = await fetch(`./api/worlds/${encodeURIComponent(id)}/edits${q}`, { cache: 'no-store' });
-      if (res.ok) { const data = await res.json(); return data.unchanged ? null : data; }
+      if (res.ok) { const data = await res.json(); if (data.shred != null) this.shredStamp = data.shred; return data.unchanged ? null : data; }
     } catch { /* no server (static hosting): shared edits are simply unavailable */ }
     return null;
   }

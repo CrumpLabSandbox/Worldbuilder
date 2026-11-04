@@ -236,24 +236,26 @@ place it has here, if any.
   comes down, squashes it into a cube bale (about a fifth of its loose volume, textured with what
   went in) and stacks the bale in the brick yard beside the pile; replayed in drop order on load, so
   everyone sees the same bales. Several objects can arrive as one **payload** (from the Shred
-  Hole's Portal Chute). The pile checks its mailboxes less often when nothing is arriving (💤). Old drops are rebuilt into the same heap
-  on load (seeded by drop id, so everyone sees the same pile). The game polls the server's
-  mailbox every few seconds; `relay` (or `?shredRelay=URL`) adds a second mailbox, such as the
-  Shred Hole's Cloudflare Worker, for when the server isn't reachable from the internet.
+  Hole's Portal Chute). Old drops are rebuilt into the same heap on load (seeded by drop id, so
+  everyone sees the same pile).
 
-  Drops may arrive as **Debris Drop v2** (hull points packed as base64 bytes, `b` + `s`, about a
-  quarter of the size); `src/dropCodec.js` unpacks them back into `p` arrays, in the browser
-  and in the server's mailbox. The pile checks its mailbox every 8 s while drops are arriving and
-  backs off to every 2 minutes when nothing comes. The server's `POST /api/shred/drops` also
-  accepts `text/plain` bodies (sent that way to skip CORS preflights).
+  Nothing polls for drops. The Shred Hole posts each one, once, to this server. The game's
+  regular check for shared builds (every 6 s while the tab is open) also carries the mailbox's
+  stamp, and the pile only downloads drops when that stamp changes and someone is within
+  4.5 km of it. Drops may arrive as **Debris Drop v2** (hull points packed as base64 bytes,
+  `b` + `s`); `src/dropCodec.js` unpacks them, in the browser and in the server. The server's
+  `POST /api/shred/drops` also accepts `text/plain` bodies (sent that way to skip CORS
+  preflights).
 
   **Mailbox API** (in `server/shredDrops.js`): `POST /api/shred/drops` with a debris drop,
   `GET /api/shred/drops?since=<ms>` returns `{ now, drops }`. A drop is
   `{ v: 1, object: { name, icon, verdict, quip, mass }, spray, colors, pieces: [{ c, i, m, p, q, o, v }] }`
   where each piece has outer/inner colours, mass (kg), hull points `p` (flat x,y,z list in metres),
   orientation `q`, offset `o` and velocity `v` (y up). Posting is allowed from
-  `SHRED_ORIGINS` (default `https://samuelling.github.io`, plus localhost) and rate-limited by
-  `SHRED_LIMIT_PER_HOUR` (default 40). The last 400 drops are kept in `DATA_DIR/shred-drops.jsonl`.
+  `SHRED_ORIGINS` (default `https://samuelling.github.io`, plus localhost) and limited by
+  `SHRED_LIMIT_PER_HOUR` per visitor (default 40) and `SHRED_LIMIT_PER_DAY` for the whole site
+  (default 300). The last 400 drops are kept in `DATA_DIR/shred-drops.jsonl`. **Empty the pile**
+  on the stats page clears it for everyone.
 
 Near the BBS computer and the thingsynth stage, **✋ About Cognitive Hands** says
 where the hands come from and links to that piece.

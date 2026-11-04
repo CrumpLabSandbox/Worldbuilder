@@ -8,7 +8,7 @@
 //   spray, colors: [...],
 //   pieces: [{ c, i, m, p: [x,y,z,…] hull points, q: [x,y,z,w], o: [x,y,z], v: [vx,vy,vz] }],
 //   particles: { count, colors } }
-import { inflateDrop } from '../src/dropCodec.js';
+import { inflateDrop, slimDrop } from '../src/dropCodec.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -59,9 +59,12 @@ export class ShredDrops {
   constructor({ dir }) {
     this.file = path.join(dir, 'shred-drops.jsonl');
     this.drops = [];
+    this.epoch = crypto.randomUUID().slice(0, 8);   // changes when the pile is cleared
+    this.today = { date: '', count: 0 };
   }
 
   init() {
+    try { this.epoch = fs.readFileSync(`${this.file}.epoch`, 'utf8').trim() || this.epoch; } catch { fs.writeFile(`${this.file}.epoch`, this.epoch, () => {}); }
     try {
       const lines = fs.readFileSync(this.file, 'utf8').split('\n').filter(Boolean);
       for (const l of lines.slice(-KEEP)) { try { this.drops.push(JSON.parse(l)); } catch { /* skip a bad line */ } }
@@ -69,8 +72,10 @@ export class ShredDrops {
   }
 
   add(raw) {
-    const d = cleanDrop(raw);
-    if (!d) return null;
+    const clean = cleanDrop(raw);
+    if (!clean) return null;
+    // checked in full, then kept in the compact wire form: about a fifth of the size to store and send
+    const d = slimDrop(clean);
     // keep times strictly increasing so "since" polling never misses one
     const last = this.drops[this.drops.length - 1];
     if (last && d.at <= last.at) d.at = last.at + 1;
@@ -81,6 +86,26 @@ export class ShredDrops {
       fs.writeFile(this.file, this.drops.map((x) => JSON.stringify(x)).join('\n') + '\n', () => {});
     }
     return d;
+  }
+
+  // what the game checks to see whether anything new has arrived
+  stamp() { return `${this.epoch}:${this.drops.at(-1)?.at || 0}`; }
+
+  // a site-wide limit per day, on top of the per-visitor one
+  allowToday(limit) {
+    const date = new Date().toISOString().slice(0, 10);
+    if (this.today.date !== date) this.today = { date, count: 0 };
+    if (this.today.count >= limit) return false;
+    this.today.count++;
+    return true;
+  }
+
+  // empty the pile, for everyone
+  clear() {
+    this.drops = [];
+    this.epoch = crypto.randomUUID().slice(0, 8);
+    fs.writeFileSync(this.file, '');
+    fs.writeFileSync(`${this.file}.epoch`, this.epoch);
   }
 
   since(t) {

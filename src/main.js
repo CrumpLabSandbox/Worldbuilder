@@ -522,6 +522,7 @@ function updateDialButton() {
   $('computer-actions').classList.toggle('hidden', !c);
   $('btn-organ').classList.toggle('hidden', !!bbs || !!ride || !!follow || !nearestStage());
   updateRange();
+  for (const g of structureObjects.values()) { const sp = g.userData.shredPile; if (sp) { sp.notice(store.shredStamp); sp.look(controls.position); } }
   $('btn-hands').classList.toggle('hidden', !!bbs || !!ride || !!follow || !!uni || !!night || !(nearestComputer() || nearestStage()));
   $('btn-night').classList.toggle('hidden', !!night || !!uni || !!bbs || !!ride || !!follow || !nearestNight());
   $('btn-university').classList.toggle('hidden', !!uni || !!bbs || !!ride || !!follow || !nearestUniversity());

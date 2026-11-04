@@ -2,7 +2,7 @@
 // (https://samuelling.github.io/Tunnel/). Whatever falls through the portal under the Shred Hole
 // comes out of a matching portal hanging in the sky here and lands on a growing heap.
 //
-// The server keeps the drops (server/shredDrops.js); this polls for them, supersizes the pieces
+// The server keeps the drops (server/shredDrops.js); this fetches them, supersizes the pieces
 // (they are real-size convex hulls: a duck chunk is a few centimetres) and lets them fall.
 // The heap is a height field that accepts each piece's volume and slumps to an angle of repose,
 // so pieces stack instead of interpenetrating. Old drops are rebuilt into the same heap on load
@@ -20,7 +20,7 @@ const CELLS = 64, CELL = (PILE_R * 2) / CELLS;
 const REPOSE = Math.tan(38 * DEG); // steepest slope the heap holds
 const PORTAL_ALT = 150, PORTAL_R = 28;
 const GRAV = 9.81 * 2.2;           // a bit brisker than real so the long fall stays watchable
-const POLL = 8, POLL_MAX = 120;    // seconds between mailbox checks; the pile naps when nothing arrives
+const NEAR = 4500;                 // metres: closer than this, the pile loads its drops
 const COMPACT_AT = 32;             // heap height (m) that brings the compactor
 const BALE_SQUASH = 0.22;          // a bale keeps ~22% of the heap's loose volume
 
@@ -144,7 +144,7 @@ export function buildShredPile(rec, planet, f) {
     c.textAlign = 'right'; c.font = '700 26px "Arial Black", sans-serif';
     c.fillText(`${total.pieces.toLocaleString()} PIECES · ${total.kg.toFixed(1)} KG OF REAL-WORLD MASS`, w - 50, h - 40);
     c.textAlign = 'left';
-    const tags = [bales.length ? `${bales.length} BALE${bales.length === 1 ? '' : 'S'} COMPACTED` : '', pollEvery >= 30 ? '💤 NAPPING' : ''].filter(Boolean);
+    const tags = [bales.length ? `${bales.length} BALE${bales.length === 1 ? '' : 'S'} COMPACTED` : ''].filter(Boolean);
     if (tags.length) c.fillText(tags.join(' · '), 50, h - 40);
     board.needsUpdate = true;
   }
@@ -458,48 +458,37 @@ export function buildShredPile(rec, planet, f) {
     pGeo.attributes.color.needsUpdate = true;
   }
 
-  // ---- the mailbox
-  const sources = () => {
-    const list = ['./api/shred/drops'];
-    let relay = rec.relay || '';
-    try {
-      const q = new URLSearchParams(location.search).get('shredRelay');
-      if (q) localStorage.setItem('shredRelay', q);
-      relay = localStorage.getItem('shredRelay') || relay;
-    } catch { /* storage blocked */ }
-    if (relay) list.push(relay.replace(/\/$/, ''));
-    return list;
-  };
-  let pollClock = POLL, pollEvery = POLL, first = true, busy = false;
-  async function poll() {
-    if (busy) return;
+  // ---- the mailbox: nothing here checks on a timer. The game's regular check for shared
+  // builds also brings the mailbox's stamp ("epoch:last drop"), and the pile only fetches drops
+  // when that stamp changes while someone is close enough to see it.
+  let stamp = null, shown = null, busy = false;
+  function reset() {
+    clearHeap();
+    for (const m of [...baleGroup.children]) { baleGroup.remove(m); m.geometry.dispose(); m.material.map?.dispose(); m.material.dispose(); }
+    bales.length = 0; colTop.fill(0); baleMoves.length = 0;
+    log.length = 0; total.pieces = 0; total.kg = 0; heapLog = { pieces: 0, kg: 0, colors: [], drops: 0 };
+    seen.clear(); lastAt = 0;
+  }
+  async function fetchDrops() {
+    if (busy || stamp === shown) return;
     busy = true;
-    const got = [];
-    await Promise.all(sources().map(async (url) => {
-      try {
-        const r = await fetch(`${url}?since=${first ? 0 : lastAt}`, { cache: 'no-store' });
-        if (!r.ok) return;
+    const want = stamp, epoch = (s) => String(s).split(':')[0];
+    const fresh = shown == null || epoch(want) !== epoch(shown);   // first look, or the pile was cleared
+    try {
+      const r = await fetch(`./api/shred/drops?since=${fresh ? 0 : lastAt}`, { cache: 'no-store' });
+      if (r.ok) {
         const j = await r.json();
-        if (Array.isArray(j.drops)) got.push(...j.drops.map(inflateDrop));   // v2 drops carry packed points
-      } catch { /* that mailbox isn't reachable from here */ }
-    }));
-    got.sort((a, b) => a.at - b.at);
-    let fresh = 0;
-    for (const d of got) {
-      const key = d.id || `${d.at}:${d.object?.name}`;
-      if (seen.has(key) || !Array.isArray(d.pieces)) continue;
-      seen.add(key);
-      lastAt = Math.max(lastAt, d.at || 0);
-      fresh++;
-      if (first) settleDrop(d); else arrive(d);
-    }
-    if (!first) {
-      const was = pollEvery;
-      pollEvery = fresh ? POLL : Math.min(POLL_MAX, pollEvery * 1.5);
-      if ((was >= 30) !== (pollEvery >= 30)) drawBoard();
-    }
-    if (first) drawBoard();
-    first = false;
+        if (fresh) reset();
+        for (const d of (j.drops || []).map(inflateDrop)) {   // v2 drops carry packed points
+          if (seen.has(d.id) || !Array.isArray(d.pieces)) continue;
+          seen.add(d.id);
+          lastAt = Math.max(lastAt, d.at || 0);
+          if (fresh) settleDrop(d); else arrive(d);
+        }
+        shown = want;
+        drawBoard();
+      }
+    } catch { /* no server here (static hosting): the pile stays as it is */ }
     busy = false;
   }
 
@@ -515,9 +504,6 @@ export function buildShredPile(rec, planet, f) {
     rimMat.emissiveIntensity = 1.4 + 0.4 * Math.sin(t * 2) + uniforms.uPulse.value;
     light.intensity = 3 + 2 * uniforms.uPulse.value;
     beam.material.opacity = 0.04 + 0.05 * uniforms.uPulse.value;
-    // only check the mailbox when someone is within sight of the pile (or it has never been read)
-    pollClock += dt;
-    if (pollClock >= pollEvery && !document.hidden) { pollClock = 0; poll(); }
     if (arriving.length) emerge(dt);
     if (falling.length) fall(dt);
     stepCompactor(dt);
@@ -536,6 +522,10 @@ export function buildShredPile(rec, planet, f) {
       const pos = toWorld(new THREE.Vector3(0, 34, -250));            // straight on, looking up: heap and portal
       return { pos, look: toWorld(new THREE.Vector3(0, 70, 0)).sub(pos).normalize() };
     },
+    // the mailbox's latest stamp, from the game's regular check
+    notice(s) { if (s != null) stamp = String(s); },
+    // where the viewer is: drops load only when someone is near
+    look(pos) { if (stamp != null && stamp !== shown && site.position.distanceTo(pos) < NEAR) fetchDrops(); },
     // for testing from the console: worldbuilder.structure('shred-pile').userData.shredPile.arrive(drop)
     arrive,
   };

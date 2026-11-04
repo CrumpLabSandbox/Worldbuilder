@@ -369,7 +369,6 @@
       "band": 50,
       "raise": 2,
       "debrisScale": 10,
-      "relay": "https://tunnel-claude.samuelling.workers.dev/drops",
       "url": "https://samuelling.github.io/Tunnel/",
       "name": "The Shred Pile"
     }

@@ -10,6 +10,7 @@
 //   STATS_KEY             password for the /stats page (no key, no page)
 //   SHRED_ORIGINS         sites allowed to post debris drops (default: the Shred Hole on GitHub Pages)
 //   SHRED_LIMIT_PER_HOUR  drops per visitor per hour (default 40)
+//   SHRED_LIMIT_PER_DAY   drops for the whole site per day (default 300)
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -35,6 +36,7 @@ const shred = new ShredDrops({ dir: DATA_DIR });
 shred.init();
 const SHRED_ORIGINS = (process.env.SHRED_ORIGINS || 'https://samuelling.github.io').split(',').map((s) => s.trim()).filter(Boolean);
 const SHRED_PER_HOUR = +(process.env.SHRED_LIMIT_PER_HOUR || 40);
+const SHRED_PER_DAY = +(process.env.SHRED_LIMIT_PER_DAY || 300);
 
 const logFile = path.join(DATA_DIR, 'chat-log.jsonl');
 const stats = new Stats({ dir: path.join(DATA_DIR, 'stats'), places: () => new Set((store.base('home')?.structures || []).map((s) => s.id)) });
@@ -77,7 +79,8 @@ function shredCors(req, res) {
   const ok = SHRED_ORIGINS.includes(origin) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
   if (ok) res.set({ 'Access-Control-Allow-Origin': origin, Vary: 'Origin' });
   res.set({ 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'content-type', 'Access-Control-Allow-Private-Network': 'true' });
-  return ok || !origin;
+  // a browser always says where it is posting from; with no origin, only this machine may post (testing)
+  return ok || (!origin && /^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(req.socket.remoteAddress || ''));
 }
 app.options('/api/shred/drops', (req, res) => { shredCors(req, res); res.status(204).end(); });
 app.get('/api/shred/drops', (req, res) => {
@@ -90,6 +93,7 @@ app.post('/api/shred/drops', express.json({ limit: '600kb', type: ['application/
   const who = visitor(req), now = Date.now();
   const list = (shredHits.get(who) || []).filter((t) => now - t < 3600e3);
   if (list.length >= SHRED_PER_HOUR) return res.status(429).json({ error: 'The portal needs a breather.' });
+  if (!shred.allowToday(SHRED_PER_DAY)) return res.status(429).json({ error: 'The pile has had enough for today. Try again tomorrow.' });
   list.push(now); shredHits.set(who, list);
   const d = shred.add(req.body);
   if (!d) return res.status(400).json({ error: 'That drop has no usable pieces.' });
@@ -106,8 +110,8 @@ app.get('/api/worlds/:id/edits', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const edits = await store.getEdits(req.params.id);
   // the game polls with the version it has; only send everything when it changed
-  if (req.query.known != null && +req.query.known === edits.version) return res.json({ version: edits.version, unchanged: true });
-  res.json(edits);
+  if (req.query.known != null && +req.query.known === edits.version) return res.json({ version: edits.version, unchanged: true, shred: shred.stamp() });
+  res.json({ ...edits, shred: shred.stamp() });
 });
 
 app.post('/api/chat', async (req, res) => {
@@ -150,7 +154,15 @@ app.get('/stats', (req, res) => {
     try { issue = JSON.parse(fs.readFileSync(path.join(dir, 'issues', 'november.json'), 'utf8')); break; } catch { /* try the next */ }
   }
   res.set({ 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
-  res.type('html').send(statsPage(stats.summary(days), { days, key, world: store.base('home'), issue }));
+  res.type('html').send(statsPage(stats.summary(days), { days, key, world: store.base('home'), issue, shred: { kept: shred.drops.length, today: shred.today.date === new Date().toISOString().slice(0, 10) ? shred.today.count : 0, perDay: SHRED_PER_DAY } }));
+});
+
+// empty the Shred Pile for everyone (a button on the stats page)
+app.post('/api/shred/clear', express.urlencoded({ extended: false, limit: '2kb' }), (req, res) => {
+  const key = process.env.STATS_KEY;
+  if (!key || !sameKey(req.body?.key ?? '', key)) return res.status(404).type('text').send('Not found');
+  shred.clear();
+  res.redirect(303, `/stats?key=${encodeURIComponent(key)}`);
 });
 
 // ---- the built game
