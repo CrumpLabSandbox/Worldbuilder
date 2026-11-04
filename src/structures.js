@@ -16,6 +16,7 @@ import { buildNightWindow } from './nightWindow.js';
 import { buildDrownedRange } from './drownedRange.js';
 import { buildLastSkip } from './lastSkip.js';
 import { buildComicStatue } from './comicStatue.js';
+import { buildShredPile } from './shredPile.js';
 import { buildOrbitakt } from './orbitakt.js';
 import { buildPaperMachine } from './paperMachine.js';
 import { buildAshland } from './ashland.js';
@@ -390,6 +391,10 @@ export const STRUCTURES = {
   comicstatue: {
     label: 'Comic statue', feature: true, menu: false,
     place: (rec, planet) => buildComicStatue(rec, planet, planet.featureById(rec.id)),
+  },
+  shredpile: {
+    label: 'Shred pile', feature: true, menu: false,
+    place: (rec, planet) => buildShredPile(rec, planet, planet.featureById(rec.id)),
   },
   computer: {
     label: 'BBS computer', feature: true, menu: false,
